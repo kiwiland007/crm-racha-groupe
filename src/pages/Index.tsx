@@ -7,6 +7,8 @@ import { RecentContacts } from "@/components/dashboard/RecentContacts";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { InventoryStatus } from "@/components/dashboard/InventoryStatus";
 import { CreditCard, Receipt } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import InvoiceForm from "./InvoiceForm";
 import RecentInvoices from "@/components/dashboard/RecentInvoices";
 
@@ -52,8 +54,14 @@ const Index = () => {
           <InventoryStatus />
         </div>
 
-        <div className="mt-8">
-          <InvoiceForm />
+        <div className="mt-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <h2 className="text-2xl font-bold">Gestion des factures et devis</h2>
+          <div className="flex gap-2">
+            <Link to="/quotes">
+              <Button variant="outline">Voir tous les devis</Button>
+            </Link>
+            <InvoiceForm />
+          </div>
         </div>
       </div>
     </Layout>

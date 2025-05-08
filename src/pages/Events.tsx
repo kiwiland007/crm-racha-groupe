@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -46,11 +45,13 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { EventForm } from "@/components/events/EventForm";
 
 export default function Events() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [openEventForm, setOpenEventForm] = useState(false);
 
-  const events = [
+  const [events, setEvents] = useState([
     {
       id: 1,
       title: "Salon Digital Tech",
@@ -103,7 +104,37 @@ export default function Events() {
       equipments: 12,
       description: "Installation complète du stand AgriTech avec bornes et écrans tactiles."
     },
-  ];
+  ]);
+
+  const handleAddEvent = (eventData: any) => {
+    const newEvent = {
+      id: events.length + 1,
+      title: eventData.title,
+      startDate: formatDate(new Date(eventData.startDate)),
+      endDate: formatDate(new Date(eventData.endDate)),
+      time: `${eventData.startTime} - ${eventData.endTime}`,
+      location: eventData.location,
+      client: eventData.client,
+      status: eventData.status,
+      teamMembers: parseInt(eventData.teamMembers),
+      equipments: parseInt(eventData.equipments),
+      description: eventData.description
+    };
+    
+    setEvents([newEvent, ...events]);
+    
+    toast.success("Événement créé", {
+      description: `L'événement "${eventData.title}" a été créé avec succès.`
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -134,12 +165,6 @@ export default function Events() {
     }
   };
 
-  const handleAddEvent = () => {
-    toast.info("Fonctionnalité à venir", {
-      description: "La création d'évènements sera bientôt disponible."
-    });
-  };
-
   return (
     <Layout title="Évènements">
       <Tabs defaultValue="list" className="w-full">
@@ -149,7 +174,7 @@ export default function Events() {
             <TabsTrigger value="calendar">Calendrier</TabsTrigger>
           </TabsList>
           <div className="mt-2 md:mt-0">
-            <Button className="gap-2" onClick={handleAddEvent}>
+            <Button className="gap-2" onClick={() => setOpenEventForm(true)}>
               <Plus size={16} />
               Nouvel évènement
             </Button>
@@ -356,6 +381,12 @@ export default function Events() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <EventForm 
+        open={openEventForm} 
+        onOpenChange={setOpenEventForm} 
+        onAddEvent={handleAddEvent}
+      />
     </Layout>
   );
 }

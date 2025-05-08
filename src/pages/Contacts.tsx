@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ContactForm } from "@/components/contacts/ContactForm";
 
 export default function Contacts() {
-  const contacts = [
+  const [contacts, setContacts] = useState([
     {
       id: 1,
       name: "Imane Alaoui",
@@ -95,11 +96,25 @@ export default function Contacts() {
       source: "Salon Professionnel",
       lastContact: "05 Avr 2025",
     },
-  ];
+  ]);
 
-  const handleAddContact = () => {
-    toast.info("Fonctionnalité à venir", {
-      description: "La création de contacts sera bientôt disponible."
+  const [openContactForm, setOpenContactForm] = useState(false);
+
+  const handleAddContact = (contactData: any) => {
+    const newContact = {
+      id: contacts.length + 1,
+      ...contactData,
+      lastContact: new Date().toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    };
+    
+    setContacts([newContact, ...contacts]);
+    
+    toast.success("Contact ajouté", {
+      description: `${contactData.name} a été ajouté avec succès.`
     });
   };
 
@@ -131,7 +146,7 @@ export default function Contacts() {
               </SelectContent>
             </Select>
           </div>
-          <Button className="gap-2" onClick={handleAddContact}>
+          <Button className="gap-2" onClick={() => setOpenContactForm(true)}>
             <Plus size={16} />
             Ajouter un contact
           </Button>
@@ -218,6 +233,12 @@ export default function Contacts() {
           </CardContent>
         </Card>
       </div>
+      
+      <ContactForm 
+        open={openContactForm} 
+        onOpenChange={setOpenContactForm}
+        onAddContact={handleAddContact}
+      />
     </Layout>
   );
 }
