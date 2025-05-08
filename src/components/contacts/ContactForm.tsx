@@ -1,17 +1,17 @@
 
-import React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -28,48 +28,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-const contactFormSchema = z.object({
-  name: z.string().min(1, { message: "Le nom est requis" }),
-  company: z.string().min(1, { message: "L'entreprise est requise" }),
-  email: z.string().email({ message: "Email invalide" }),
-  phone: z.string().min(1, { message: "Le téléphone est requis" }),
-  type: z.enum(["client", "prospect"]),
-  source: z.string().min(1, { message: "La source est requise" }),
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Le nom doit contenir au moins 2 caractères",
+  }),
+  company: z.string().min(1, {
+    message: "Le nom de l'entreprise est requis",
+  }),
+  email: z.string().email({
+    message: "Veuillez entrer une adresse email valide",
+  }),
+  phone: z.string().min(8, {
+    message: "Le numéro de téléphone doit contenir au moins 8 caractères",
+  }),
+  type: z.string({
+    required_error: "Veuillez sélectionner un type",
+  }),
+  source: z.string({
+    required_error: "Veuillez sélectionner une source",
+  }),
+  notes: z.string().optional(),
+  assignedTo: z.string().optional(),
 });
 
-type ContactFormValues = z.infer<typeof contactFormSchema>;
+type ContactFormValues = z.infer<typeof formSchema>;
 
-interface ContactFormProps {
-  open: boolean;
+export function ContactForm({ 
+  open, 
+  onOpenChange, 
+  onAddContact 
+}: { 
+  open: boolean; 
   onOpenChange: (open: boolean) => void;
-  onAddContact?: (contact: ContactFormValues) => void;
-}
+  onAddContact: (data: any) => void;
+}) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-export function ContactForm({ open, onOpenChange, onAddContact }: ContactFormProps) {
   const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       company: "",
       email: "",
       phone: "",
       type: "prospect",
-      source: "",
+      source: "Site Web",
+      notes: "",
+      assignedTo: "",
     },
   });
 
   function onSubmit(data: ContactFormValues) {
-    if (onAddContact) {
+    setIsSubmitting(true);
+    
+    try {
+      // Ajouter le contact
       onAddContact(data);
-    } else {
-      toast.success("Contact ajouté", {
-        description: `${data.name} a été ajouté avec succès.`,
-      });
+      
+      // Réinitialiser le formulaire
+      form.reset();
+      
+      // Fermer le dialogue
+      onOpenChange(false);
+      
+      toast.success("Contact ajouté avec succès");
+    } catch (error) {
+      toast.error("Erreur lors de l'ajout du contact");
+      console.error("Erreur d'ajout de contact:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    form.reset();
-    onOpenChange(false);
   }
 
   return (
@@ -78,40 +109,40 @@ export function ContactForm({ open, onOpenChange, onAddContact }: ContactFormPro
         <DialogHeader>
           <DialogTitle>Ajouter un contact</DialogTitle>
           <DialogDescription>
-            Créer un nouveau contact dans votre CRM
+            Remplissez les informations pour ajouter un nouveau contact.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom complet</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Prénom Nom" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="company"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Entreprise</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nom de l'entreprise" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom complet</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Prénom Nom" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="company"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Entreprise</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nom de l'entreprise" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="email"
@@ -119,13 +150,13 @@ export function ContactForm({ open, onOpenChange, onAddContact }: ContactFormPro
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="email@example.com" {...field} />
+                      <Input placeholder="email@exemple.ma" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="phone"
@@ -139,7 +170,9 @@ export function ContactForm({ open, onOpenChange, onAddContact }: ContactFormPro
                   </FormItem>
                 )}
               />
-
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="type"
@@ -153,32 +186,94 @@ export function ContactForm({ open, onOpenChange, onAddContact }: ContactFormPro
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="client">Client</SelectItem>
                         <SelectItem value="prospect">Prospect</SelectItem>
+                        <SelectItem value="client">Client</SelectItem>
+                        <SelectItem value="partenaire">Partenaire</SelectItem>
+                        <SelectItem value="fournisseur">Fournisseur</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="source"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Source</FormLabel>
-                    <FormControl>
-                      <Input placeholder="LinkedIn, Facebook Ads, etc." {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une source" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Site Web">Site Web</SelectItem>
+                        <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                        <SelectItem value="Facebook">Facebook</SelectItem>
+                        <SelectItem value="Instagram">Instagram</SelectItem>
+                        <SelectItem value="Recommandation">Recommandation</SelectItem>
+                        <SelectItem value="Salon Professionnel">Salon Professionnel</SelectItem>
+                        <SelectItem value="Publicité">Publicité</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
+            
+            <FormField
+              control={form.control}
+              name="assignedTo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Attribué à</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un commercial" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="hamid">Hamid Alaoui</SelectItem>
+                      <SelectItem value="sara">Sara Bennani</SelectItem>
+                      <SelectItem value="karim">Karim Idrissi</SelectItem>
+                      <SelectItem value="non-attribue">Non attribué</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Informations supplémentaires sur le contact" 
+                      className="resize-none h-20" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <DialogFooter>
-              <Button type="submit">Ajouter le contact</Button>
+              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Ajout en cours..." : "Ajouter le contact"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
