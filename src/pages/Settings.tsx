@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,12 +29,123 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function Settings() {
+  const [companySettings, setCompanySettings] = useState({
+    name: "Maroc Tactile",
+    website: "https://maroctactile.com",
+    email: "contact@maroctactile.com",
+    phone: "+212 522 123 456",
+    language: "fr",
+    timezone: "africa-casablanca",
+    currency: "mad",
+    dateFormat: "dd-mm-yyyy"
+  });
+  
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(0);
+  
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "Ahmed Dupont",
+      email: "ahmed@maroctactile.com",
+      role: "Admin",
+      avatar: "AD"
+    },
+    {
+      id: 2,
+      name: "Sofia Moussaoui",
+      email: "sofia@maroctactile.com",
+      role: "Commercial",
+      avatar: "SM"
+    },
+    {
+      id: 3,
+      name: "Karim Bennani",
+      email: "karim@maroctactile.com",
+      role: "Technicien",
+      avatar: "KB"
+    }
+  ]);
+  
+  const [notificationSettings, setNotificationSettings] = useState({
+    newProspects: true,
+    stockAlerts: true,
+    upcomingEvents: true,
+    equipmentReturns: true,
+    email: true,
+    sms: false,
+    browser: true,
+    mobile: true
+  });
+  
+  const [integrations, setIntegrations] = useState({
+    facebook: false,
+    instagram: false,
+    linkedin: false,
+    googleAds: false,
+    mailchimp: false
+  });
+
   const handleSave = () => {
     toast.success("Paramètres enregistrés", {
       description: "Vos modifications ont été enregistrées avec succès."
     });
+  };
+  
+  const handleInputChange = (field, value) => {
+    setCompanySettings({
+      ...companySettings,
+      [field]: value
+    });
+  };
+  
+  const handleNotificationToggle = (field) => {
+    setNotificationSettings({
+      ...notificationSettings,
+      [field]: !notificationSettings[field]
+    });
+  };
+  
+  const handleDeleteUser = (userId) => {
+    setUsers(users.filter(user => user.id !== userId));
+    toast.success("Utilisateur supprimé", {
+      description: "L'utilisateur a été supprimé avec succès."
+    });
+    setDeleteUserDialogOpen(false);
+  };
+  
+  const confirmDeleteUser = (userId) => {
+    setCurrentUserId(userId);
+    setDeleteUserDialogOpen(true);
+  };
+  
+  const handleIntegrationConnect = (platform) => {
+    setIntegrations({
+      ...integrations,
+      [platform]: true
+    });
+    
+    toast.success(`Connexion établie`, {
+      description: `Votre compte ${platform} a été connecté avec succès.`
+    });
+  };
+  
+  const getRoleBadgeClass = (role) => {
+    switch(role) {
+      case "Admin":
+        return "bg-racha-teal/10 text-racha-teal hover:bg-racha-teal/10";
+      case "Commercial":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-100";
+      case "Technicien":
+        return "bg-green-100 text-green-800 hover:bg-green-100";
+      default:
+        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+    }
   };
 
   return (
@@ -61,19 +173,35 @@ export default function Settings() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="company-name">Nom de l'entreprise</Label>
-                      <Input id="company-name" defaultValue="Maroc Tactile" />
+                      <Input 
+                        id="company-name" 
+                        value={companySettings.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="website">Site web</Label>
-                      <Input id="website" defaultValue="https://maroctactile.com" />
+                      <Input 
+                        id="website" 
+                        value={companySettings.website}
+                        onChange={(e) => handleInputChange('website', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" defaultValue="contact@maroctactile.com" />
+                      <Input 
+                        id="email" 
+                        value={companySettings.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Téléphone</Label>
-                      <Input id="phone" defaultValue="+212 522 123 456" />
+                      <Input 
+                        id="phone" 
+                        value={companySettings.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)} 
+                      />
                     </div>
                   </div>
                 </div>
@@ -85,7 +213,10 @@ export default function Settings() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="language">Langue par défaut</Label>
-                      <Select defaultValue="fr">
+                      <Select 
+                        value={companySettings.language}
+                        onValueChange={(value) => handleInputChange('language', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez une langue" />
                         </SelectTrigger>
@@ -98,7 +229,10 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="timezone">Fuseau horaire</Label>
-                      <Select defaultValue="africa-casablanca">
+                      <Select 
+                        value={companySettings.timezone}
+                        onValueChange={(value) => handleInputChange('timezone', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez un fuseau" />
                         </SelectTrigger>
@@ -111,7 +245,10 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="currency">Devise</Label>
-                      <Select defaultValue="mad">
+                      <Select 
+                        value={companySettings.currency}
+                        onValueChange={(value) => handleInputChange('currency', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez une devise" />
                         </SelectTrigger>
@@ -124,7 +261,10 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="date-format">Format de date</Label>
-                      <Select defaultValue="dd-mm-yyyy">
+                      <Select 
+                        value={companySettings.dateFormat}
+                        onValueChange={(value) => handleInputChange('dateFormat', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez un format" />
                         </SelectTrigger>
@@ -154,64 +294,33 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex justify-end">
-                  <Button>Ajouter un utilisateur</Button>
+                  <Button onClick={() => setConfirmDialogOpen(true)}>Ajouter un utilisateur</Button>
                 </div>
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Utilisateurs</h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarFallback className="bg-racha-teal text-white">AD</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">Ahmed Dupont</p>
-                          <p className="text-sm text-muted-foreground">ahmed@maroctactile.com</p>
+                    {users.map(user => (
+                      <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <Avatar>
+                            <AvatarFallback className="bg-racha-teal text-white">{user.avatar}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{user.name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={getRoleBadgeClass(user.role)}>
+                            {user.role}
+                          </Badge>
+                          <Button variant="outline" size="sm">Éditer</Button>
+                          <Button variant="outline" size="sm" className="text-red-600" onClick={() => confirmDeleteUser(user.id)}>
+                            Supprimer
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-racha-teal/10 text-racha-teal hover:bg-racha-teal/10">
-                          Admin
-                        </Badge>
-                        <Button variant="outline" size="sm">Éditer</Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarFallback className="bg-racha-blue text-white">SM</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">Sofia Moussaoui</p>
-                          <p className="text-sm text-muted-foreground">sofia@maroctactile.com</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                          Commercial
-                        </Badge>
-                        <Button variant="outline" size="sm">Éditer</Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarFallback className="bg-racha-blue text-white">KB</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">Karim Bennani</p>
-                          <p className="text-sm text-muted-foreground">karim@maroctactile.com</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                          Technicien
-                        </Badge>
-                        <Button variant="outline" size="sm">Éditer</Button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
@@ -293,28 +402,40 @@ export default function Settings() {
                         <p className="font-medium">Nouveaux prospects</p>
                         <p className="text-sm text-muted-foreground">Recevez des notifications quand de nouveaux prospects sont ajoutés</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.newProspects} 
+                        onCheckedChange={() => handleNotificationToggle('newProspects')} 
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Alertes de stock</p>
                         <p className="text-sm text-muted-foreground">Recevez des alertes quand le stock est bas</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.stockAlerts} 
+                        onCheckedChange={() => handleNotificationToggle('stockAlerts')} 
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Évènements à venir</p>
                         <p className="text-sm text-muted-foreground">Recevez des rappels pour les évènements planifiés</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.upcomingEvents} 
+                        onCheckedChange={() => handleNotificationToggle('upcomingEvents')} 
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Retours d'équipement</p>
                         <p className="text-sm text-muted-foreground">Recevez des notifications pour les retours de location</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.equipmentReturns} 
+                        onCheckedChange={() => handleNotificationToggle('equipmentReturns')} 
+                      />
                     </div>
                   </div>
                 </div>
@@ -328,28 +449,40 @@ export default function Settings() {
                       <Label>Email</Label>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Recevez des notifications par email</div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={notificationSettings.email} 
+                          onCheckedChange={() => handleNotificationToggle('email')} 
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>SMS</Label>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Recevez des notifications par SMS</div>
-                        <Switch />
+                        <Switch 
+                          checked={notificationSettings.sms} 
+                          onCheckedChange={() => handleNotificationToggle('sms')} 
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Navigateur</Label>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Recevez des notifications dans le navigateur</div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={notificationSettings.browser} 
+                          onCheckedChange={() => handleNotificationToggle('browser')} 
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Application mobile</Label>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Recevez des notifications push sur mobile</div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={notificationSettings.mobile} 
+                          onCheckedChange={() => handleNotificationToggle('mobile')} 
+                        />
                       </div>
                     </div>
                   </div>
@@ -384,7 +517,13 @@ export default function Settings() {
                         </div>
                       </div>
                       <div>
-                        <Button variant="outline">Connecter</Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleIntegrationConnect('facebook')}
+                          disabled={integrations.facebook}
+                        >
+                          {integrations.facebook ? 'Connecté' : 'Connecter'}
+                        </Button>
                       </div>
                     </div>
 
@@ -399,7 +538,13 @@ export default function Settings() {
                         </div>
                       </div>
                       <div>
-                        <Button variant="outline">Connecter</Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleIntegrationConnect('instagram')}
+                          disabled={integrations.instagram}
+                        >
+                          {integrations.instagram ? 'Connecté' : 'Connecter'}
+                        </Button>
                       </div>
                     </div>
 
@@ -414,7 +559,13 @@ export default function Settings() {
                         </div>
                       </div>
                       <div>
-                        <Button variant="outline">Connecter</Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleIntegrationConnect('linkedin')}
+                          disabled={integrations.linkedin}
+                        >
+                          {integrations.linkedin ? 'Connecté' : 'Connecter'}
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -436,7 +587,13 @@ export default function Settings() {
                         </div>
                       </div>
                       <div>
-                        <Button variant="outline">Connecter</Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleIntegrationConnect('googleAds')}
+                          disabled={integrations.googleAds}
+                        >
+                          {integrations.googleAds ? 'Connecté' : 'Connecter'}
+                        </Button>
                       </div>
                     </div>
 
@@ -451,7 +608,13 @@ export default function Settings() {
                         </div>
                       </div>
                       <div>
-                        <Button variant="outline">Connecter</Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleIntegrationConnect('mailchimp')}
+                          disabled={integrations.mailchimp}
+                        >
+                          {integrations.mailchimp ? 'Connecté' : 'Connecter'}
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -461,8 +624,39 @@ export default function Settings() {
           </TabsContent>
         </div>
       </Tabs>
+      
+      {/* Boîte de dialogue pour confirmer la suppression d'un utilisateur */}
+      <AlertDialog open={deleteUserDialogOpen} onOpenChange={setDeleteUserDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'utilisateur ne pourra plus accéder au système.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDeleteUser(currentUserId)} className="bg-red-600 hover:bg-red-700">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Boîte de dialogue pour ajouter un utilisateur */}
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ajouter un utilisateur</AlertDialogTitle>
+            <AlertDialogDescription>
+              La fonctionnalité d'ajout d'utilisateur sera disponible prochainement.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Fermer</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
-
-import { Badge } from "@/components/ui/badge";
