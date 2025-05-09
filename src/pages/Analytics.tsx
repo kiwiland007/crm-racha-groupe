@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from "recharts";
 import { 
-  CurrencyDirham, 
+  DollarSign, 
   Users, 
   Calendar, 
   TrendingUp, 
@@ -52,7 +51,7 @@ export default function Analytics() {
       <Tabs defaultValue="ventes" className="w-full">
         <TabsList className="mb-4 grid w-full grid-cols-3">
           <TabsTrigger value="ventes" className="flex items-center gap-2">
-            <CurrencyDirham size={16} />
+            <DollarSign size={16} />
             <span className="hidden md:inline">Chiffre d'affaires</span>
             <span className="md:hidden">CA</span>
           </TabsTrigger>
