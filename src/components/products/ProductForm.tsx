@@ -1,3 +1,4 @@
+
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -11,19 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import QRCodeGenerator from "../common/QRCodeGenerator";
+import ProductBasicInfo from "./form/ProductBasicInfo";
+import ProductPriceInfo from "./form/ProductPriceInfo";
+import ProductCategoryInfo from "./form/ProductCategoryInfo";
+import ProductAvailabilityInfo from "./form/ProductAvailabilityInfo";
+import ProductDescriptionInfo from "./form/ProductDescriptionInfo";
+import ProductQRCode from "./form/ProductQRCode";
 
 const productSchema = z.object({
   name: z.string().min(2, {
@@ -109,137 +105,20 @@ export function ProductForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom du produit</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nom du produit" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="sku"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SKU (Référence)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="SKU du produit" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prix (MAD)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Catégorie</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une catégorie" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ecrans">Écrans tactiles</SelectItem>
-                        <SelectItem value="bornes">Bornes interactives</SelectItem>
-                        <SelectItem value="tables">Tables tactiles</SelectItem>
-                        <SelectItem value="accessoires">Accessoires</SelectItem>
-                        <SelectItem value="logiciels">Logiciels</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="availability"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Disponibilité</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une disponibilité" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="en_stock">En stock</SelectItem>
-                        <SelectItem value="sur_commande">Sur commande</SelectItem>
-                        <SelectItem value="rupture">Rupture de stock</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <ProductBasicInfo control={form.control} />
+              <ProductPriceInfo control={form.control} />
+              <ProductCategoryInfo control={form.control} />
+              <ProductAvailabilityInfo control={form.control} />
             </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Description du produit..."
-                      {...field}
-                      className="min-h-[100px]"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <ProductDescriptionInfo control={form.control} />
 
             <div className="flex justify-end">
               {editProduct && (
-                <QRCodeGenerator 
-                  type="product" 
-                  productId={editProduct.id} 
-                  value={JSON.stringify({
-                    id: editProduct.id,
-                    name: editProduct.name,
-                    price: editProduct.price
-                  })}
-                  showDialog={true}
-                  size={128}
+                <ProductQRCode
+                  productId={editProduct.id}
+                  productName={editProduct.name}
+                  productPrice={editProduct.price}
                 />
               )}
             </div>
