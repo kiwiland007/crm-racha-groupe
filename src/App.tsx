@@ -13,6 +13,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Quotes from "./pages/Quotes";
 import Analytics from "./pages/Analytics";
+import Products from "./pages/Products";
+import InvoiceForm from "./pages/InvoiceForm";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/chat" element={<Chat />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/invoice/new" element={<InvoiceForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

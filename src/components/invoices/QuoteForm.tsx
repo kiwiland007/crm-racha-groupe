@@ -32,6 +32,8 @@ import {
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { FileText } from "lucide-react";
+import { generatePDF } from "@/utils/pdfGenerator";
 
 const quoteFormSchema = z.object({
   client: z.string().min(1, { message: "Le client est requis" }),
@@ -41,6 +43,8 @@ const quoteFormSchema = z.object({
   description: z.string().min(1, { message: "La description est requise" }),
   paymentMethod: z.enum(["Virement", "Chèque", "Espèces", "Carte bancaire"]),
   paymentStatus: z.enum(["En attente", "Partiel", "Payé"]).default("En attente"),
+  clientPhone: z.string().optional(),
+  clientEmail: z.string().email({ message: "Email invalide" }).optional().or(z.literal('')),
 });
 
 type QuoteFormValues = z.infer<typeof quoteFormSchema>;
@@ -48,7 +52,7 @@ type QuoteFormValues = z.infer<typeof quoteFormSchema>;
 interface QuoteFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddQuote?: (quote: QuoteFormValues) => void;
+  onAddQuote?: (quote: QuoteFormValues) => any;
 }
 
 export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
@@ -62,6 +66,8 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
       description: "",
       paymentMethod: "Virement",
       paymentStatus: "En attente",
+      clientPhone: "",
+      clientEmail: "",
     },
   });
 
@@ -80,8 +86,23 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
   }, [form.watch("amount"), form.watch("advanceAmount")]);
 
   function onSubmit(data: QuoteFormValues) {
+    let newQuote;
+    
     if (onAddQuote) {
-      onAddQuote(data);
+      newQuote = onAddQuote(data);
+      
+      // Générer PDF optionnel
+      if (confirm("Voulez-vous générer un PDF pour ce devis?")) {
+        generatePDF({
+          id: newQuote.id,
+          client: data.client,
+          date: newQuote.date,
+          amount: parseInt(data.amount),
+          advanceAmount: parseInt(data.advanceAmount) || 0,
+          status: data.paymentStatus,
+          paymentMethod: data.paymentMethod,
+        }, 'quote');
+      }
     } else {
       toast.success("Devis créé", {
         description: `Le devis pour ${data.client} a été créé avec succès.`,
@@ -91,9 +112,15 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
     onOpenChange(false);
   }
 
+  const remainingAmount = () => {
+    const amount = parseFloat(form.watch("amount") || "0");
+    const advanceAmount = parseFloat(form.watch("advanceAmount") || "0");
+    return amount - advanceAmount;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Créer un devis</DialogTitle>
           <DialogDescription>
@@ -133,6 +160,34 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
 
               <FormField
                 control={form.control}
+                name="clientPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Téléphone du client</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+212 661 123 456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="clientEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email du client</FormLabel>
+                    <FormControl>
+                      <Input placeholder="client@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
@@ -154,12 +209,17 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
                     <FormControl>
                       <Input type="number" placeholder="5000" {...field} />
                     </FormControl>
-                    <FormDescription className="text-xs">
-                      {form.watch("advanceAmount") && form.watch("amount") && 
-                        `Reste à payer: ${
-                          parseFloat(form.watch("amount")) - parseFloat(form.watch("advanceAmount") || "0")
-                        } MAD`
-                      }
+                    <FormDescription className="text-xs flex justify-between">
+                      <span>
+                        {form.watch("advanceAmount") && form.watch("amount") && 
+                          `Reste à payer: ${remainingAmount().toLocaleString()} MAD`
+                        }
+                      </span>
+                      <span>
+                        {form.watch("amount") && form.watch("advanceAmount") &&
+                          `(${Math.round((parseInt(form.watch("advanceAmount")) / parseInt(form.watch("amount"))) * 100)}%)`
+                        }
+                      </span>
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -226,8 +286,11 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
               )}
             />
 
-            <DialogFooter>
-              <Button type="submit">Créer le devis</Button>
+            <DialogFooter className="flex-col md:flex-row gap-2">
+              <Button type="submit" className="w-full md:w-auto">
+                <FileText className="mr-2 h-4 w-4" />
+                Créer le devis
+              </Button>
             </DialogFooter>
           </form>
         </Form>

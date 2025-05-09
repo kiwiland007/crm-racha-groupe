@@ -25,10 +25,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, MoreVertical, Plus, Search } from "lucide-react";
+import { Filter, MoreVertical, Plus, Search, FileText } from "lucide-react";
 import { QuoteForm } from "@/components/invoices/QuoteForm";
+import { generatePDF, generateBulkPDF } from "@/utils/pdfGenerator";
+import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Quotes() {
+  const isMobile = useIsMobile();
+  
   const [quotes, setQuotes] = useState([
     {
       id: "DEV-001",
@@ -38,7 +43,9 @@ export default function Quotes() {
       advanceAmount: 5000,
       status: "Émis",
       paymentMethod: "Virement",
-      description: "Configuration des écrans tactiles pour salon Média"
+      description: "Configuration des écrans tactiles pour salon Média",
+      clientPhone: "+212 661 234 567",
+      clientEmail: "contact@societeabc.ma"
     },
     {
       id: "DEV-002",
@@ -48,7 +55,9 @@ export default function Quotes() {
       advanceAmount: 3000,
       status: "En attente",
       paymentMethod: "Chèque",
-      description: "Maintenance des bornes interactives"
+      description: "Maintenance des bornes interactives",
+      clientPhone: "+212 662 345 678", 
+      clientEmail: "contact@eventpro.ma"
     },
     {
       id: "DEV-003",
@@ -58,7 +67,9 @@ export default function Quotes() {
       advanceAmount: 10000,
       status: "Accepté",
       paymentMethod: "Carte bancaire",
-      description: "Installation système interactif pour l'accueil"
+      description: "Installation système interactif pour l'accueil",
+      clientPhone: "+212 663 456 789",
+      clientEmail: "reservation@hotelmarrakech.ma"
     },
   ]);
   
@@ -73,7 +84,9 @@ export default function Quotes() {
       advanceAmount: quoteData.advanceAmount ? parseInt(quoteData.advanceAmount) : 0,
       status: "Émis",
       paymentMethod: quoteData.paymentMethod,
-      description: quoteData.description
+      description: quoteData.description,
+      clientPhone: quoteData.clientPhone || "",
+      clientEmail: quoteData.clientEmail || ""
     };
     
     setQuotes([newQuote, ...quotes]);
@@ -103,12 +116,26 @@ export default function Quotes() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+  
+  const handleGeneratePDF = (quote: any) => {
+    generatePDF(quote, 'quote');
+    toast.success("PDF généré", {
+      description: `Devis ${quote.id} pour ${quote.client}`
+    });
+  };
+  
+  const handleGenerateAllPDFs = () => {
+    generateBulkPDF(quotes, 'quote');
+    toast.success("PDF généré", {
+      description: `Liste des devis générée`
+    });
+  };
 
   return (
     <Layout title="Devis">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
@@ -122,10 +149,16 @@ export default function Quotes() {
               Filtres
             </Button>
           </div>
-          <Button className="gap-2" onClick={() => setOpenQuoteForm(true)}>
-            <Plus size={16} />
-            Nouveau devis
-          </Button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <Button className="gap-2 flex-1 md:flex-auto" onClick={() => setOpenQuoteForm(true)}>
+              <Plus size={16} />
+              Nouveau devis
+            </Button>
+            <Button variant="outline" className="gap-2 flex-1 md:flex-auto" onClick={handleGenerateAllPDFs}>
+              <FileText size={16} />
+              {isMobile ? "PDF" : "Générer liste PDF"}
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -133,55 +166,68 @@ export default function Quotes() {
             <CardTitle>Devis récents</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>N°</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="hidden md:table-cell">Date</TableHead>
-                  <TableHead className="text-right">Montant (MAD)</TableHead>
-                  <TableHead className="hidden md:table-cell text-right">Avance (MAD)</TableHead>
-                  <TableHead className="hidden md:table-cell">Mode</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {quotes.map((quote) => (
-                  <TableRow key={quote.id}>
-                    <TableCell className="font-medium">{quote.id}</TableCell>
-                    <TableCell>{quote.client}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{quote.description}</TableCell>
-                    <TableCell className="hidden md:table-cell">{quote.date}</TableCell>
-                    <TableCell className="text-right">{quote.amount.toLocaleString()} MAD</TableCell>
-                    <TableCell className="hidden md:table-cell text-right">{quote.advanceAmount.toLocaleString()} MAD</TableCell>
-                    <TableCell className="hidden md:table-cell">{quote.paymentMethod}</TableCell>
-                    <TableCell>{getStatusBadge(quote.status)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                          <DropdownMenuItem>Modifier</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>Convertir en facture</DropdownMenuItem>
-                          <DropdownMenuItem>Envoyer par email</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>N°</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead className={isMobile ? "hidden" : ""}>Description</TableHead>
+                    <TableHead className={isMobile ? "hidden" : ""}>Date</TableHead>
+                    <TableHead className="text-right">Montant</TableHead>
+                    <TableHead className={isMobile ? "hidden" : ""}>Avance</TableHead>
+                    <TableHead className={isMobile ? "hidden" : ""}>Mode</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {quotes.map((quote) => (
+                    <TableRow key={quote.id}>
+                      <TableCell className="font-medium">{quote.id}</TableCell>
+                      <TableCell>{quote.client}</TableCell>
+                      <TableCell className={`${isMobile ? "hidden" : ""} max-w-[200px] truncate`}>{quote.description}</TableCell>
+                      <TableCell className={isMobile ? "hidden" : ""}>{quote.date}</TableCell>
+                      <TableCell className="text-right">{quote.amount.toLocaleString()} MAD</TableCell>
+                      <TableCell className={isMobile ? "hidden" : ""}>
+                        {quote.advanceAmount.toLocaleString()} MAD
+                        {quote.amount > 0 && (
+                          <span className="text-xs text-gray-500 block">
+                            {Math.round((quote.advanceAmount / quote.amount) * 100)}%
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className={isMobile ? "hidden" : ""}>{quote.paymentMethod}</TableCell>
+                      <TableCell>{getStatusBadge(quote.status)}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleGeneratePDF(quote)}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Générer PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
+                            <DropdownMenuItem>Modifier</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Convertir en facture</DropdownMenuItem>
+                            <DropdownMenuItem>Envoyer par email</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

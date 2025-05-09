@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare, MessageCircle } from "lucide-react";
+import { Phone, MessageSquare, MessageCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { generatePDF } from "@/utils/pdfGenerator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Données factices pour les factures récentes
 const invoices = [
@@ -43,6 +45,8 @@ const invoices = [
 ];
 
 export function RecentInvoices() {
+  const isMobile = useIsMobile();
+
   const handleWhatsappContact = (contact: string, invoiceId: string) => {
     // Formatage du numéro pour WhatsApp (enlève les espaces)
     const whatsappNumber = contact.replace(/\s/g, '');
@@ -72,66 +76,81 @@ export function RecentInvoices() {
     });
   };
 
+  const handleGeneratePDF = (invoice: any) => {
+    generatePDF(invoice, 'invoice');
+    toast.success("PDF généré", {
+      description: `Facture ${invoice.id} pour ${invoice.client}`
+    });
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Factures récentes</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>N°</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Montant (MAD)</TableHead>
-              <TableHead>Avance (MAD)</TableHead>
-              <TableHead>Mode</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Contact</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell>{invoice.id}</TableCell>
-                <TableCell>{invoice.client}</TableCell>
-                <TableCell>{invoice.date}</TableCell>
-                <TableCell>{invoice.amount.toLocaleString()} MAD</TableCell>
-                <TableCell>{invoice.advanceAmount.toLocaleString()} MAD</TableCell>
-                <TableCell>{invoice.paymentMethod}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${invoice.status === "Payée" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
-                    {invoice.status}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handlePhoneCall(invoice.contact)}>
-                        <Phone className="mr-2 h-4 w-4" />
-                        Appeler
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSMS(invoice.contact, invoice.id)}>
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        SMS
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleWhatsappContact(invoice.contact, invoice.id)}>
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        WhatsApp
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+      <CardContent className={isMobile ? "px-2" : ""}>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>N°</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead className={isMobile ? "hidden" : ""}>Date</TableHead>
+                <TableHead className={isMobile ? "hidden" : ""}>Montant (MAD)</TableHead>
+                <TableHead className={isMobile ? "hidden" : ""}>Avance (MAD)</TableHead>
+                <TableHead className={isMobile ? "hidden" : ""}>Mode</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>PDF</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {invoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell>{invoice.id}</TableCell>
+                  <TableCell>{invoice.client}</TableCell>
+                  <TableCell className={isMobile ? "hidden" : ""}>{invoice.date}</TableCell>
+                  <TableCell className={isMobile ? "hidden" : ""}>{invoice.amount.toLocaleString()} MAD</TableCell>
+                  <TableCell className={isMobile ? "hidden" : ""}>{invoice.advanceAmount.toLocaleString()} MAD</TableCell>
+                  <TableCell className={isMobile ? "hidden" : ""}>{invoice.paymentMethod}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${invoice.status === "Payée" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
+                      {invoice.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Phone className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handlePhoneCall(invoice.contact)}>
+                          <Phone className="mr-2 h-4 w-4" />
+                          Appeler
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSMS(invoice.contact, invoice.id)}>
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          SMS
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleWhatsappContact(invoice.contact, invoice.id)}>
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          WhatsApp
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => handleGeneratePDF(invoice)}>
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
