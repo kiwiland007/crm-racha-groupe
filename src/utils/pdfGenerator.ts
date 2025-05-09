@@ -7,6 +7,9 @@ import { toast } from "sonner";
 declare module "jspdf" {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;
+    lastAutoTable: {
+      finalY: number;
+    };
   }
 }
 
@@ -83,7 +86,7 @@ export const generatePDF = (data: any, type: 'invoice' | 'quote') => {
     });
     
     // Mode de paiement
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    const finalY = doc.lastAutoTable.finalY + 10;
     doc.text(`Mode de paiement: ${data.paymentMethod}`, 20, finalY);
     doc.text(`Statut: ${data.status}`, 20, finalY + 5);
     
