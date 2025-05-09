@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { QRCodeGenerator } from "../common/QRCodeGenerator";
+import QRCodeGenerator from "../common/QRCodeGenerator";
 
 const productSchema = z.object({
   name: z.string().min(2, {

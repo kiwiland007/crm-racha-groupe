@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Filter, MoreVertical, Plus, Search, QrCode, Edit, Trash2 } from "lucide-react";
 import ProductForm from "@/components/products/ProductForm";
-import { QRCodeGenerator } from "@/components/common/QRCodeGenerator";
+import QRCodeGenerator from "@/components/common/QRCodeGenerator";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 

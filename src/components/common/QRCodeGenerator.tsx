@@ -8,6 +8,9 @@ interface QRCodeGeneratorProps {
   level?: "L" | "M" | "Q" | "H";
   includeMargin?: boolean;
   className?: string;
+  productId?: string;
+  type?: string;
+  showDialog?: boolean;
 }
 
 const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
@@ -16,6 +19,9 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
   level = "L",
   includeMargin = false,
   className = "",
+  productId,
+  type,
+  showDialog,
 }) => {
   return (
     <div className={`qr-code-container ${className}`}>
