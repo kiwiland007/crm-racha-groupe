@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare, WhatsApp } from "lucide-react";
+import { Phone, MessageSquare, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -122,7 +122,7 @@ export function RecentInvoices() {
                         SMS
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleWhatsappContact(invoice.contact, invoice.id)}>
-                        <WhatsApp className="mr-2 h-4 w-4" />
+                        <MessageCircle className="mr-2 h-4 w-4" />
                         WhatsApp
                       </DropdownMenuItem>
                     </DropdownMenuContent>
