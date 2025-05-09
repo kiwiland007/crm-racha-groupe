@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -60,6 +59,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+// Définir une interface pour les permissions pour assurer la cohérence
+interface UserPermissions {
+  contacts: boolean;
+  inventory: boolean;
+  events: boolean;
+  quotes: boolean;
+  settings: boolean;
+  admin: boolean;
+}
+
+// Définir une interface pour l'utilisateur
+interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  permissions: UserPermissions;
+}
+
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Le nom est requis" }),
   email: z.string().email({ message: "Email invalide" }),
@@ -78,7 +97,7 @@ const formSchema = z.object({
 type UserFormValues = z.infer<typeof formSchema>;
 
 export function UserManagement() {
-  const [users, setUsers] = useState([
+  const [users, setUsers] = useState<User[]>([
     {
       id: 1,
       fullName: "Ahmed El Mansouri",
@@ -144,7 +163,7 @@ export function UserManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
@@ -183,9 +202,21 @@ export function UserManagement() {
   });
 
   const handleAddUser = (data: UserFormValues) => {
-    const newUser = {
+    // Assurez-vous que toutes les permissions sont définies
+    const newUser: User = {
       id: users.length + 1,
-      ...data,
+      fullName: data.fullName,
+      email: data.email,
+      role: data.role,
+      isActive: data.isActive,
+      permissions: {
+        contacts: data.permissions.contacts ?? false,
+        inventory: data.permissions.inventory ?? false,
+        events: data.permissions.events ?? false,
+        quotes: data.permissions.quotes ?? false,
+        settings: data.permissions.settings ?? false,
+        admin: data.permissions.admin ?? false,
+      }
     };
     
     setUsers([...users, newUser]);
@@ -204,7 +235,18 @@ export function UserManagement() {
         if (user.id === currentUser.id) {
           return {
             ...user,
-            ...data
+            fullName: data.fullName,
+            email: data.email,
+            role: data.role,
+            isActive: data.isActive,
+            permissions: {
+              contacts: data.permissions.contacts ?? false,
+              inventory: data.permissions.inventory ?? false,
+              events: data.permissions.events ?? false,
+              quotes: data.permissions.quotes ?? false,
+              settings: data.permissions.settings ?? false,
+              admin: data.permissions.admin ?? false,
+            }
           };
         }
         return user;
@@ -235,13 +277,13 @@ export function UserManagement() {
     }
   };
 
-  const editUserClicked = (user: any) => {
+  const editUserClicked = (user: User) => {
     setCurrentUser(user);
     editForm.reset(user);
     setOpenEditDialog(true);
   };
 
-  const deleteUserClicked = (user: any) => {
+  const deleteUserClicked = (user: User) => {
     setCurrentUser(user);
     setOpenDeleteDialog(true);
   };
