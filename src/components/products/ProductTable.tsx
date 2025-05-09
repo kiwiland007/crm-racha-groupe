@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -15,10 +14,14 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: string;
+  price: {
+    sale: string;
+    rental: string;
+  };
   category: string;
   availability: string;
   sku: string;
+  technicalSpecs?: string;
 }
 
 interface ProductTableProps {
@@ -59,10 +62,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
             <TableHead>SKU</TableHead>
             <TableHead>Produit</TableHead>
             {!isMobile && <TableHead>Description</TableHead>}
-            <TableHead className="text-right">Prix (MAD)</TableHead>
+            <TableHead className="text-right">Prix vente</TableHead>
+            <TableHead className="text-right">Prix location</TableHead>
             {!isMobile && <TableHead>Catégorie</TableHead>}
             <TableHead>Disponibilité</TableHead>
-            <TableHead className="w-[120px]">Actions</TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,7 +75,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
               <TableCell className="font-medium">{product.sku}</TableCell>
               <TableCell>{product.name}</TableCell>
               {!isMobile && <TableCell className="max-w-[200px] truncate">{product.description}</TableCell>}
-              <TableCell className="text-right">{parseInt(product.price).toLocaleString()} MAD</TableCell>
+              <TableCell className="text-right">{parseInt(product.price.sale).toLocaleString()} MAD</TableCell>
+              <TableCell className="text-right">{parseInt(product.price.rental).toLocaleString()} MAD/jour</TableCell>
               {!isMobile && <TableCell>{getCategoryLabel(product.category)}</TableCell>}
               <TableCell><ProductAvailabilityBadge availability={product.availability} /></TableCell>
               <TableCell>

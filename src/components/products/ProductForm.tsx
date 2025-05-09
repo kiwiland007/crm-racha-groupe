@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -20,6 +19,7 @@ import ProductCategoryInfo from "./form/ProductCategoryInfo";
 import ProductAvailabilityInfo from "./form/ProductAvailabilityInfo";
 import ProductDescriptionInfo from "./form/ProductDescriptionInfo";
 import ProductQRCode from "./form/ProductQRCode";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const productSchema = z.object({
   name: z.string().min(2, {
@@ -28,8 +28,13 @@ const productSchema = z.object({
   description: z.string().min(10, {
     message: "La description doit comporter au moins 10 caractères",
   }),
-  price: z.string().refine((val) => !isNaN(Number(val)), {
-    message: "Le prix doit être un nombre valide",
+  price: z.object({
+    sale: z.string().refine((val) => !isNaN(Number(val)), {
+      message: "Le prix de vente doit être un nombre valide",
+    }),
+    rental: z.string().refine((val) => !isNaN(Number(val)), {
+      message: "Le prix de location doit être un nombre valide",
+    }),
   }),
   category: z.string().min(1, {
     message: "Veuillez sélectionner une catégorie",
@@ -40,6 +45,7 @@ const productSchema = z.object({
   sku: z.string().min(1, {
     message: "Le SKU est requis",
   }),
+  technicalSpecs: z.string().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -62,10 +68,14 @@ export function ProductForm({
     defaultValues: editProduct || {
       name: "",
       description: "",
-      price: "",
+      price: {
+        sale: "",
+        rental: "",
+      },
       category: "",
       availability: "en_stock",
       sku: "",
+      technicalSpecs: "",
     },
   });
 
@@ -91,7 +101,7 @@ export function ProductForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editProduct ? "Modifier le produit" : "Ajouter un produit"}
@@ -104,14 +114,70 @@ export function ProductForm({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ProductBasicInfo control={form.control} />
-              <ProductPriceInfo control={form.control} />
-              <ProductCategoryInfo control={form.control} />
-              <ProductAvailabilityInfo control={form.control} />
-            </div>
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details">Détails</TabsTrigger>
+                <TabsTrigger value="technical">Fiche technique</TabsTrigger>
+              </TabsList>
 
-            <ProductDescriptionInfo control={form.control} />
+              <TabsContent value="details" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ProductBasicInfo control={form.control} />
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="price.sale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prix de vente (MAD)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="0.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="price.rental"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prix de location (MAD/jour)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="0.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <ProductCategoryInfo control={form.control} />
+                  <ProductAvailabilityInfo control={form.control} />
+                </div>
+
+                <ProductDescriptionInfo control={form.control} />
+              </TabsContent>
+
+              <TabsContent value="technical" className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="technicalSpecs"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Spécifications techniques</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Dimensions, résolution, connectivité..." 
+                          className="min-h-[200px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+            </Tabs>
 
             <div className="flex justify-end">
               {editProduct && (
