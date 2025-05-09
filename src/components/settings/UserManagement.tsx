@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -49,7 +50,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MoreVertical, Plus, Trash2, UserCog } from "lucide-react";
+import { MoreVertical, Plus, Trash2, UserCog, Phone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +75,7 @@ interface User {
   id: number;
   fullName: string;
   email: string;
+  phone: string;
   role: string;
   isActive: boolean;
   permissions: UserPermissions;
@@ -82,6 +84,7 @@ interface User {
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Le nom est requis" }),
   email: z.string().email({ message: "Email invalide" }),
+  phone: z.string().optional(),
   role: z.string(),
   isActive: z.boolean().default(true),
   permissions: z.object({
@@ -102,6 +105,7 @@ export function UserManagement() {
       id: 1,
       fullName: "Ahmed El Mansouri",
       email: "a.elmansouri@example.ma",
+      phone: "+212 661 23 45 67",
       role: "admin",
       isActive: true,
       permissions: {
@@ -117,6 +121,7 @@ export function UserManagement() {
       id: 2,
       fullName: "Fatima Benkirane",
       email: "f.benkirane@example.ma",
+      phone: "+212 662 34 56 78",
       role: "manager",
       isActive: true,
       permissions: {
@@ -132,6 +137,7 @@ export function UserManagement() {
       id: 3,
       fullName: "Youssef Alami",
       email: "y.alami@example.ma",
+      phone: "+212 663 45 67 89",
       role: "commercial",
       isActive: true,
       permissions: {
@@ -147,6 +153,7 @@ export function UserManagement() {
       id: 4,
       fullName: "Sara Zouiten",
       email: "s.zouiten@example.ma",
+      phone: "+212 664 56 78 90",
       role: "technicien",
       isActive: true,
       permissions: {
@@ -170,6 +177,7 @@ export function UserManagement() {
     defaultValues: {
       fullName: "",
       email: "",
+      phone: "",
       role: "commercial",
       isActive: true,
       permissions: {
@@ -188,6 +196,7 @@ export function UserManagement() {
     defaultValues: {
       fullName: "",
       email: "",
+      phone: "",
       role: "commercial",
       isActive: true,
       permissions: {
@@ -207,15 +216,16 @@ export function UserManagement() {
       id: users.length + 1,
       fullName: data.fullName,
       email: data.email,
+      phone: data.phone || "",
       role: data.role,
       isActive: data.isActive,
       permissions: {
-        contacts: data.permissions.contacts ?? false,
-        inventory: data.permissions.inventory ?? false,
-        events: data.permissions.events ?? false,
-        quotes: data.permissions.quotes ?? false,
-        settings: data.permissions.settings ?? false,
-        admin: data.permissions.admin ?? false,
+        contacts: data.permissions.contacts,
+        inventory: data.permissions.inventory,
+        events: data.permissions.events,
+        quotes: data.permissions.quotes,
+        settings: data.permissions.settings,
+        admin: data.permissions.admin,
       }
     };
     
@@ -237,15 +247,16 @@ export function UserManagement() {
             ...user,
             fullName: data.fullName,
             email: data.email,
+            phone: data.phone || "",
             role: data.role,
             isActive: data.isActive,
             permissions: {
-              contacts: data.permissions.contacts ?? false,
-              inventory: data.permissions.inventory ?? false,
-              events: data.permissions.events ?? false,
-              quotes: data.permissions.quotes ?? false,
-              settings: data.permissions.settings ?? false,
-              admin: data.permissions.admin ?? false,
+              contacts: data.permissions.contacts,
+              inventory: data.permissions.inventory,
+              events: data.permissions.events,
+              quotes: data.permissions.quotes,
+              settings: data.permissions.settings,
+              admin: data.permissions.admin,
             }
           };
         }
@@ -279,7 +290,10 @@ export function UserManagement() {
 
   const editUserClicked = (user: User) => {
     setCurrentUser(user);
-    editForm.reset(user);
+    editForm.reset({
+      ...user,
+      phone: user.phone || ""
+    });
     setOpenEditDialog(true);
   };
 
@@ -363,6 +377,7 @@ export function UserManagement() {
           <TableRow>
             <TableHead>Nom</TableHead>
             <TableHead className="hidden md:table-cell">Email</TableHead>
+            <TableHead className="hidden md:table-cell">Téléphone</TableHead>
             <TableHead>Rôle</TableHead>
             <TableHead className="hidden md:table-cell">Statut</TableHead>
             <TableHead className="w-[80px]">Actions</TableHead>
@@ -382,6 +397,7 @@ export function UserManagement() {
                 </div>
               </TableCell>
               <TableCell className="hidden md:table-cell">{user.email}</TableCell>
+              <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
               <TableCell>{getRoleBadge(user.role)}</TableCell>
               <TableCell className="hidden md:table-cell">
                 <Switch 
@@ -450,19 +466,35 @@ export function UserManagement() {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adresse email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.ma" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="email@example.ma" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+212 600 00 00 00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -634,7 +666,6 @@ export function UserManagement() {
           </DialogHeader>
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleEditUser)} className="space-y-4">
-              {/* Mêmes champs que pour l'ajout */}
               <FormField
                 control={editForm.control}
                 name="fullName"
@@ -649,19 +680,35 @@ export function UserManagement() {
                 )}
               />
               
-              <FormField
-                control={editForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adresse email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.ma" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="email@example.ma" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+212 600 00 00 00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -716,7 +763,6 @@ export function UserManagement() {
               <div>
                 <h4 className="text-sm font-medium mb-3">Permissions</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Mêmes permissions que pour l'ajout */}
                   <FormField
                     control={editForm.control}
                     name="permissions.contacts"

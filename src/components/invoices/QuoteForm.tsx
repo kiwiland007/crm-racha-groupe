@@ -19,6 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 const quoteFormSchema = z.object({
   client: z.string().min(1, { message: "Le client est requis" }),
@@ -38,6 +40,7 @@ const quoteFormSchema = z.object({
   advanceAmount: z.string(),
   description: z.string().min(1, { message: "La description est requise" }),
   paymentMethod: z.enum(["Virement", "Chèque", "Espèces", "Carte bancaire"]),
+  paymentStatus: z.enum(["En attente", "Partiel", "Payé"]).default("En attente"),
 });
 
 type QuoteFormValues = z.infer<typeof quoteFormSchema>;
@@ -55,11 +58,26 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
       client: "",
       date: new Date().toISOString().split('T')[0],
       amount: "",
-      advanceAmount: "",
+      advanceAmount: "0",
       description: "",
       paymentMethod: "Virement",
+      paymentStatus: "En attente",
     },
   });
+
+  // Surveiller les changements de montant et d'avance pour déterminer le statut
+  React.useEffect(() => {
+    const amount = parseFloat(form.watch("amount") || "0");
+    const advanceAmount = parseFloat(form.watch("advanceAmount") || "0");
+    
+    if (advanceAmount <= 0) {
+      form.setValue("paymentStatus", "En attente");
+    } else if (advanceAmount >= amount) {
+      form.setValue("paymentStatus", "Payé");
+    } else {
+      form.setValue("paymentStatus", "Partiel");
+    }
+  }, [form.watch("amount"), form.watch("advanceAmount")]);
 
   function onSubmit(data: QuoteFormValues) {
     if (onAddQuote) {
@@ -118,7 +136,7 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Montant (MAD)</FormLabel>
+                    <FormLabel>Montant total (MAD)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="10000" {...field} />
                     </FormControl>
@@ -136,6 +154,13 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
                     <FormControl>
                       <Input type="number" placeholder="5000" {...field} />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      {form.watch("advanceAmount") && form.watch("amount") && 
+                        `Reste à payer: ${
+                          parseFloat(form.watch("amount")) - parseFloat(form.watch("advanceAmount") || "0")
+                        } MAD`
+                      }
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -161,6 +186,27 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="paymentStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Statut du paiement</FormLabel>
+                    <div className="h-10 flex items-center">
+                      {field.value === "En attente" && (
+                        <Badge className="bg-yellow-100 text-yellow-800">En attente</Badge>
+                      )}
+                      {field.value === "Partiel" && (
+                        <Badge className="bg-blue-100 text-blue-800">Paiement partiel</Badge>
+                      )}
+                      {field.value === "Payé" && (
+                        <Badge className="bg-green-100 text-green-800">Payé</Badge>
+                      )}
+                    </div>
                   </FormItem>
                 )}
               />
