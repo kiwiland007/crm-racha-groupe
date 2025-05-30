@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductProvider } from "@/contexts/ProductContext";
 import { AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
 import Index from "./pages/Index";
@@ -54,19 +55,21 @@ const AppContent = () => {
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ProductProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ProtectedRoute>
-                <AppContent />
-              </ProtectedRoute>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ProductProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ProductProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <ProtectedRoute>
+                  <AppContent />
+                </ProtectedRoute>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ProductProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
