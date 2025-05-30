@@ -103,12 +103,18 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleRetry = () => {
+    // Réinitialiser l'état d'erreur
     this.setState({
       hasError: false,
       error: null,
       errorInfo: null,
       errorId: ''
     });
+
+    // Forcer un re-render complet
+    setTimeout(() => {
+      this.forceUpdate();
+    }, 100);
   };
 
   private handleReload = () => {
@@ -116,7 +122,27 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = '/';
+    try {
+      // Réinitialiser l'état d'erreur d'abord
+      this.setState({
+        hasError: false,
+        error: null,
+        errorInfo: null,
+        errorId: ''
+      });
+
+      // Essayer plusieurs méthodes de navigation
+      if (window.history && window.history.pushState) {
+        window.history.pushState({}, '', '/');
+        window.location.reload();
+      } else {
+        window.location.replace('/');
+      }
+    } catch (navError) {
+      console.error('Navigation error:', navError);
+      // Fallback: recharger complètement la page
+      window.location.href = '/';
+    }
   };
 
   private copyErrorDetails = () => {

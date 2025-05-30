@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Bell } from "lucide-react";
 import {
   DropdownMenu,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "./UserProfile";
-import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -95,9 +95,6 @@ export default function Header({ title }: { title: string }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Language Selector */}
-        <LanguageSelector />
 
         {/* User Profile */}
         <UserProfile />

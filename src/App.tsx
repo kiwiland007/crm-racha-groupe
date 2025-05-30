@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,10 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductProvider } from "@/contexts/ProductContext";
 import { AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
-import ErrorBoundary from "@/components/common/ErrorBoundary";
+import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
 import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
 import { useMonitoring } from "@/utils/monitoring";
-import "@/i18n";
 import Index from "./pages/Index";
 import Contacts from "./pages/Contacts";
 import Inventory from "./pages/Inventory";
@@ -59,7 +59,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ErrorBoundary>
+  <RouterErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ProductProvider>
@@ -75,7 +75,7 @@ const App = () => (
         </ProductProvider>
       </AuthProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
+  </RouterErrorBoundary>
 );
 
 export default App;
