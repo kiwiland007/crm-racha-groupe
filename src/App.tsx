@@ -5,9 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductProvider } from "@/contexts/ProductContext";
 import { AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
+import { useMonitoring } from "@/utils/monitoring";
+import "@/i18n";
 import Index from "./pages/Index";
 import Contacts from "./pages/Contacts";
 import Inventory from "./pages/Inventory";
@@ -29,6 +30,11 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   useKeyboardNavigation();
+  const { recordPageView } = useMonitoring();
+
+  React.useEffect(() => {
+    recordPageView(window.location.pathname);
+  }, [recordPageView]);
 
   return (
     <Routes>
@@ -55,21 +61,19 @@ const AppContent = () => {
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <ProductProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <ProtectedRoute>
-                  <AppContent />
-                </ProtectedRoute>
-              </BrowserRouter>
-            </TooltipProvider>
-          </ProductProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ProtectedRoute>
+                <AppContent />
+              </ProtectedRoute>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ProductProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

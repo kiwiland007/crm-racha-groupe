@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "./UserProfile";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -96,8 +96,8 @@ export default function Header({ title }: { title: string }) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Theme Toggle */}
-        <ThemeToggle />
+        {/* Language Selector */}
+        <LanguageSelector />
 
         {/* User Profile */}
         <UserProfile />

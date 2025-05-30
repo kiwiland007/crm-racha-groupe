@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProductProvider } from '@/contexts/ProductContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Configuration du QueryClient pour les tests
 const createTestQueryClient = () => new QueryClient({
@@ -27,15 +26,13 @@ const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider>
-          <AuthProvider>
-            <ProductProvider>
-              <TooltipProvider>
-                {children}
-              </TooltipProvider>
-            </ProductProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ProductProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </ProductProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
