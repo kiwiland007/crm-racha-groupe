@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
+import {
   Card,
   CardContent
 } from "@/components/ui/card";
@@ -24,7 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, MoreVertical, Plus, Search, UserCheck } from "lucide-react";
+import { Filter, MoreVertical, Plus, Search, UserCheck, Eye, Edit, FileText, MessageSquare, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -34,7 +35,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ContactForm } from "@/components/contacts/ContactForm";
-import { 
+import ContactPanel from "@/components/contacts/ContactPanel";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -46,6 +48,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Contacts() {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState([
     {
       id: 1,
@@ -129,6 +132,9 @@ export default function Contacts() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [contactToAssign, setContactToAssign] = useState<number | null>(null);
   const [selectedAgent, setSelectedAgent] = useState("");
+  const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [contactPanelOpen, setContactPanelOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<any>(null);
 
   const handleAddContact = (contactData: any) => {
     const newContact = {
@@ -140,9 +146,9 @@ export default function Contacts() {
         year: 'numeric'
       })
     };
-    
+
     setContacts([newContact, ...contacts]);
-    
+
     toast.success("Contact ajouté", {
       description: `${contactData.name} a été ajouté avec succès.`
     });
@@ -157,13 +163,13 @@ export default function Contacts() {
     if (contactToDelete) {
       const updatedContacts = contacts.filter(contact => contact.id !== contactToDelete);
       setContacts(updatedContacts);
-      
+
       const deletedContact = contacts.find(contact => contact.id === contactToDelete);
-      
+
       toast.success("Contact supprimé", {
         description: `${deletedContact?.name} a été supprimé avec succès.`
       });
-      
+
       setContactToDelete(null);
       setDeleteDialogOpen(false);
     }
@@ -172,6 +178,72 @@ export default function Contacts() {
   const handleAssignContact = (contactId: number) => {
     setContactToAssign(contactId);
     setAssignDialogOpen(true);
+  };
+
+  const handleViewContact = (contact: any) => {
+    setSelectedContact(contact);
+    setContactPanelOpen(true);
+  };
+
+  const handleEditContact = (contact: any) => {
+    setEditingContact(contact);
+    setOpenContactForm(true);
+    toast.info("Modification du contact", {
+      description: `Modification de ${contact.name}`
+    });
+  };
+
+  const handleUpdateContact = (updatedContact: any) => {
+    const updatedContacts = contacts.map(contact =>
+      contact.id === updatedContact.id ? updatedContact : contact
+    );
+    setContacts(updatedContacts);
+    setEditingContact(null);
+    toast.success("Contact modifié", {
+      description: `${updatedContact.name} a été modifié avec succès.`
+    });
+  };
+
+  const handleCreateQuote = (contact: any) => {
+    // Rediriger vers la page de création de devis avec les données du contact
+    navigate('/quotes', {
+      state: {
+        prefilledClient: {
+          name: contact.name,
+          company: contact.company,
+          email: contact.email,
+          phone: contact.phone
+        }
+      }
+    });
+    toast.success("Création de devis", {
+      description: `Redirection vers la création de devis pour ${contact.name}`
+    });
+  };
+
+  const handleAddNote = (contact: any) => {
+    const note = prompt(`Ajouter une note pour ${contact.name}:`);
+    if (note && note.trim()) {
+      // Ajouter la note au contact (simple string pour l'instant)
+      const updatedContacts = contacts.map(c =>
+        c.id === contact.id
+          ? { ...c, notes: c.notes ? `${c.notes}\n\n[${new Date().toLocaleDateString()}] ${note.trim()}` : `[${new Date().toLocaleDateString()}] ${note.trim()}` }
+          : c
+      );
+      setContacts(updatedContacts);
+      toast.success("Note ajoutée", {
+        description: `Note ajoutée pour ${contact.name}`
+      });
+    }
+  };
+
+  const handleCreateTask = (contact: any) => {
+    const task = prompt(`Créer une tâche pour ${contact.name}:`);
+    if (task && task.trim()) {
+      toast.success("Tâche créée", {
+        description: `Tâche "${task.trim()}" créée pour ${contact.name}`
+      });
+    }
   };
 
   const confirmAssignContact = () => {
@@ -185,18 +257,18 @@ export default function Contacts() {
         }
         return contact;
       });
-      
+
       setContacts(updatedContacts);
-      
+
       const assignedContact = updatedContacts.find(contact => contact.id === contactToAssign);
-      const agentName = selectedAgent === "hamid" ? "Hamid Alaoui" : 
-                        selectedAgent === "sara" ? "Sara Bennani" : 
+      const agentName = selectedAgent === "hamid" ? "Hamid Alaoui" :
+                        selectedAgent === "sara" ? "Sara Bennani" :
                         selectedAgent === "karim" ? "Karim Idrissi" : "Personne";
-      
+
       toast.success("Contact attribué", {
         description: `${assignedContact?.name} a été attribué à ${agentName}.`
       });
-      
+
       setContactToAssign(null);
       setAssignDialogOpen(false);
       setSelectedAgent("");
@@ -205,12 +277,12 @@ export default function Contacts() {
 
   // Filtrer les contacts en fonction de la recherche et du type
   const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           contact.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           contact.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesType = contactTypeFilter === "all" || contact.type === contactTypeFilter;
-    
+
     return matchesSearch && matchesType;
   });
 
@@ -246,8 +318,8 @@ export default function Contacts() {
               <Filter size={16} />
               Filtres
             </Button>
-            <Select 
-              value={contactTypeFilter} 
+            <Select
+              value={contactTypeFilter}
               onValueChange={setContactTypeFilter}
             >
               <SelectTrigger className="w-[180px] hidden md:flex">
@@ -262,7 +334,10 @@ export default function Contacts() {
               </SelectContent>
             </Select>
           </div>
-          <Button className="gap-2" onClick={() => setOpenContactForm(true)}>
+          <Button className="gap-2" onClick={() => {
+            setEditingContact(null);
+            setOpenContactForm(true);
+          }}>
             <Plus size={16} />
             Ajouter un contact
           </Button>
@@ -286,7 +361,11 @@ export default function Contacts() {
               <TableBody>
                 {filteredContacts.length > 0 ? (
                   filteredContacts.map((contact) => (
-                    <TableRow key={contact.id}>
+                    <TableRow
+                      key={contact.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleViewContact(contact)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="hidden sm:flex h-9 w-9">
@@ -334,24 +413,66 @@ export default function Contacts() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir profil</DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAssignContact(contact.id)}>
-                              <UserCheck className="mr-2 h-4 w-4" /> 
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewContact(contact);
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir profil
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditContact(contact);
+                            }}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleCreateQuote(contact);
+                            }}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Créer un devis
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleAssignContact(contact.id);
+                            }}>
+                              <UserCheck className="mr-2 h-4 w-4" />
                               Attribuer
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Créer une tâche</DropdownMenuItem>
-                            <DropdownMenuItem>Ajouter une note</DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleCreateTask(contact);
+                            }}>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Créer une tâche
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddNote(contact);
+                            }}>
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              Ajouter une note
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="text-red-600"
-                              onClick={() => handleDeleteContact(contact.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteContact(contact.id);
+                              }}
                             >
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -371,11 +492,24 @@ export default function Contacts() {
           </CardContent>
         </Card>
       </div>
-      
-      <ContactForm 
-        open={openContactForm} 
-        onOpenChange={setOpenContactForm}
+
+      <ContactForm
+        open={openContactForm}
+        onOpenChange={(open) => {
+          setOpenContactForm(open);
+          if (!open) setEditingContact(null);
+        }}
         onAddContact={handleAddContact}
+        editContact={editingContact}
+        onEditContact={handleUpdateContact}
+      />
+
+      <ContactPanel
+        contact={selectedContact}
+        isOpen={contactPanelOpen}
+        onClose={() => setContactPanelOpen(false)}
+        onEdit={handleEditContact}
+        onDelete={handleDeleteContact}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -418,8 +552,8 @@ export default function Contacts() {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmAssignContact} 
+            <AlertDialogAction
+              onClick={confirmAssignContact}
               disabled={!selectedAgent}
               className="bg-blue-600 hover:bg-blue-700"
             >

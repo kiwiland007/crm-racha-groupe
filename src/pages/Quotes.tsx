@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
+import {
   Card,
   CardContent,
   CardHeader,
@@ -25,15 +25,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, MoreVertical, Plus, Search, FileText } from "lucide-react";
-import { QuoteForm } from "@/components/invoices/QuoteForm";
-import { generatePDF, generateBulkPDF } from "@/utils/pdfGenerator";
+import { Filter, MoreVertical, Plus, Search, FileText, MessageCircle, Eye, Edit, Trash2, Receipt, Mail, ArrowRight, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
+import { pdfServiceFixed, PDFQuoteData } from "@/services/pdfServiceFixed";
+import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Quotes() {
   const isMobile = useIsMobile();
-  
+
   const [quotes, setQuotes] = useState([
     {
       id: "DEV-001",
@@ -56,7 +57,7 @@ export default function Quotes() {
       status: "En attente",
       paymentMethod: "Chèque",
       description: "Maintenance des bornes interactives",
-      clientPhone: "+212 662 345 678", 
+      clientPhone: "+212 662 345 678",
       clientEmail: "contact@eventpro.ma"
     },
     {
@@ -72,25 +73,36 @@ export default function Quotes() {
       clientEmail: "reservation@hotelmarrakech.ma"
     },
   ]);
-  
+
   const [openQuoteForm, setOpenQuoteForm] = useState(false);
+  const [editingQuote, setEditingQuote] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const handleAddQuote = (quoteData: any) => {
     const newQuote = {
-      id: `DEV-00${quotes.length + 1}`,
+      id: quoteData.id,
       client: quoteData.client,
-      date: formatDate(new Date(quoteData.date)),
-      amount: parseInt(quoteData.amount),
-      advanceAmount: quoteData.advanceAmount ? parseInt(quoteData.advanceAmount) : 0,
-      status: "Émis",
-      paymentMethod: quoteData.paymentMethod,
-      description: quoteData.description,
+      date: quoteData.date,
+      amount: quoteData.total,
+      advanceAmount: 0,
+      status: quoteData.status,
+      paymentMethod: quoteData.paymentTerms,
+      description: quoteData.description || quoteData.projectName,
       clientPhone: quoteData.clientPhone || "",
       clientEmail: quoteData.clientEmail || ""
     };
-    
+
     setQuotes([newQuote, ...quotes]);
-    
+
+    // Générer automatiquement le PDF
+    const filename = pdfServiceFixed.generateQuotePDF(quoteData, 'quote');
+    if (filename) {
+      toast.success("Devis créé et PDF généré", {
+        description: `Devis ${quoteData.id} pour ${quoteData.client}`
+      });
+    }
+
     return newQuote;
   };
 
@@ -105,30 +117,192 @@ export default function Quotes() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Émis":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Émis</Badge>;
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100 gap-1">
+            <FileText size={12} />
+            Émis
+          </Badge>
+        );
       case "Accepté":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Accepté</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 gap-1">
+            <CheckCircle size={12} />
+            Accepté
+          </Badge>
+        );
       case "Facturé":
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800 hover:bg-purple-100">Facturé</Badge>;
+        return (
+          <Badge variant="outline" className="bg-purple-100 text-purple-800 hover:bg-purple-100 gap-1">
+            <Receipt size={12} />
+            Facturé
+          </Badge>
+        );
       case "En attente":
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">En attente</Badge>;
+        return (
+          <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100 gap-1">
+            <Clock size={12} />
+            En attente
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <Badge variant="outline" className="gap-1">
+            <AlertCircle size={12} />
+            {status}
+          </Badge>
+        );
     }
   };
-  
+
   const handleGeneratePDF = (quote: any) => {
-    generatePDF(quote, 'quote');
-    toast.success("PDF généré", {
-      description: `Devis ${quote.id} pour ${quote.client}`
+    // Convertir le devis au format PDFQuoteData
+    const pdfData: PDFQuoteData = {
+      id: quote.id,
+      client: quote.client,
+      clientPhone: quote.clientPhone,
+      clientEmail: quote.clientEmail,
+      projectName: quote.description,
+      description: quote.description,
+      date: quote.date,
+      items: [
+        {
+          type: "service",
+          name: quote.description,
+          description: "Service principal",
+          quantity: 1,
+          unitPrice: quote.amount,
+          discount: 0
+        }
+      ],
+      subtotal: quote.amount,
+      discount: 0,
+      tax: Math.round(quote.amount * 0.2),
+      total: Math.round(quote.amount * 1.2),
+      taxRate: 20,
+      paymentTerms: quote.paymentMethod,
+      validityDays: 30,
+      notes: `Devis généré automatiquement pour ${quote.client}`,
+      status: quote.status
+    };
+
+    const filename = pdfServiceFixed.generateQuotePDF(pdfData, 'quote');
+    if (filename) {
+      toast.success("PDF généré", {
+        description: `Devis ${quote.id} pour ${quote.client}`
+      });
+    }
+  };
+
+  const handleGenerateAllPDFs = () => {
+    // Fonction temporairement désactivée - service de liste PDF à implémenter
+    toast.info("Fonctionnalité en développement", {
+      description: "Génération de liste PDF bientôt disponible"
     });
   };
-  
-  const handleGenerateAllPDFs = () => {
-    generateBulkPDF(quotes, 'quote');
-    toast.success("PDF généré", {
-      description: `Liste des devis générée`
+
+  const handleViewDetails = (quote: any) => {
+    toast.info("Détails du devis", {
+      description: `Affichage des détails du devis ${quote.id}`
     });
+  };
+
+  const handleEditQuote = (quote: any) => {
+    setEditingQuote(quote);
+    setOpenQuoteForm(true);
+  };
+
+  const handleUpdateQuote = (quoteData: any) => {
+    const updatedQuotes = quotes.map(quote =>
+      quote.id === quoteData.id ? { ...quote, ...quoteData } : quote
+    );
+    setQuotes(updatedQuotes);
+    setEditingQuote(null);
+    toast.success("Devis modifié avec succès");
+  };
+
+  const handleConvertToInvoice = (quote: any) => {
+    // Convertir le devis en facture
+    const updatedQuotes = quotes.map(q =>
+      q.id === quote.id ? { ...q, status: "Facturé" } : q
+    );
+    setQuotes(updatedQuotes);
+
+    // Créer une nouvelle facture basée sur le devis
+    const newInvoice = {
+      id: `INV-${Date.now()}`,
+      quoteId: quote.id,
+      client: quote.client,
+      clientEmail: quote.clientEmail,
+      clientPhone: quote.clientPhone,
+      projectName: quote.description,
+      amount: quote.amount,
+      advanceAmount: quote.advanceAmount,
+      remainingAmount: quote.amount - quote.advanceAmount,
+      paymentMethod: quote.paymentMethod,
+      date: new Date().toLocaleDateString('fr-FR'),
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'), // 30 jours
+      status: "En attente",
+      items: quote.items || [],
+      notes: `Facture générée automatiquement à partir du devis ${quote.id}`,
+      createdAt: new Date().toISOString()
+    };
+
+    // Sauvegarder la facture dans le localStorage
+    const existingInvoices = JSON.parse(localStorage.getItem('crm_invoices') || '[]');
+    const updatedInvoices = [...existingInvoices, newInvoice];
+    localStorage.setItem('crm_invoices', JSON.stringify(updatedInvoices));
+
+    toast.success("Devis converti en facture", {
+      description: `Facture ${newInvoice.id} créée avec succès`,
+      action: {
+        label: "Voir factures",
+        onClick: () => window.location.href = "/invoices"
+      }
+    });
+  };
+
+  const handleSendEmail = (quote: any) => {
+    if (quote.clientEmail) {
+      const subject = `Devis ${quote.id} - ${quote.client}`;
+      const body = `Bonjour,\n\nVeuillez trouver ci-joint votre devis ${quote.id}.\n\nCordialement,\nRacha Business Digital`;
+      const mailtoUrl = `mailto:${quote.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoUrl);
+
+      toast.success("Email ouvert", {
+        description: `Email préparé pour ${quote.client}`
+      });
+    } else {
+      toast.error("Email non disponible", {
+        description: "Aucune adresse email pour ce client"
+      });
+    }
+  };
+
+  const handleDeleteQuote = (quote: any) => {
+    const updatedQuotes = quotes.filter(q => q.id !== quote.id);
+    setQuotes(updatedQuotes);
+
+    toast.success("Devis supprimé", {
+      description: `Devis ${quote.id} supprimé avec succès`
+    });
+  };
+
+  const handleSendWhatsApp = (quote: any) => {
+    if (quote.clientPhone) {
+      const cleanPhone = quote.clientPhone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+      const message = `Bonjour ${quote.client},\n\nVotre devis ${quote.id} d'un montant de ${quote.amount.toLocaleString()} MAD est disponible.\n\nDescription: ${quote.description}\n\nCordialement,\nRacha Business Digital\n📞 +212 6 69 38 28 28`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
+
+      toast.success("WhatsApp ouvert", {
+        description: `Message prêt pour ${quote.client}`
+      });
+    } else {
+      toast.error("Téléphone non disponible", {
+        description: "Aucun numéro de téléphone pour ce client"
+      });
+    }
   };
 
   return (
@@ -142,6 +316,8 @@ export default function Quotes() {
                 type="search"
                 placeholder="Rechercher des devis..."
                 className="pl-8 bg-white border-gray-200 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button variant="outline" size="sm" className="hidden md:flex gap-2">
@@ -160,6 +336,36 @@ export default function Quotes() {
             </Button>
           </div>
         </div>
+
+        {/* Indicateur de workflow */}
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Workflow Commercial</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                  <FileText size={14} />
+                  <span>Devis</span>
+                </div>
+                <ArrowRight size={16} className="text-gray-400" />
+                <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded">
+                  <CheckCircle size={14} />
+                  <span>Accepté</span>
+                </div>
+                <ArrowRight size={16} className="text-gray-400" />
+                <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-800 rounded">
+                  <Receipt size={14} />
+                  <span>Facturé</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500">
+                Processus automatisé de conversion
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -182,7 +388,13 @@ export default function Quotes() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {quotes.map((quote) => (
+                  {quotes.filter(quote => {
+                    const matchesSearch = quote.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        quote.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        quote.description.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesStatus = statusFilter === "all" || quote.status === statusFilter;
+                    return matchesSearch && matchesStatus;
+                  }).map((quote) => (
                     <TableRow key={quote.id}>
                       <TableCell className="font-medium">{quote.id}</TableCell>
                       <TableCell>{quote.client}</TableCell>
@@ -211,13 +423,32 @@ export default function Quotes() {
                               <FileText className="mr-2 h-4 w-4" />
                               Générer PDF
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewDetails(quote)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditQuote(quote)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Convertir en facture</DropdownMenuItem>
-                            <DropdownMenuItem>Envoyer par email</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleConvertToInvoice(quote)}>
+                              <Receipt className="mr-2 h-4 w-4" />
+                              Convertir en facture
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSendEmail(quote)}>
+                              <Mail className="mr-2 h-4 w-4" />
+                              Envoyer par email
+                            </DropdownMenuItem>
+                            {quote.clientPhone && (
+                              <DropdownMenuItem onClick={() => handleSendWhatsApp(quote)}>
+                                <MessageCircle className="mr-2 h-4 w-4" />
+                                Envoyer WhatsApp
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteQuote(quote)}>
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -231,11 +462,16 @@ export default function Quotes() {
           </CardContent>
         </Card>
       </div>
-      
-      <QuoteForm 
-        open={openQuoteForm} 
-        onOpenChange={setOpenQuoteForm}
-        onAddQuote={handleAddQuote}
+
+      <AdvancedQuoteForm
+        open={openQuoteForm}
+        onOpenChange={(open) => {
+          setOpenQuoteForm(open);
+          if (!open) setEditingQuote(null);
+        }}
+        onSave={editingQuote ? handleUpdateQuote : handleAddQuote}
+        type="quote"
+        editingData={editingQuote}
       />
     </Layout>
   );

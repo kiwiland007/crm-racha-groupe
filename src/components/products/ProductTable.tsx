@@ -9,20 +9,7 @@ import {
 } from "@/components/ui/table";
 import ProductAvailabilityBadge from "./ProductAvailabilityBadge";
 import ProductActions from "./ProductActions";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: {
-    sale: string;
-    rental: string;
-  };
-  category: string;
-  availability: string;
-  sku: string;
-  technicalSpecs?: string;
-}
+import { useProductContext, Product } from "@/contexts/ProductContext";
 
 interface ProductTableProps {
   products: Product[];
@@ -31,27 +18,17 @@ interface ProductTableProps {
   isMobile: boolean;
 }
 
-const ProductTable: React.FC<ProductTableProps> = ({ 
-  products, 
+const ProductTable: React.FC<ProductTableProps> = ({
+  products,
   onEditProduct,
   onDeleteProduct,
   isMobile
 }) => {
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "ecrans":
-        return "Écrans tactiles";
-      case "bornes":
-        return "Bornes interactives";
-      case "tables":
-        return "Tables tactiles";
-      case "accessoires":
-        return "Accessoires";
-      case "logiciels":
-        return "Logiciels";
-      default:
-        return category;
-    }
+  const { getCategoryById } = useProductContext();
+
+  const getCategoryLabel = (categoryId: string) => {
+    const category = getCategoryById(categoryId);
+    return category ? category.name : categoryId;
   };
 
   return (

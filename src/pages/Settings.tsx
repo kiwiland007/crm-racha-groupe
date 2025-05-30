@@ -36,8 +36,12 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { UserManagement } from "@/components/settings/UserManagement";
 import { LeadCaptureForm } from "@/components/marketing/LeadCaptureForm";
+import { WhatsAppStats } from "@/components/whatsapp/WhatsAppIntegration";
+import { IntegrationModals } from "@/components/settings/IntegrationModals";
+import { APIManagement } from "@/components/settings/APIManagement";
 
 export default function Settings() {
   const [generalSettings, setGeneralSettings] = useState({
@@ -65,6 +69,12 @@ export default function Settings() {
 
   const [openLeadCaptureForm, setOpenLeadCaptureForm] = useState(false);
 
+  // États pour les modals d'intégration
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   const handleGeneralSettingsSave = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("Paramètres généraux enregistrés");
@@ -75,10 +85,16 @@ export default function Settings() {
     toast.success("Paramètres de notification enregistrés");
   };
 
+  const handleWhatsAppReconfigure = () => {
+    toast.info("Reconfiguration WhatsApp", {
+      description: "Ouverture de l'assistant de reconfiguration WhatsApp Business"
+    });
+  };
+
   return (
     <Layout title="Paramètres">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6 md:w-auto md:grid-cols-6">
           <TabsTrigger value="general" className="flex gap-2 items-center">
             <Settings2 size={16} />
             <span className="hidden sm:inline">Général</span>
@@ -94,6 +110,14 @@ export default function Settings() {
           <TabsTrigger value="integrations" className="flex gap-2 items-center">
             <Globe size={16} />
             <span className="hidden sm:inline">Intégrations</span>
+          </TabsTrigger>
+          <TabsTrigger value="api" className="flex gap-2 items-center">
+            <CreditCard size={16} />
+            <span className="hidden sm:inline">API</span>
+          </TabsTrigger>
+          <TabsTrigger value="whatsapp" className="flex gap-2 items-center">
+            <MessageSquare size={16} />
+            <span className="hidden sm:inline">WhatsApp</span>
           </TabsTrigger>
         </TabsList>
 
@@ -111,9 +135,9 @@ export default function Settings() {
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
                     <Label htmlFor="companyName">Nom de l'entreprise</Label>
-                    <Input 
-                      id="companyName" 
-                      value={generalSettings.companyName} 
+                    <Input
+                      id="companyName"
+                      value={generalSettings.companyName}
                       onChange={(e) => setGeneralSettings({...generalSettings, companyName: e.target.value})}
                     />
                   </div>
@@ -121,18 +145,18 @@ export default function Settings() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        value={generalSettings.email} 
+                      <Input
+                        id="email"
+                        type="email"
+                        value={generalSettings.email}
                         onChange={(e) => setGeneralSettings({...generalSettings, email: e.target.value})}
                       />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="phone">Téléphone</Label>
-                      <Input 
-                        id="phone" 
-                        value={generalSettings.phone} 
+                      <Input
+                        id="phone"
+                        value={generalSettings.phone}
                         onChange={(e) => setGeneralSettings({...generalSettings, phone: e.target.value})}
                       />
                     </div>
@@ -140,27 +164,27 @@ export default function Settings() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="address">Adresse</Label>
-                    <Textarea 
-                      id="address" 
-                      value={generalSettings.address} 
+                    <Textarea
+                      id="address"
+                      value={generalSettings.address}
                       onChange={(e) => setGeneralSettings({...generalSettings, address: e.target.value})}
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="website">Site web</Label>
-                    <Input 
-                      id="website" 
-                      value={generalSettings.website} 
+                    <Input
+                      id="website"
+                      value={generalSettings.website}
                       onChange={(e) => setGeneralSettings({...generalSettings, website: e.target.value})}
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="description">Description de l'entreprise</Label>
-                    <Textarea 
-                      id="description" 
-                      value={generalSettings.description} 
+                    <Textarea
+                      id="description"
+                      value={generalSettings.description}
                       onChange={(e) => setGeneralSettings({...generalSettings, description: e.target.value})}
                     />
                   </div>
@@ -175,9 +199,9 @@ export default function Settings() {
                       <Label htmlFor="facebook" className="flex items-center gap-2">
                         <Facebook size={16} /> Facebook
                       </Label>
-                      <Input 
-                        id="facebook" 
-                        value={generalSettings.facebook} 
+                      <Input
+                        id="facebook"
+                        value={generalSettings.facebook}
                         onChange={(e) => setGeneralSettings({...generalSettings, facebook: e.target.value})}
                       />
                     </div>
@@ -185,9 +209,9 @@ export default function Settings() {
                       <Label htmlFor="instagram" className="flex items-center gap-2">
                         <Instagram size={16} /> Instagram
                       </Label>
-                      <Input 
-                        id="instagram" 
-                        value={generalSettings.instagram} 
+                      <Input
+                        id="instagram"
+                        value={generalSettings.instagram}
                         onChange={(e) => setGeneralSettings({...generalSettings, instagram: e.target.value})}
                       />
                     </div>
@@ -197,9 +221,9 @@ export default function Settings() {
                     <Label htmlFor="linkedin" className="flex items-center gap-2">
                       <Linkedin size={16} /> LinkedIn
                     </Label>
-                    <Input 
-                      id="linkedin" 
-                      value={generalSettings.linkedin} 
+                    <Input
+                      id="linkedin"
+                      value={generalSettings.linkedin}
                       onChange={(e) => setGeneralSettings({...generalSettings, linkedin: e.target.value})}
                     />
                   </div>
@@ -253,12 +277,12 @@ export default function Settings() {
                     <Switch
                       id="emailNotifications"
                       checked={notificationSettings.emailNotifications}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setNotificationSettings({...notificationSettings, emailNotifications: checked})
                       }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="smsNotifications" className="flex flex-col space-y-1">
                       <span>Notifications par SMS</span>
@@ -269,12 +293,12 @@ export default function Settings() {
                     <Switch
                       id="smsNotifications"
                       checked={notificationSettings.smsNotifications}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setNotificationSettings({...notificationSettings, smsNotifications: checked})
                       }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between space-x-2">
                     <Label htmlFor="pushNotifications" className="flex flex-col space-y-1">
                       <span>Notifications push</span>
@@ -285,56 +309,56 @@ export default function Settings() {
                     <Switch
                       id="pushNotifications"
                       checked={notificationSettings.pushNotifications}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setNotificationSettings({...notificationSettings, pushNotifications: checked})
                       }
                     />
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">Types de notifications</h3>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="newLeadAlerts">Nouveaux leads</Label>
                       <Switch
                         id="newLeadAlerts"
                         checked={notificationSettings.newLeadAlerts}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           setNotificationSettings({...notificationSettings, newLeadAlerts: checked})
                         }
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="quotationAlerts">Devis et factures</Label>
                       <Switch
                         id="quotationAlerts"
                         checked={notificationSettings.quotationAlerts}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           setNotificationSettings({...notificationSettings, quotationAlerts: checked})
                         }
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="eventReminders">Rappels d'événements</Label>
                       <Switch
                         id="eventReminders"
                         checked={notificationSettings.eventReminders}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           setNotificationSettings({...notificationSettings, eventReminders: checked})
                         }
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between space-x-2">
                       <Label htmlFor="paymentAlerts">Paiements</Label>
                       <Switch
                         id="paymentAlerts"
                         checked={notificationSettings.paymentAlerts}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           setNotificationSettings({...notificationSettings, paymentAlerts: checked})
                         }
                       />
@@ -377,7 +401,12 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Configurer</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPaymentModalOpen(true)}
+                    >
+                      Configurer
+                    </Button>
                   </div>
                 </div>
 
@@ -394,7 +423,35 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Configurer</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEmailModalOpen(true)}
+                    >
+                      Configurer
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-green-100 p-2 rounded-md">
+                        <MessageSquare className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">WhatsApp Business</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Communiquez directement avec vos clients via WhatsApp Business
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={handleWhatsAppReconfigure}
+                      className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                    >
+                      Reconfigurer
+                    </Button>
                   </div>
                 </div>
 
@@ -411,7 +468,12 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Configurer</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setChatModalOpen(true)}
+                    >
+                      Configurer
+                    </Button>
                   </div>
                 </div>
 
@@ -428,7 +490,12 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <Button onClick={() => setOpenLeadCaptureForm(true)}>Configurer</Button>
+                    <Button
+                      onClick={() => setOpenLeadCaptureForm(true)}
+                      className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                    >
+                      Configurer
+                    </Button>
                   </div>
                 </div>
 
@@ -445,18 +512,125 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Configurer</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setAuthModalOpen(true)}
+                    >
+                      Configurer
+                    </Button>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Gestion API */}
+        <TabsContent value="api">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestion des API</CardTitle>
+              <CardDescription>
+                Gérez vos clés API et accédez à la documentation technique.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <APIManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* WhatsApp Business */}
+        <TabsContent value="whatsapp">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-green-600" />
+                  Configuration WhatsApp Business
+                </CardTitle>
+                <CardDescription>
+                  Gérez votre intégration WhatsApp Business pour communiquer avec vos clients.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-green-100 p-2 rounded-md">
+                        <MessageSquare className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">WhatsApp Business API</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Statut de la connexion à l'API WhatsApp Business
+                        </p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                      ✓ Connecté
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp-number">Numéro WhatsApp Business</Label>
+                      <Input
+                        id="whatsapp-number"
+                        value="+212 661 234 567"
+                        disabled
+                        className="bg-gray-50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="business-name">Nom de l'entreprise</Label>
+                      <Input
+                        id="business-name"
+                        value="Racha Business Digital SARL"
+                        disabled
+                        className="bg-gray-50"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-url">URL Webhook</Label>
+                    <Input
+                      id="webhook-url"
+                      value="https://api.rachabusinessgroup.com/webhook/whatsapp"
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button variant="outline" onClick={handleWhatsAppReconfigure}>
+                      Reconfigurer
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <WhatsAppStats />
+          </div>
+        </TabsContent>
       </Tabs>
 
-      <LeadCaptureForm 
-        open={openLeadCaptureForm} 
+      <LeadCaptureForm
+        open={openLeadCaptureForm}
         onOpenChange={setOpenLeadCaptureForm}
+      />
+
+      <IntegrationModals
+        paymentOpen={paymentModalOpen}
+        emailOpen={emailModalOpen}
+        chatOpen={chatModalOpen}
+        authOpen={authModalOpen}
+        onPaymentOpenChange={setPaymentModalOpen}
+        onEmailOpenChange={setEmailModalOpen}
+        onChatOpenChange={setChatModalOpen}
+        onAuthOpenChange={setAuthModalOpen}
       />
     </Layout>
   );

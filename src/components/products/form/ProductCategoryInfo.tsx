@@ -15,12 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Control } from "react-hook-form";
+import { useProductContext } from "@/contexts/ProductContext";
 
 interface ProductCategoryInfoProps {
   control: Control<any>;
 }
 
 const ProductCategoryInfo: React.FC<ProductCategoryInfoProps> = ({ control }) => {
+  const { categories } = useProductContext();
+  const productCategories = categories.filter(cat => cat.type === "product");
+
   return (
     <FormField
       control={control}
@@ -38,11 +42,16 @@ const ProductCategoryInfo: React.FC<ProductCategoryInfoProps> = ({ control }) =>
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="ecrans">Écrans tactiles</SelectItem>
-              <SelectItem value="bornes">Bornes interactives</SelectItem>
-              <SelectItem value="tables">Tables tactiles</SelectItem>
-              <SelectItem value="accessoires">Accessoires</SelectItem>
-              <SelectItem value="logiciels">Logiciels</SelectItem>
+              {productCategories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+              {productCategories.length === 0 && (
+                <SelectItem value="" disabled>
+                  Aucune catégorie disponible
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
           <FormMessage />

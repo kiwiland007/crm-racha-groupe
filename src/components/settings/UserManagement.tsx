@@ -50,7 +50,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MoreVertical, Plus, Trash2, UserCog, Phone } from "lucide-react";
+import { MoreVertical, Plus, Trash2, UserCog, Phone, RefreshCw, Eye, EyeOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,6 +85,7 @@ const formSchema = z.object({
   fullName: z.string().min(2, { message: "Le nom est requis" }),
   email: z.string().email({ message: "Email invalide" }),
   phone: z.string().optional(),
+  password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
   role: z.string(),
   isActive: z.boolean().default(true),
   permissions: z.object({
@@ -100,6 +101,20 @@ const formSchema = z.object({
 type UserFormValues = z.infer<typeof formSchema>;
 
 export function UserManagement() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
+
+  // Fonction pour générer un mot de passe sécurisé
+  const generateSecurePassword = () => {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  };
+
   const [users, setUsers] = useState<User[]>([
     {
       id: 1,
@@ -166,7 +181,7 @@ export function UserManagement() {
       }
     },
   ]);
-  
+
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -178,6 +193,7 @@ export function UserManagement() {
       fullName: "",
       email: "",
       phone: "",
+      password: "",
       role: "commercial",
       isActive: true,
       permissions: {
@@ -190,13 +206,14 @@ export function UserManagement() {
       }
     },
   });
-  
+
   const editForm = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       email: "",
       phone: "",
+      password: "",
       role: "commercial",
       isActive: true,
       permissions: {
@@ -228,13 +245,13 @@ export function UserManagement() {
         admin: data.permissions.admin,
       }
     };
-    
+
     setUsers([...users, newUser]);
-    
+
     toast.success("Utilisateur ajouté", {
       description: `${data.fullName} a été ajouté avec succès.`
     });
-    
+
     setOpenAddDialog(false);
     form.reset();
   };
@@ -262,13 +279,13 @@ export function UserManagement() {
         }
         return user;
       });
-      
+
       setUsers(updatedUsers);
-      
+
       toast.success("Utilisateur modifié", {
         description: `${data.fullName} a été mis à jour avec succès.`
       });
-      
+
       setOpenEditDialog(false);
       setCurrentUser(null);
     }
@@ -278,11 +295,11 @@ export function UserManagement() {
     if (currentUser) {
       const updatedUsers = users.filter(user => user.id !== currentUser.id);
       setUsers(updatedUsers);
-      
+
       toast.success("Utilisateur supprimé", {
         description: `${currentUser.fullName} a été supprimé avec succès.`
       });
-      
+
       setOpenDeleteDialog(false);
       setCurrentUser(null);
     }
@@ -400,8 +417,8 @@ export function UserManagement() {
               <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
               <TableCell>{getRoleBadge(user.role)}</TableCell>
               <TableCell className="hidden md:table-cell">
-                <Switch 
-                  checked={user.isActive} 
+                <Switch
+                  checked={user.isActive}
                   onCheckedChange={(checked) => {
                     const updatedUsers = users.map(u => {
                       if (u.id === user.id) {
@@ -426,8 +443,8 @@ export function UserManagement() {
                       Modifier
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-red-600" 
+                    <DropdownMenuItem
+                      className="text-red-600"
                       onClick={() => deleteUserClicked(user)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
@@ -465,8 +482,8 @@ export function UserManagement() {
                   </FormItem>
                 )}
               />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="email"
@@ -480,7 +497,7 @@ export function UserManagement() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="phone"
@@ -495,7 +512,58 @@ export function UserManagement() {
                   )}
                 />
               </div>
-              
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center justify-between">
+                      Mot de passe
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newPassword = generateSecurePassword();
+                          form.setValue("password", newPassword);
+                          toast.success("Mot de passe généré", {
+                            description: "Un mot de passe sécurisé a été généré automatiquement"
+                          });
+                        }}
+                        className="h-6 px-2 text-xs"
+                      >
+                        <RefreshCw size={12} className="mr-1" />
+                        Générer
+                      </Button>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Minimum 6 caractères"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -503,7 +571,7 @@ export function UserManagement() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rôle</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={(value) => {
                           field.onChange(value);
                           handleRoleChange(value, form);
@@ -526,7 +594,7 @@ export function UserManagement() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="isActive"
@@ -545,7 +613,7 @@ export function UserManagement() {
                   )}
                 />
               </div>
-              
+
               <div>
                 <h4 className="text-sm font-medium mb-3">Permissions</h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -564,7 +632,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="permissions.inventory"
@@ -580,7 +648,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="permissions.events"
@@ -596,7 +664,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="permissions.quotes"
@@ -612,7 +680,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="permissions.settings"
@@ -628,7 +696,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="permissions.admin"
@@ -646,7 +714,7 @@ export function UserManagement() {
                   />
                 </div>
               </div>
-              
+
               <DialogFooter>
                 <Button type="submit">Ajouter l'utilisateur</Button>
               </DialogFooter>
@@ -679,7 +747,7 @@ export function UserManagement() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={editForm.control}
@@ -694,7 +762,7 @@ export function UserManagement() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={editForm.control}
                   name="phone"
@@ -709,7 +777,7 @@ export function UserManagement() {
                   )}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={editForm.control}
@@ -717,7 +785,7 @@ export function UserManagement() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rôle</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={(value) => {
                           field.onChange(value);
                           handleRoleChange(value, editForm);
@@ -740,7 +808,7 @@ export function UserManagement() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={editForm.control}
                   name="isActive"
@@ -759,7 +827,7 @@ export function UserManagement() {
                   )}
                 />
               </div>
-              
+
               <div>
                 <h4 className="text-sm font-medium mb-3">Permissions</h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -778,7 +846,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={editForm.control}
                     name="permissions.inventory"
@@ -794,7 +862,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={editForm.control}
                     name="permissions.events"
@@ -810,7 +878,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={editForm.control}
                     name="permissions.quotes"
@@ -826,7 +894,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={editForm.control}
                     name="permissions.settings"
@@ -842,7 +910,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={editForm.control}
                     name="permissions.admin"
@@ -860,7 +928,7 @@ export function UserManagement() {
                   />
                 </div>
               </div>
-              
+
               <DialogFooter>
                 <Button type="submit">Enregistrer les modifications</Button>
               </DialogFooter>
@@ -880,7 +948,7 @@ export function UserManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteUser}
               className="bg-red-600 hover:bg-red-700 text-white"
             >

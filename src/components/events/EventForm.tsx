@@ -51,9 +51,13 @@ interface EventFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddEvent?: (event: EventFormValues) => void;
+  onUpdateEvent?: (event: EventFormValues & { id: number }) => void;
+  editingEvent?: any;
 }
 
-export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
+export function EventForm({ open, onOpenChange, onAddEvent, onUpdateEvent, editingEvent }: EventFormProps) {
+  const isEditing = !!editingEvent;
+
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -71,10 +75,78 @@ export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
     },
   });
 
+  // Mettre à jour le formulaire quand on édite un événement
+  React.useEffect(() => {
+    if (editingEvent && open) {
+      try {
+        const [startTime, endTime] = editingEvent.time.split(' - ');
+
+        // Conversion sécurisée des dates
+        const parseDate = (dateStr: string) => {
+          // Si c'est déjà au format YYYY-MM-DD, on le garde
+          if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return dateStr;
+          }
+          // Sinon, on essaie de parser et convertir
+          const date = new Date(dateStr);
+          return date.toISOString().split('T')[0];
+        };
+
+        form.reset({
+          title: editingEvent.title || "",
+          startDate: parseDate(editingEvent.startDate),
+          endDate: parseDate(editingEvent.endDate),
+          startTime: startTime || "09:00",
+          endTime: endTime || "18:00",
+          location: editingEvent.location || "",
+          client: editingEvent.client || "",
+          status: editingEvent.status || "planifié",
+          teamMembers: editingEvent.teamMembers?.toString() || "1",
+          equipments: editingEvent.equipments?.toString() || "0",
+          description: editingEvent.description || "",
+        });
+      } catch (error) {
+        console.error("Erreur lors du parsing de l'événement:", error);
+        // Valeurs par défaut en cas d'erreur
+        form.reset({
+          title: editingEvent.title || "",
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: new Date().toISOString().split('T')[0],
+          startTime: "09:00",
+          endTime: "18:00",
+          location: editingEvent.location || "",
+          client: editingEvent.client || "",
+          status: editingEvent.status || "planifié",
+          teamMembers: "1",
+          equipments: "0",
+          description: editingEvent.description || "",
+        });
+      }
+    } else if (!editingEvent && open) {
+      form.reset({
+        title: "",
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
+        startTime: "09:00",
+        endTime: "18:00",
+        location: "",
+        client: "",
+        status: "planifié",
+        teamMembers: "1",
+        equipments: "0",
+        description: "",
+      });
+    }
+  }, [editingEvent, open, form]);
+
   function onSubmit(data: EventFormValues) {
-    if (onAddEvent) {
+    if (isEditing && onUpdateEvent && editingEvent) {
+      onUpdateEvent({ ...data, id: editingEvent.id });
+      toast.success("Événement modifié", {
+        description: `L'événement "${data.title}" a été modifié avec succès.`,
+      });
+    } else if (onAddEvent) {
       onAddEvent(data);
-    } else {
       toast.success("Événement créé", {
         description: `L'événement "${data.title}" a été créé avec succès.`,
       });
@@ -85,11 +157,11 @@ export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Créer un événement</DialogTitle>
+          <DialogTitle>{isEditing ? "Modifier l'événement" : "Créer un événement"}</DialogTitle>
           <DialogDescription>
-            Planifier un nouvel événement dans votre agenda
+            {isEditing ? "Modifier les informations de l'événement" : "Planifier un nouvel événement dans votre agenda"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -108,7 +180,7 @@ export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="startDate"
@@ -199,7 +271,7 @@ export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Statut</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un statut" />
@@ -259,8 +331,10 @@ export function EventForm({ open, onOpenChange, onAddEvent }: EventFormProps) {
               )}
             />
 
-            <DialogFooter>
-              <Button type="submit">Créer l'événement</Button>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEditing ? "Modifier l'événement" : "Créer l'événement"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

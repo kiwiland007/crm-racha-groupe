@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
 
 interface ProductPriceInfoProps {
-  control: Control<any>;
+  control: Control<Record<string, unknown>>;
 }
 
 const ProductPriceInfo: React.FC<ProductPriceInfoProps> = ({ control }) => {

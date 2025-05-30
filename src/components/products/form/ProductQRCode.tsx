@@ -5,7 +5,7 @@ import QRCodeGenerator from "../../common/QRCodeGenerator";
 interface ProductQRCodeProps {
   productId: string;
   productName: string;
-  productPrice: string;
+  productPrice: { sale: string; rental: string };
 }
 
 const ProductQRCode: React.FC<ProductQRCodeProps> = ({

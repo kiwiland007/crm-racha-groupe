@@ -18,8 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function RecentContacts() {
+  const navigate = useNavigate();
   const contacts = [
     {
       id: 1,
@@ -63,7 +66,14 @@ export function RecentContacts() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Contacts récents</CardTitle>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            navigate('/contacts');
+            toast.success("Redirection vers les contacts");
+          }}
+        >
           Voir tous
         </Button>
       </CardHeader>

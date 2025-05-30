@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import {
   Card,
@@ -9,78 +9,65 @@ import {
 import ProductsHeader from "@/components/products/ProductsHeader";
 import ProductTable from "@/components/products/ProductTable";
 import ProductForm from "@/components/products/ProductForm";
+import CategoryManager from "@/components/products/CategoryManager";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-type Product = {
-  id: string;
-  name: string;
-  description: string;
-  price: {
-    sale: string;
-    rental: string;
-  };
-  category: string;
-  availability: string;
-  sku: string;
-  technicalSpecs?: string;
-};
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProductContext, Product } from "@/contexts/ProductContext";
+import { useAdvancedSearch } from "@/hooks/use-search";
 
 export default function Products() {
   const isMobile = useIsMobile();
-  
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: "PRD-001",
-      name: "Écran tactile 32\"",
-      description: "Écran tactile 32 pouces avec résolution 4K et 10 points de contact",
-      price: {
-        sale: "15000",
-        rental: "2000"
-      },
-      category: "ecrans",
-      availability: "en_stock",
-      sku: "ECR-32-4K",
-      technicalSpecs: "Résolution: 3840x2160\nTechnologie tactile: Capacitive\nPoints de contact: 10\nConnectivité: HDMI, USB-C\nDimensions: 80x50x5cm"
-    },
-    {
-      id: "PRD-002",
-      name: "Borne interactive 42\"",
-      description: "Borne interactive avec écran 42 pouces pour centres commerciaux",
-      price: {
-        sale: "38000",
-        rental: "5000"
-      },
-      category: "bornes",
-      availability: "sur_commande",
-      sku: "BRN-42-COM",
-      technicalSpecs: "Écran: 42\" Full HD\nProcesseur: Intel i5\nMémoire: 8GB RAM\nStockage: 256GB SSD\nOS: Windows 10 Pro"
-    },
-    {
-      id: "PRD-003",
-      name: "Table tactile 55\"",
-      description: "Table tactile 55 pouces pour restaurants et hôtels",
-      price: {
-        sale: "62000",
-        rental: "8000"
-      },
-      category: "tables",
-      availability: "en_stock",
-      sku: "TBL-55-HTL",
-      technicalSpecs: "Taille: 55 pouces\nRésolution: 4K UHD\nVerre trempé: 6mm\nProtection IP65\nHauteur ajustable: 70-110cm"
-    },
-  ]);
-  
+  const {
+    products,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    getCategoryById
+  } = useProductContext();
+
   const [openProductForm, setOpenProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
-  const [searchTerm, setSearchTerm] = useState("");
+
+  // Utilisation du hook de recherche avancée
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredData: filteredProducts,
+    filters: activeFilters,
+    setFilter,
+    clearAllFilters,
+    activeFilterCount,
+    resultCount
+  } = useAdvancedSearch({
+    data: products,
+    searchFields: ['name', 'description', 'sku'],
+    filterFunctions: {
+      category: (product, categoryValue) => product.category === categoryValue,
+      availability: (product, availabilityValue) => product.availability === availabilityValue,
+      priceRange: (product, priceRangeValue) => {
+        const price = parseInt(product.price.sale);
+        switch (priceRangeValue) {
+          case "0-20000":
+            return price >= 0 && price <= 20000;
+          case "20000-50000":
+            return price > 20000 && price <= 50000;
+          case "50000+":
+            return price > 50000;
+          default:
+            return true;
+        }
+      }
+    }
+  });
+
+
   
-  const handleAddProduct = (productData: Product) => {
-    setProducts([productData, ...products]);
+  const handleAddProduct = (productData: Omit<Product, 'id'>) => {
+    addProduct(productData);
     toast.success("Produit ajouté", {
       description: `Le produit ${productData.name} a été ajouté avec succès.`,
     });
-    return productData;
   };
   
   const handleEditProduct = (product: Product) => {
@@ -89,7 +76,7 @@ export default function Products() {
   };
   
   const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter(product => product.id !== productId));
+    deleteProduct(productId);
     toast.success("Produit supprimé", {
       description: `Le produit a été supprimé avec succès.`,
     });
@@ -98,41 +85,53 @@ export default function Products() {
   const handleSearch = (term: string) => {
     setSearchTerm(term);
   };
-  
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  const handleFilter = (filters: any) => {
+    Object.entries(filters).forEach(([key, value]) => {
+      setFilter(key, value);
+    });
+  };
 
   return (
     <Layout title="Produits">
-      <div className="flex flex-col gap-4">
-        <ProductsHeader 
-          onAddProduct={() => {
-            setEditingProduct(undefined);
-            setOpenProductForm(true);
-          }}
-          onSearch={handleSearch}
-        />
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="products">Produits</TabsTrigger>
+          <TabsTrigger value="categories">Catégories</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Produits</CardTitle>
-          </CardHeader>
-          <CardContent className={isMobile ? "p-0" : "p-0"}>
-            <ProductTable 
-              products={filteredProducts} 
-              onEditProduct={handleEditProduct}
-              onDeleteProduct={handleDeleteProduct}
-              isMobile={isMobile}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      
-      <ProductForm 
-        open={openProductForm} 
+        <TabsContent value="products" className="space-y-4">
+          <ProductsHeader
+            onAddProduct={() => {
+              setEditingProduct(undefined);
+              setOpenProductForm(true);
+            }}
+            onSearch={handleSearch}
+            onFilter={handleFilter}
+          />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Liste des produits</CardTitle>
+            </CardHeader>
+            <CardContent className={isMobile ? "p-0" : "p-0"}>
+              <ProductTable
+                products={filteredProducts}
+                onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+                isMobile={isMobile}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="categories" className="space-y-4">
+          <CategoryManager />
+        </TabsContent>
+      </Tabs>
+
+      <ProductForm
+        open={openProductForm}
         onOpenChange={setOpenProductForm}
         onAddProduct={handleAddProduct}
         editProduct={editingProduct}

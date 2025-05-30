@@ -56,20 +56,33 @@ const formSchema = z.object({
 
 type ContactFormValues = z.infer<typeof formSchema>;
 
-export function ContactForm({ 
-  open, 
-  onOpenChange, 
-  onAddContact 
-}: { 
-  open: boolean; 
+export function ContactForm({
+  open,
+  onOpenChange,
+  onAddContact,
+  editContact,
+  onEditContact
+}: {
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddContact: (data: any) => void;
+  editContact?: any;
+  onEditContact?: (data: any) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: editContact ? {
+      name: editContact.name || "",
+      company: editContact.company || "",
+      email: editContact.email || "",
+      phone: editContact.phone || "",
+      type: editContact.type || "prospect",
+      source: editContact.source || "Site Web",
+      notes: editContact.notes || "",
+      assignedTo: editContact.assignedTo || "",
+    } : {
       name: "",
       company: "",
       email: "",
@@ -83,21 +96,26 @@ export function ContactForm({
 
   function onSubmit(data: ContactFormValues) {
     setIsSubmitting(true);
-    
+
     try {
-      // Ajouter le contact
-      onAddContact(data);
-      
+      if (editContact && onEditContact) {
+        // Modifier le contact existant
+        onEditContact({ ...editContact, ...data });
+        toast.success("Contact modifié avec succès");
+      } else {
+        // Ajouter un nouveau contact
+        onAddContact(data);
+        toast.success("Contact ajouté avec succès");
+      }
+
       // Réinitialiser le formulaire
       form.reset();
-      
+
       // Fermer le dialogue
       onOpenChange(false);
-      
-      toast.success("Contact ajouté avec succès");
     } catch (error) {
-      toast.error("Erreur lors de l'ajout du contact");
-      console.error("Erreur d'ajout de contact:", error);
+      toast.error(editContact ? "Erreur lors de la modification du contact" : "Erreur lors de l'ajout du contact");
+      console.error("Erreur de contact:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,11 +123,14 @@ export function ContactForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Ajouter un contact</DialogTitle>
+          <DialogTitle>{editContact ? "Modifier le contact" : "Ajouter un contact"}</DialogTitle>
           <DialogDescription>
-            Remplissez les informations pour ajouter un nouveau contact.
+            {editContact
+              ? "Modifiez les informations du contact."
+              : "Remplissez les informations pour ajouter un nouveau contact."
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -127,7 +148,7 @@ export function ContactForm({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="company"
@@ -141,8 +162,8 @@ export function ContactForm({
                 </FormItem>
               )}
             />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="email"
@@ -156,7 +177,7 @@ export function ContactForm({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="phone"
@@ -171,8 +192,8 @@ export function ContactForm({
                 )}
               />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="type"
@@ -196,7 +217,7 @@ export function ContactForm({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="source"
@@ -224,7 +245,7 @@ export function ContactForm({
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="assignedTo"
@@ -248,7 +269,7 @@ export function ContactForm({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="notes"
@@ -256,23 +277,26 @@ export function ContactForm({
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Informations supplémentaires sur le contact" 
-                      className="resize-none h-20" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Informations supplémentaires sur le contact"
+                      className="resize-none h-20"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Ajout en cours..." : "Ajouter le contact"}
+              <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+                {isSubmitting
+                  ? (editContact ? "Modification en cours..." : "Ajout en cours...")
+                  : (editContact ? "Modifier le contact" : "Ajouter le contact")
+                }
               </Button>
             </DialogFooter>
           </form>

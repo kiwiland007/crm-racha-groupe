@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare, MessageCircle, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Phone, MessageSquare, MessageCircle, FileText, Edit, MoreVertical, Search } from "lucide-react";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { generatePDF } from "@/utils/pdfGenerator";
@@ -46,6 +47,7 @@ const invoices = [
 
 export function RecentInvoices() {
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleWhatsappContact = (contact: string, invoiceId: string) => {
     // Formatage du numéro pour WhatsApp (enlève les espaces)
@@ -83,10 +85,37 @@ export function RecentInvoices() {
     });
   };
 
+  const handleEditInvoice = (invoice: any) => {
+    // Redirection vers la page de modification de facture
+    window.location.href = `/invoices?edit=${invoice.id}`;
+    toast.info("Redirection", {
+      description: `Modification de la facture ${invoice.id}`
+    });
+  };
+
+  // Filtrer les factures selon le terme de recherche
+  const filteredInvoices = invoices.filter(invoice =>
+    invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Factures récentes</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Factures récentes</CardTitle>
+          <div className="relative w-48">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              type="search"
+              placeholder="Rechercher..."
+              className="pl-8 h-8 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
       </CardHeader>
       <CardContent className={isMobile ? "px-2" : ""}>
         <div className="overflow-x-auto">
@@ -100,12 +129,11 @@ export function RecentInvoices() {
                 <TableHead className={isMobile ? "hidden" : ""}>Avance (MAD)</TableHead>
                 <TableHead className={isMobile ? "hidden" : ""}>Mode</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>PDF</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((invoice) => (
+              {filteredInvoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell>{invoice.id}</TableCell>
                   <TableCell>{invoice.client}</TableCell>
@@ -122,10 +150,18 @@ export function RecentInvoices() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
-                          <Phone className="h-4 w-4" />
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleGeneratePDF(invoice)}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          Générer PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handlePhoneCall(invoice.contact)}>
                           <Phone className="mr-2 h-4 w-4" />
                           Appeler
@@ -140,11 +176,6 @@ export function RecentInvoices() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => handleGeneratePDF(invoice)}>
-                      <FileText className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

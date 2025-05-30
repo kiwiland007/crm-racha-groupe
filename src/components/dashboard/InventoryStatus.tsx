@@ -11,8 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function InventoryStatus() {
+  const navigate = useNavigate();
   const inventory = [
     {
       id: 1,
@@ -77,9 +80,43 @@ export function InventoryStatus() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>État de l'inventaire</CardTitle>
-        <Button variant="outline" size="sm">
-          Gérer l'inventaire
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              try {
+                console.log("Tentative de navigation vers /inventory");
+                navigate('/inventory');
+                toast.success("Redirection vers l'inventaire", {
+                  description: "Navigation vers la page inventaire"
+                });
+              } catch (error) {
+                console.error("Erreur de navigation:", error);
+                toast.error("Erreur de navigation", {
+                  description: "Impossible d'accéder à l'inventaire"
+                });
+                // Fallback: redirection manuelle
+                window.location.href = '/inventory';
+              }
+            }}
+          >
+            Gérer l'inventaire
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              window.location.href = '/inventory';
+              toast.info("Redirection directe", {
+                description: "Navigation directe vers l'inventaire"
+              });
+            }}
+            title="Redirection directe"
+          >
+            📦
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>

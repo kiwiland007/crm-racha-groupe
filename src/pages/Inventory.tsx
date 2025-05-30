@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,17 +23,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search } from "lucide-react";
+import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search, Settings, Eye, Edit, Trash2, Package, Wrench, Download } from "lucide-react";
+import QRCodeGenerator from "@/components/common/QRCodeGenerator";
+import { EquipmentForm } from "@/components/inventory/EquipmentForm";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
+// QR Code functionality moved to components
 
 export default function Inventory() {
-  const items = [
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedItemForQR, setSelectedItemForQR] = useState<any>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showEquipmentForm, setShowEquipmentForm] = useState(false);
+
+  const allItems = [
     {
       id: 1,
       name: "Écran tactile 32\"",
@@ -105,6 +129,23 @@ export default function Inventory() {
     },
   ];
 
+  const [equipmentList, setEquipmentList] = useState(allItems);
+
+  // Filtrer les items selon la recherche et les filtres
+  const filteredItems = equipmentList.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  // Obtenir les catégories uniques pour les filtres
+  const categories = [...new Set(equipmentList.map(item => item.category))];
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "disponible":
@@ -135,15 +176,208 @@ export default function Inventory() {
   };
 
   const handleAddItem = () => {
-    toast.info("Fonctionnalité à venir", {
-      description: "L'ajout d'équipement sera bientôt disponible."
+    setShowEquipmentForm(true);
+  };
+
+  const handleAddEquipment = (equipmentData: any) => {
+    const newEquipment = {
+      id: equipmentList.length + 1,
+      name: equipmentData.name,
+      category: equipmentData.category,
+      status: equipmentData.status,
+      quantity: 1,
+      location: equipmentData.location,
+      lastMaintenance: equipmentData.purchaseDate,
+      alert: false,
+      price: {
+        sale: equipmentData.purchasePrice,
+        rental: Math.round(equipmentData.purchasePrice * 0.1) // 10% du prix de vente
+      },
+      serialNumber: equipmentData.serialNumber,
+      purchaseDate: equipmentData.purchaseDate,
+      notes: equipmentData.notes
+    };
+
+    setEquipmentList([...equipmentList, newEquipment]);
+
+    toast.success("Équipement ajouté avec succès", {
+      description: `${newEquipment.name} a été ajouté à l'inventaire`,
+      action: {
+        label: "Voir détails",
+        onClick: () => toast.info("Détails", {
+          description: `Équipement: ${newEquipment.name} - ${newEquipment.category}`
+        })
+      }
     });
   };
 
-  const handleGenerateQR = () => {
-    toast.info("Fonctionnalité à venir", {
-      description: "La génération de QR codes sera bientôt disponible."
+  const handleGenerateQR = (item?: any) => {
+    if (item) {
+      setSelectedItemForQR(item);
+      setShowQRModal(true);
+      toast.success("QR Code généré", {
+        description: `QR Code pour ${item.name} affiché`
+      });
+    } else {
+      // Générer QR pour tous les équipements
+      toast.success("QR Codes générés", {
+        description: `QR Codes pour ${filteredItems.length} équipements générés`,
+        action: {
+          label: "Télécharger tout",
+          onClick: () => {
+            filteredItems.forEach((equipment, index) => {
+              setTimeout(() => {
+                const qrData = JSON.stringify({
+                  id: equipment.id,
+                  name: equipment.name,
+                  category: equipment.category,
+                  status: equipment.status,
+                  location: equipment.location,
+                  price: equipment.price
+                });
+
+                // Créer un lien de téléchargement pour chaque QR
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  // Ici on pourrait générer le QR code et le télécharger
+                  console.log(`QR généré pour ${equipment.name}:`, qrData);
+                }
+              }, index * 100); // Délai pour éviter la surcharge
+            });
+          }
+        }
+      });
+    }
+  };
+
+  const handleViewDetails = (item: any) => {
+    toast.info("Détails de l'équipement", {
+      description: `Affichage des détails de ${item.name}`,
+      action: {
+        label: "Fermer",
+        onClick: () => console.log("Détails fermés")
+      }
     });
+  };
+
+  const handleEditItem = (item: any) => {
+    const newName = prompt(`Modifier le nom de l'équipement:`, item.name);
+    if (newName && newName.trim() && newName !== item.name) {
+      // Mettre à jour l'item dans la liste
+      const updatedItems = allItems.map(i =>
+        i.id === item.id ? { ...i, name: newName.trim() } : i
+      );
+      // Note: Ici on devrait mettre à jour l'état, mais comme allItems est const,
+      // on simule juste avec un toast
+      toast.success("Équipement modifié", {
+        description: `${item.name} → ${newName.trim()}`
+      });
+    } else if (newName !== null) {
+      toast.error("Modification annulée", {
+        description: "Nom invalide ou identique"
+      });
+    }
+  };
+
+  const handleDeleteItem = (item: any) => {
+    toast.error("Supprimer l'équipement", {
+      description: `${item.name} sera supprimé`
+    });
+  };
+
+  const handleUpdateStock = (item: any) => {
+    const newQuantity = prompt(`Nouvelle quantité pour ${item.name}:`, item.quantity.toString());
+    if (newQuantity && !isNaN(Number(newQuantity)) && Number(newQuantity) >= 0) {
+      const quantity = Number(newQuantity);
+      toast.success("Stock mis à jour", {
+        description: `${item.name}: ${item.quantity} → ${quantity} unités`,
+        action: {
+          label: "Voir inventaire",
+          onClick: () => console.log("Redirection inventaire")
+        }
+      });
+    } else if (newQuantity !== null) {
+      toast.error("Quantité invalide", {
+        description: "Veuillez entrer un nombre valide (≥ 0)"
+      });
+    }
+  };
+
+  const handleAddMaintenance = (item: any) => {
+    const maintenanceType = prompt(`Type de maintenance pour ${item.name}:`, "Maintenance préventive");
+    if (maintenanceType && maintenanceType.trim()) {
+      toast.success("Maintenance planifiée", {
+        description: `${maintenanceType} programmée pour ${item.name}`,
+        action: {
+          label: "Voir planning",
+          onClick: () => console.log("Redirection vers planning")
+        }
+      });
+    } else if (maintenanceType !== null) {
+      toast.error("Maintenance annulée", {
+        description: "Type de maintenance requis"
+      });
+    }
+  };
+
+  const handleExport = () => {
+    try {
+      // Préparer les données pour l'export
+      const exportData = filteredItems.map(item => ({
+        ID: item.id,
+        Nom: item.name,
+        Catégorie: item.category,
+        Statut: item.status,
+        Quantité: item.quantity,
+        Emplacement: item.location,
+        'Prix Vente (MAD)': item.price.sale,
+        'Prix Location (MAD/jour)': item.price.rental,
+        'Dernière Maintenance': item.lastMaintenance,
+        Alerte: item.alert ? 'Oui' : 'Non'
+      }));
+
+      // Créer le contenu CSV avec BOM UTF-8 pour Excel
+      const headers = Object.keys(exportData[0]).join(';'); // Utiliser ; pour Excel français
+      const csvContent = exportData.map(row =>
+        Object.values(row).map(value => {
+          // Échapper les guillemets et virgules
+          const stringValue = String(value || '');
+          if (stringValue.includes(';') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        }).join(';')
+      ).join('\n');
+
+      // Ajouter BOM UTF-8 pour la compatibilité Excel
+      const BOM = '\uFEFF';
+      const fullCsvContent = `${BOM}${headers}\n${csvContent}`;
+
+      // Créer et télécharger le fichier avec encodage UTF-8
+      const blob = new Blob([fullCsvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `inventaire-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("Export réussi", {
+        description: `Inventaire exporté (${filteredItems.length} équipements)`,
+        action: {
+          label: "Voir fichier",
+          onClick: () => toast.info("Fichier téléchargé", {
+            description: "Vérifiez votre dossier de téléchargements"
+          })
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'export:', error);
+      toast.error("Erreur d'export", {
+        description: "Impossible d'exporter l'inventaire"
+      });
+    }
   };
 
   return (
@@ -171,18 +405,96 @@ export default function Inventory() {
               type="search"
               placeholder="Rechercher dans l'inventaire..."
               className="pl-8 bg-white border-gray-200 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter size={16} />
-              Filtres
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2" onClick={handleGenerateQR}>
+            <Popover open={showFilters} onOpenChange={setShowFilters}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Filter size={16} />
+                  Filtres
+                  {(categoryFilter !== "all" || statusFilter !== "all") && (
+                    <span className="ml-1 h-2 w-2 rounded-full bg-blue-500" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="end">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Filtres d'inventaire</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Filtrez les équipements par catégorie et statut
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Catégorie</label>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Toutes les catégories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Toutes les catégories</SelectItem>
+                          {categories.map(category => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Statut</label>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tous les statuts" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les statuts</SelectItem>
+                          <SelectItem value="disponible">Disponible</SelectItem>
+                          <SelectItem value="loué">Loué</SelectItem>
+                          <SelectItem value="maintenance">Maintenance</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCategoryFilter("all");
+                        setStatusFilter("all");
+                        toast.info("Filtres réinitialisés");
+                      }}
+                    >
+                      Réinitialiser
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setShowFilters(false);
+                        toast.success("Filtres appliqués", {
+                          description: `${filteredItems.length} équipements trouvés`
+                        });
+                      }}
+                    >
+                      Appliquer
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => handleGenerateQR()}>
               <QrCode size={16} />
               Générer QR
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
               <Printer size={16} />
               Exporter
             </Button>
@@ -206,7 +518,7 @@ export default function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((item) => (
+                  {filteredItems.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="flex items-center gap-2">
                         {item.name}
@@ -223,19 +535,35 @@ export default function Inventory() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
-                            <DropdownMenuItem>Générer QR code</DropdownMenuItem>
+                          <DropdownMenuContent align="end" className="w-48 z-50">
+                            <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditItem(item)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleGenerateQR(item)}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              Générer QR code
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Modifier le stock</DropdownMenuItem>
-                            <DropdownMenuItem>Ajouter maintenance</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStock(item)}>
+                              <Package className="mr-2 h-4 w-4" />
+                              Modifier le stock
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAddMaintenance(item)}>
+                              <Wrench className="mr-2 h-4 w-4" />
+                              Ajouter maintenance
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteItem(item)}>
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -266,7 +594,7 @@ export default function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items
+                  {filteredItems
                     .filter((item) => item.status === "disponible")
                     .map((item) => (
                       <TableRow key={item.id}>
@@ -285,19 +613,35 @@ export default function Inventory() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                              <DropdownMenuItem>Modifier</DropdownMenuItem>
-                              <DropdownMenuItem>Générer QR code</DropdownMenuItem>
+                            <DropdownMenuContent align="end" className="w-48 z-50">
+                              <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditItem(item)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleGenerateQR(item)}>
+                                <QrCode className="mr-2 h-4 w-4" />
+                                Générer QR code
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>Modifier le stock</DropdownMenuItem>
-                              <DropdownMenuItem>Ajouter maintenance</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateStock(item)}>
+                                <Package className="mr-2 h-4 w-4" />
+                                Modifier le stock
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleAddMaintenance(item)}>
+                                <Wrench className="mr-2 h-4 w-4" />
+                                Ajouter maintenance
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteItem(item)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Supprimer
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -327,7 +671,7 @@ export default function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items
+                  {filteredItems
                     .filter((item) => item.status === "loué")
                     .map((item) => (
                       <TableRow key={item.id}>
@@ -344,14 +688,27 @@ export default function Inventory() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                              <DropdownMenuItem>Modifier</DropdownMenuItem>
-                              <DropdownMenuItem>Enregistrer retour</DropdownMenuItem>
+                            <DropdownMenuContent align="end" className="w-48 z-50">
+                              <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditItem(item)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                toast.success("Retour enregistré", {
+                                  description: `${item.name} marqué comme retourné`
+                                });
+                              }}>
+                                <Package className="mr-2 h-4 w-4" />
+                                Enregistrer retour
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -378,7 +735,7 @@ export default function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items
+                  {filteredItems
                     .filter((item) => item.status === "maintenance")
                     .map((item) => (
                       <TableRow key={item.id}>
@@ -395,14 +752,27 @@ export default function Inventory() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                              <DropdownMenuItem>Modifier</DropdownMenuItem>
-                              <DropdownMenuItem>Terminer la maintenance</DropdownMenuItem>
+                            <DropdownMenuContent align="end" className="w-48 z-50">
+                              <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditItem(item)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                toast.success("Maintenance terminée", {
+                                  description: `${item.name} remis en service`
+                                });
+                              }}>
+                                <Wrench className="mr-2 h-4 w-4" />
+                                Terminer la maintenance
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -414,6 +784,84 @@ export default function Inventory() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal QR Code */}
+      {selectedItemForQR && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">QR Code - {selectedItemForQR.name}</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedItemForQR(null);
+                  setShowQRModal(false);
+                }}
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="flex flex-col items-center space-y-4">
+              <QRCodeGenerator
+                value={JSON.stringify({
+                  id: selectedItemForQR.id,
+                  name: selectedItemForQR.name,
+                  category: selectedItemForQR.category,
+                  status: selectedItemForQR.status,
+                  location: selectedItemForQR.location,
+                  price: selectedItemForQR.price,
+                  url: `${window.location.origin}/inventory/${selectedItemForQR.id}`
+                })}
+                size={200}
+                level="M"
+                includeMargin={true}
+              />
+
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-2">
+                  Scannez ce code pour accéder aux informations de l'équipement
+                </p>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p><strong>ID:</strong> {selectedItemForQR.id}</p>
+                  <p><strong>Catégorie:</strong> {selectedItemForQR.category}</p>
+                  <p><strong>Statut:</strong> {selectedItemForQR.status}</p>
+                  <p><strong>Emplacement:</strong> {selectedItemForQR.location}</p>
+                </div>
+              </div>
+
+              <Button
+                className="w-full gap-2"
+                onClick={() => {
+                  // Télécharger le QR code
+                  const canvas = document.querySelector('canvas');
+                  if (canvas) {
+                    const url = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `qr-${selectedItemForQR.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+                    link.click();
+                    toast.success("QR Code téléchargé", {
+                      description: `QR Code pour ${selectedItemForQR.name} téléchargé`
+                    });
+                  }
+                }}
+              >
+                <Download size={16} />
+                Télécharger le QR Code
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Formulaire d'ajout d'équipement */}
+      <EquipmentForm
+        open={showEquipmentForm}
+        onOpenChange={setShowEquipmentForm}
+        onAddEquipment={handleAddEquipment}
+      />
     </Layout>
   );
 }

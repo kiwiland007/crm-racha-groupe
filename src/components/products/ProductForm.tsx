@@ -3,6 +3,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "sonner";
 import ProductBasicInfo from "./form/ProductBasicInfo";
 import ProductPriceInfo from "./form/ProductPriceInfo";
@@ -53,7 +62,7 @@ type ProductFormValues = z.infer<typeof productSchema>;
 interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProduct?: (product: ProductFormValues & { id: string }) => void;
+  onAddProduct?: (product: ProductFormValues) => void;
   editProduct?: ProductFormValues & { id: string };
 }
 
@@ -80,19 +89,14 @@ export function ProductForm({
   });
 
   const onSubmit = (data: ProductFormValues) => {
-    const productData = {
-      ...data,
-      id: editProduct?.id || `PRD-${Math.floor(Math.random() * 1000)}`,
-    };
-
     if (onAddProduct) {
-      onAddProduct(productData);
+      onAddProduct(data);
     } else {
       toast.success(editProduct ? "Produit mis à jour" : "Produit ajouté", {
         description: `Le produit ${data.name} a été ${editProduct ? "mis à jour" : "ajouté"} avec succès.`,
       });
     }
-    
+
     if (!editProduct) {
       form.reset();
     }

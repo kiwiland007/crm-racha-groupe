@@ -9,11 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from "@/components/ui/tabs";
 import {
   Calendar as CalendarIcon,
@@ -25,6 +25,11 @@ import {
   Plus,
   Search,
   Users,
+  Eye,
+  Edit,
+  UserPlus,
+  PackageCheck,
+  X
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -46,10 +51,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { EventForm } from "@/components/events/EventForm";
+import { TechnicianAssignment } from "@/components/events/TechnicianAssignment";
+import { MaterialReservation } from "@/components/events/MaterialReservation";
 
 export default function Events() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openEventForm, setOpenEventForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openTechnicianAssignment, setOpenTechnicianAssignment] = useState(false);
+  const [assigningEvent, setAssigningEvent] = useState<any>(null);
+  const [openMaterialReservation, setOpenMaterialReservation] = useState(false);
+  const [reservingEvent, setReservingEvent] = useState<any>(null);
 
   const [events, setEvents] = useState([
     {
@@ -63,7 +76,8 @@ export default function Events() {
       status: "planifié",
       teamMembers: 3,
       equipments: 8,
-      description: "Installation de stands interactifs pour le salon annuel Digital Tech."
+      description: "Installation de stands interactifs pour le salon annuel Digital Tech.",
+      reservedMaterials: []
     },
     {
       id: 2,
@@ -76,7 +90,8 @@ export default function Events() {
       status: "confirmé",
       teamMembers: 2,
       equipments: 4,
-      description: "Installation de 4 écrans tactiles pour le stand d'Event Masters."
+      description: "Installation de 4 écrans tactiles pour le stand d'Event Masters.",
+      reservedMaterials: []
     },
     {
       id: 3,
@@ -89,7 +104,8 @@ export default function Events() {
       status: "planifié",
       teamMembers: 1,
       equipments: 0,
-      description: "Présentation des nouvelles offres et services."
+      description: "Présentation des nouvelles offres et services.",
+      reservedMaterials: []
     },
     {
       id: 4,
@@ -102,7 +118,8 @@ export default function Events() {
       status: "en attente",
       teamMembers: 4,
       equipments: 12,
-      description: "Installation complète du stand AgriTech avec bornes et écrans tactiles."
+      description: "Installation complète du stand AgriTech avec bornes et écrans tactiles.",
+      reservedMaterials: []
     },
   ]);
 
@@ -118,14 +135,82 @@ export default function Events() {
       status: eventData.status,
       teamMembers: parseInt(eventData.teamMembers),
       equipments: parseInt(eventData.equipments),
-      description: eventData.description
+      description: eventData.description,
+      reservedMaterials: []
     };
-    
+
     setEvents([newEvent, ...events]);
-    
-    toast.success("Événement créé", {
-      description: `L'événement "${eventData.title}" a été créé avec succès.`
-    });
+  };
+
+  const handleUpdateEvent = (eventData: any) => {
+    const updatedEvents = events.map(event =>
+      event.id === eventData.id
+        ? {
+            ...event,
+            title: eventData.title,
+            startDate: formatDate(new Date(eventData.startDate)),
+            endDate: formatDate(new Date(eventData.endDate)),
+            time: `${eventData.startTime} - ${eventData.endTime}`,
+            location: eventData.location,
+            client: eventData.client,
+            status: eventData.status,
+            teamMembers: parseInt(eventData.teamMembers),
+            equipments: parseInt(eventData.equipments),
+            description: eventData.description
+          }
+        : event
+    );
+
+    setEvents(updatedEvents);
+    setEditingEvent(null);
+  };
+
+  const handleEditEvent = (event: any) => {
+    setEditingEvent(event);
+    setOpenEventForm(true);
+  };
+
+  const handleCloseForm = (open: boolean) => {
+    setOpenEventForm(open);
+    if (!open) {
+      setEditingEvent(null);
+    }
+  };
+
+  const handleAssignTechnicians = (event: any) => {
+    setAssigningEvent(event);
+    setOpenTechnicianAssignment(true);
+  };
+
+  const handleTechnicianAssignment = (technicianIds: number[]) => {
+    if (assigningEvent) {
+      const updatedEvents = events.map(event =>
+        event.id === assigningEvent.id
+          ? { ...event, assignedTechnicians: technicianIds, teamMembers: technicianIds.length }
+          : event
+      );
+      setEvents(updatedEvents);
+      setAssigningEvent(null);
+    }
+  };
+
+  const handleReserveMaterial = (event: any) => {
+    setReservingEvent(event);
+    setOpenMaterialReservation(true);
+  };
+
+  const handleMaterialReservation = (eventId: number, reservedMaterials: any[]) => {
+    const updatedEvents = events.map(event =>
+      event.id === eventId
+        ? {
+            ...event,
+            reservedMaterials,
+            equipments: reservedMaterials.reduce((total, item) => total + item.quantity, 0)
+          }
+        : event
+    );
+    setEvents(updatedEvents);
+    setReservingEvent(null);
   };
 
   const formatDate = (date: Date) => {
@@ -188,6 +273,8 @@ export default function Events() {
               type="search"
               placeholder="Rechercher un évènement..."
               className="pl-8 bg-white border-gray-200 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
@@ -200,7 +287,13 @@ export default function Events() {
 
         <TabsContent value="list">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
+            {events.filter(event => {
+            const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                event.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                event.description.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesSearch;
+          }).map((event) => (
               <Card key={event.id}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between">
@@ -212,13 +305,34 @@ export default function Events() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                        <DropdownMenuItem>Modifier</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          toast.info("Détails de l'événement", {
+                            description: `Affichage des détails de ${event.title}`
+                          });
+                        }}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Voir détails
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Assigner techniciens</DropdownMenuItem>
-                        <DropdownMenuItem>Réserver matériel</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleAssignTechnicians(event)}>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Assigner techniciens
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleReserveMaterial(event)}>
+                          <PackageCheck className="mr-2 h-4 w-4" />
+                          Réserver matériel
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-red-600" onClick={() => {
+                          toast.success("Événement annulé", {
+                            description: `${event.title} a été annulé`
+                          });
+                        }}>
+                          <X className="mr-2 h-4 w-4" />
                           Annuler
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -244,7 +358,7 @@ export default function Events() {
                       <MapPin className="h-4 w-4 text-gray-500" />
                       <span className="text-sm">{event.location}</span>
                     </div>
-                    
+
                     <div className="flex justify-between items-center pt-2">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-gray-500" />
@@ -252,10 +366,36 @@ export default function Events() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">{event.equipments} équipements</span>
+                        <span className="text-sm">
+                          {event.equipments} équipements
+                          {event.reservedMaterials && event.reservedMaterials.length > 0 && (
+                            <span className="text-green-600 ml-1">✓</span>
+                          )}
+                        </span>
                       </div>
                       {getStatusBadge(event.status)}
                     </div>
+
+                    {event.reservedMaterials && event.reservedMaterials.length > 0 && (
+                      <div className="mt-3 pt-3 border-t">
+                        <div className="text-sm font-medium text-gray-700 mb-2">
+                          Matériel réservé:
+                        </div>
+                        <div className="space-y-1">
+                          {event.reservedMaterials.slice(0, 3).map((material: any, index: number) => (
+                            <div key={index} className="text-xs text-gray-600 flex justify-between">
+                              <span>{material.productName}</span>
+                              <span>×{material.quantity}</span>
+                            </div>
+                          ))}
+                          {event.reservedMaterials.length > 3 && (
+                            <div className="text-xs text-gray-500">
+                              +{event.reservedMaterials.length - 3} autres...
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -331,8 +471,18 @@ export default function Events() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              toast.info("Détails de l'événement", {
+                                description: "Formation tactile ZHC - Détails complets"
+                              });
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditEvent(events[0])}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -368,8 +518,18 @@ export default function Events() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              toast.info("Détails de l'événement", {
+                                description: "Maintenance bornes MediTech - Détails complets"
+                              });
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditEvent(events[1])}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -381,11 +541,29 @@ export default function Events() {
           </div>
         </TabsContent>
       </Tabs>
-      
-      <EventForm 
-        open={openEventForm} 
-        onOpenChange={setOpenEventForm} 
+
+      <EventForm
+        open={openEventForm}
+        onOpenChange={handleCloseForm}
         onAddEvent={handleAddEvent}
+        onUpdateEvent={handleUpdateEvent}
+        editingEvent={editingEvent}
+      />
+
+      <TechnicianAssignment
+        open={openTechnicianAssignment}
+        onOpenChange={setOpenTechnicianAssignment}
+        eventTitle={assigningEvent?.title || ""}
+        eventDate={assigningEvent?.startDate || ""}
+        currentAssignments={assigningEvent?.assignedTechnicians || []}
+        onAssign={handleTechnicianAssignment}
+      />
+
+      <MaterialReservation
+        open={openMaterialReservation}
+        onOpenChange={setOpenMaterialReservation}
+        event={reservingEvent}
+        onReserve={handleMaterialReservation}
       />
     </Layout>
   );

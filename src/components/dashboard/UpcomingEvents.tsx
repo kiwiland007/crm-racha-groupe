@@ -2,8 +2,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function UpcomingEvents() {
+  const navigate = useNavigate();
   const events = [
     {
       id: 1,
@@ -32,7 +35,14 @@ export function UpcomingEvents() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Évènements à venir</CardTitle>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            navigate('/events');
+            toast.success("Redirection vers les événements");
+          }}
+        >
           Tous les évènements
         </Button>
       </CardHeader>
