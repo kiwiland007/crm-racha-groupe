@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductProvider } from "@/contexts/ProductContext";
 import { AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
 import Index from "./pages/Index";
 import Contacts from "./pages/Contacts";
 import Inventory from "./pages/Inventory";
@@ -24,40 +26,49 @@ import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ProductProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ProtectedRoute>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/contacts" element={<Contacts />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/quotes" element={<Quotes />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/bon-livraison" element={<BonLivraison />} />
-                <Route path="/technical-sheets" element={<TechnicalSheets />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/invoice/new" element={<InvoiceForm />} />
+const AppContent = () => {
+  useKeyboardNavigation();
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </ProtectedRoute>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ProductProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/contacts" element={<Contacts />} />
+      <Route path="/inventory" element={<Inventory />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/quotes" element={<Quotes />} />
+      <Route path="/invoices" element={<Invoices />} />
+      <Route path="/bon-livraison" element={<BonLivraison />} />
+      <Route path="/technical-sheets" element={<TechnicalSheets />} />
+      <Route path="/chat" element={<Chat />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/analytics" element={<Analytics />} />
+      <Route path="/products" element={<Products />} />
+      <Route path="/services" element={<Services />} />
+      <Route path="/notifications" element={<Notifications />} />
+      <Route path="/invoice/new" element={<InvoiceForm />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => (
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ProductProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ProtectedRoute>
+                <AppContent />
+              </ProtectedRoute>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

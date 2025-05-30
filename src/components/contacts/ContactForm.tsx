@@ -3,6 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type Contact } from "@/types";
 import {
   Dialog,
   DialogContent,
@@ -65,9 +66,9 @@ export function ContactForm({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddContact: (data: any) => void;
-  editContact?: any;
-  onEditContact?: (data: any) => void;
+  onAddContact: (data: ContactFormValues) => void;
+  editContact?: Contact;
+  onEditContact?: (data: ContactFormValues) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
