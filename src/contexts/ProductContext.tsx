@@ -53,68 +53,134 @@ interface ProductProviderProps {
 
 export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
   const [categories, setCategories] = useState<Category[]>([
+    // Catégories Produits inspirées de MarocTactile.com
     {
       id: "1",
-      name: "Bornes Tactiles",
-      description: "Bornes interactives pour espaces publics et commerciaux",
+      name: "Borne Tactile",
+      description: "Bornes interactives 22\", 43\", 55\" pour espaces publics et commerciaux",
       type: "product",
       color: "bg-blue-100 text-blue-800",
       isActive: true
     },
     {
       id: "2",
-      name: "Totems Interactifs",
-      description: "Totems d'affichage et d'interaction pour événements",
+      name: "Totem Tactile",
+      description: "Totems interactifs et d'affichage LED pour événements et outdoor",
       type: "product",
       color: "bg-green-100 text-green-800",
       isActive: true
     },
     {
       id: "3",
-      name: "Tableaux Interactifs",
-      description: "Écrans tactiles pour formation et présentation",
+      name: "Tableau Interactive",
+      description: "Écrans tactiles interactifs SMART et Huawei pour formation",
       type: "product",
       color: "bg-purple-100 text-purple-800",
       isActive: true
     },
     {
       id: "4",
-      name: "Écrans Vitrines",
-      description: "Écrans d'affichage pour vitrines commerciales",
+      name: "Écran Vitrine",
+      description: "Écrans LCD 55\" Full HD pour vitrines commerciales",
       type: "product",
       color: "bg-cyan-100 text-cyan-800",
       isActive: true
     },
     {
       id: "5",
-      name: "Murs d'Images",
-      description: "Solutions multi-écrans pour affichage grand format",
+      name: "Mur d'Image",
+      description: "Murs d'images multi-écrans EVORA avec bord ultra-fin",
       type: "product",
       color: "bg-indigo-100 text-indigo-800",
       isActive: true
     },
     {
       id: "6",
-      name: "Systèmes de Paiement",
-      description: "Caisses enregistreuses et bornes de paiement",
+      name: "Écran LED",
+      description: "Écrans LED intérieurs et extérieurs (P1.8, P2.5, P3.9, P8)",
+      type: "product",
+      color: "bg-red-100 text-red-800",
+      isActive: true
+    },
+    {
+      id: "7",
+      name: "Pupitre Tactile",
+      description: "Pupitres numériques multimédias pour présentations",
+      type: "product",
+      color: "bg-yellow-100 text-yellow-800",
+      isActive: true
+    },
+    {
+      id: "8",
+      name: "Borne Arcade",
+      description: "Bornes arcade rétro avec 5000 jeux classiques",
+      type: "product",
+      color: "bg-pink-100 text-pink-800",
+      isActive: true
+    },
+    {
+      id: "9",
+      name: "Systèmes de Paiement Électronique",
+      description: "Caisses enregistreuses tactiles et bornes de paiement PMR",
       type: "product",
       color: "bg-emerald-100 text-emerald-800",
       isActive: true
     },
     {
-      id: "7",
+      id: "10",
+      name: "Hologramme",
+      description: "Solutions holographiques révolutionnaires pour expériences visuelles",
+      type: "product",
+      color: "bg-violet-100 text-violet-800",
+      isActive: true
+    },
+    {
+      id: "11",
+      name: "Borne Tactile 22 Pouces",
+      description: "Bornes tactiles compactes 22\" pour espaces restreints",
+      type: "product",
+      color: "bg-teal-100 text-teal-800",
+      isActive: true
+    },
+    // Services
+    {
+      id: "12",
       name: "Installation & Configuration",
-      description: "Services d'installation et mise en service",
+      description: "Services d'installation et mise en service sur site",
       type: "service",
       color: "bg-orange-100 text-orange-800",
       isActive: true
     },
     {
-      id: "8",
+      id: "13",
       name: "Maintenance & Support",
-      description: "Services de maintenance et support technique",
+      description: "Services de maintenance préventive et support technique 24/7",
       type: "service",
       color: "bg-red-100 text-red-800",
+      isActive: true
+    },
+    {
+      id: "14",
+      name: "Formation & Accompagnement",
+      description: "Formation utilisateurs et accompagnement personnalisé",
+      type: "service",
+      color: "bg-blue-100 text-blue-800",
+      isActive: true
+    },
+    {
+      id: "15",
+      name: "Développement Logiciel",
+      description: "Développement d'applications sur mesure et interfaces personnalisées",
+      type: "service",
+      color: "bg-purple-100 text-purple-800",
+      isActive: true
+    },
+    {
+      id: "16",
+      name: "Services Événementiels",
+      description: "Solutions complètes pour événements professionnels, stands et expositions",
+      type: "service",
+      color: "bg-emerald-100 text-emerald-800",
       isActive: true
     }
   ]);
@@ -275,6 +341,111 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
       availability: "en_stock",
       sku: "ARC-5000-RET",
       technicalSpecs: "Écran: 22\" LCD\nJeux: 5000 titres classiques\nCommandes: 2 joueurs\nJoysticks et boutons arcade\nHaut-parleurs stéréo\nDimensions: 170x70x60cm"
+    },
+    // Services Événementiels - Prestations
+    {
+      id: "EVT-001",
+      name: "Conception Stand Sur-Mesure",
+      description: "Conception et réalisation de stands personnalisés pour salons professionnels",
+      price: {
+        sale: "15000",
+        rental: "0"
+      },
+      category: "16", // Services Événementiels
+      availability: "sur_commande",
+      sku: "EVT-STAND-SUR",
+      technicalSpecs: "Prestation: Design 3D personnalisé\nFabrication: Sur-mesure selon cahier des charges\nInstallation: Montage et démontage inclus\nDurée: 2-4 semaines\nLivrable: Stand complet avec éclairage LED\nSupport: Formation équipe et assistance technique"
+    },
+    {
+      id: "EVT-002",
+      name: "Stand Modulaire & Display",
+      description: "Solution modulaire flexible et réutilisable pour expositions récurrentes",
+      price: {
+        sale: "8000",
+        rental: "1200"
+      },
+      category: "16", // Services Événementiels
+      availability: "en_stock",
+      sku: "EVT-STAND-MOD",
+      technicalSpecs: "Système: Modulaire réutilisable\nMontage: Rapide et facile\nTransport: Mallettes incluses\nConfigurations: Multiples possibles\nAccessoires: Displays portables, kakémonos\nDurée: 1-2 semaines"
+    },
+    {
+      id: "EVT-003",
+      name: "Événement Virtuel & Hybride",
+      description: "Plateforme événementielle virtuelle pour conférences et salons en ligne",
+      price: {
+        sale: "2500",
+        rental: "2500"
+      },
+      category: "16", // Services Événementiels
+      availability: "en_stock",
+      sku: "EVT-VIRTUEL",
+      technicalSpecs: "Plateforme: Événementielle 3D interactive\nStreaming: HD multi-caméras\nFonctionnalités: Chat, networking, réunions privées\nAnalytics: Rapports détaillés\nSupport: Formation et assistance technique live\nDurée: 1-3 jours"
+    },
+    {
+      id: "EVT-004",
+      name: "Container Événementiel",
+      description: "Container aménagé mobile pour événements itinérants et formations",
+      price: {
+        sale: "0",
+        rental: "1200"
+      },
+      category: "16", // Services Événementiels
+      availability: "en_stock",
+      sku: "EVT-CONTAINER",
+      technicalSpecs: "Container: 20' ou 40' aménagé\nÉquipements: Audiovisuels complets\nConfort: Climatisation intégrée\nMobilier: Modulaire et adaptable\nBranding: Personnalisation extérieure\nAutonomie: Énergétique complète"
+    },
+    {
+      id: "EVT-005",
+      name: "Agencement Espace Événementiel",
+      description: "Aménagement d'espaces temporaires pour événements professionnels",
+      price: {
+        sale: "12000",
+        rental: "0"
+      },
+      category: "16", // Services Événementiels
+      availability: "sur_commande",
+      sku: "EVT-AGENCEMENT",
+      technicalSpecs: "Design: Espace sur-mesure\nMobilier: Événementiel professionnel\nÉclairage: Scénographique LED\nSonorisation: Système intégré\nSignalétique: Personnalisée\nDurée: 2-3 semaines"
+    },
+    {
+      id: "EVT-006",
+      name: "Organisation Événement Complet",
+      description: "Gestion complète d'événements professionnels de A à Z",
+      price: {
+        sale: "25000",
+        rental: "0"
+      },
+      category: "16", // Services Événementiels
+      availability: "sur_commande",
+      sku: "EVT-COMPLET",
+      technicalSpecs: "Conception: Événementielle complète\nLogistique: Gestion totale\nCoordination: Tous prestataires\nAccueil: Protocole professionnel\nCaptation: Vidéo/photo incluse\nDurée: 1-6 mois de préparation"
+    },
+    {
+      id: "EVT-007",
+      name: "Roadshow Itinérant",
+      description: "Organisation de tournées événementielles multi-villes",
+      price: {
+        sale: "35000",
+        rental: "0"
+      },
+      category: "16", // Services Événementiels
+      availability: "sur_commande",
+      sku: "EVT-ROADSHOW",
+      technicalSpecs: "Planification: Multi-sites coordonnée\nLogistique: Transport et installation\nÉquipes: Mobiles formées\nMatériel: Standardisé et transportable\nCoordination: Locale dans chaque ville\nDurée: 1-3 mois"
+    },
+    {
+      id: "EVT-008",
+      name: "Showroom Temporaire",
+      description: "Création de showrooms éphémères pour lancements produits",
+      price: {
+        sale: "18000",
+        rental: "0"
+      },
+      category: "16", // Services Événementiels
+      availability: "sur_commande",
+      sku: "EVT-SHOWROOM",
+      technicalSpecs: "Design: Showroom sur-mesure\nScénographie: Produits mise en valeur\nÉclairage: Professionnel adapté\nParcours: Client optimisé\nTechnologies: Interactives intégrées\nDurée: 3-4 semaines"
     }
   ]);
 

@@ -40,9 +40,11 @@ interface ContactPanelProps {
   onClose: () => void;
   onEdit: (contact: Contact) => void;
   onDelete: (contactId: number) => void;
+  onCreateQuote?: (contact: Contact) => void;
+  onAddNote?: (contact: Contact, note: string) => void;
 }
 
-export default function ContactPanel({ contact, isOpen, onClose, onEdit, onDelete }: ContactPanelProps) {
+export default function ContactPanel({ contact, isOpen, onClose, onEdit, onDelete, onCreateQuote, onAddNote }: ContactPanelProps) {
   const [newNote, setNewNote] = useState('');
   const [notes, setNotes] = useState<string[]>(contact?.notes ? [contact.notes] : []);
 
@@ -83,10 +85,28 @@ export default function ContactPanel({ contact, isOpen, onClose, onEdit, onDelet
 
   const handleAddNote = () => {
     if (newNote.trim()) {
-      setNotes([...notes, newNote.trim()]);
+      const noteText = newNote.trim();
+      setNotes([...notes, noteText]);
       setNewNote('');
+
+      // Appeler la fonction parent si elle existe
+      if (onAddNote && contact) {
+        onAddNote(contact, noteText);
+      }
+
       toast.success('Note ajoutée', {
         description: 'La note a été ajoutée avec succès'
+      });
+    }
+  };
+
+  const handleCreateQuote = () => {
+    if (onCreateQuote && contact) {
+      onCreateQuote(contact);
+      onClose(); // Fermer le panel après création du devis
+    } else {
+      toast.info('Fonction non disponible', {
+        description: 'La création de devis sera bientôt disponible'
       });
     }
   };
@@ -210,7 +230,7 @@ export default function ContactPanel({ contact, isOpen, onClose, onEdit, onDelet
               <MessageSquare className="h-4 w-4 mr-2" />
               SMS
             </Button>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" onClick={handleCreateQuote}>
               <FileText className="h-4 w-4 mr-2" />
               Créer devis
             </Button>
@@ -222,7 +242,13 @@ export default function ContactPanel({ contact, isOpen, onClose, onEdit, onDelet
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Notes</h3>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={() => {
+                const textarea = document.querySelector('textarea[placeholder="Ajouter une note..."]') as HTMLTextAreaElement;
+                if (textarea) {
+                  textarea.focus();
+                  textarea.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter une note
               </Button>

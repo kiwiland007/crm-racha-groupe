@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, X, Calculator, FileText, Download } from "lucide-react";
 import { pdfServiceFixed, PDFQuoteData } from "@/services/pdfServiceFixed";
+import { useProductContext } from "@/contexts/ProductContext";
 
 const itemSchema = z.object({
   type: z.enum(["device", "service"]),
@@ -83,6 +84,7 @@ export function AdvancedQuoteForm({
   editingData
 }: AdvancedQuoteFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { products, categories } = useProductContext();
 
   const form = useForm<AdvancedQuoteFormValues>({
     resolver: zodResolver(advancedQuoteSchema),
@@ -123,7 +125,7 @@ export function AdvancedQuoteForm({
     name: "items",
   });
 
-  // Charger les données d'édition
+  // Charger les données d'édition ou de contact
   useEffect(() => {
     if (editingData && open) {
       // Convertir les données existantes au format du formulaire
@@ -132,17 +134,17 @@ export function AdvancedQuoteForm({
         clientEmail: editingData.clientEmail || "",
         clientPhone: editingData.clientPhone || "",
         clientAddress: editingData.clientAddress || "",
-        projectName: editingData.description || editingData.projectName || "",
+        projectName: editingData.projectName || editingData.description || "",
         description: editingData.description || "",
         items: editingData.items || [
           {
             type: "device" as const,
-            name: editingData.description || "",
-            description: "",
+            name: editingData.description || "Écran Tactile 32\"",
+            description: "Configuration standard",
             quantity: 1,
-            unitPrice: editingData.amount || 0,
+            unitPrice: editingData.amount || 2500,
             discount: 0,
-            category: "",
+            category: "Écrans tactiles",
           }
         ],
         taxRate: 20,
@@ -150,7 +152,7 @@ export function AdvancedQuoteForm({
         discountValue: 0,
         paymentTerms: editingData.paymentMethod || "30 jours",
         validityDays: 30,
-        notes: "",
+        notes: editingData.notes || "",
         advanceAmount: editingData.advanceAmount || 0,
         advancePercentage: 0,
         dueDate: "",
@@ -242,21 +244,33 @@ export function AdvancedQuoteForm({
     }
   };
 
-  const getDeviceOptions = () => [
-    { value: "ecran-tactile-32", label: "Écran Tactile 32\"", price: 2500 },
-    { value: "ecran-tactile-55", label: "Écran Tactile 55\"", price: 4500 },
-    { value: "borne-interactive", label: "Borne Interactive", price: 8500 },
-    { value: "projecteur-interactif", label: "Projecteur Interactif", price: 3200 },
-    { value: "table-tactile", label: "Table Tactile", price: 12000 },
-  ];
+  const getDeviceOptions = () => {
+    return products
+      .filter(product => {
+        const category = categories.find(cat => cat.id === product.category);
+        return category?.type === 'product';
+      })
+      .map(product => ({
+        value: product.id,
+        label: `${product.name} - ${product.sku}`,
+        price: parseFloat(product.price.sale || '0'),
+        description: product.description
+      }));
+  };
 
-  const getServiceOptions = () => [
-    { value: "installation", label: "Installation et Configuration", price: 500 },
-    { value: "formation", label: "Formation Utilisateurs", price: 800 },
-    { value: "maintenance", label: "Maintenance Annuelle", price: 1200 },
-    { value: "support", label: "Support Technique", price: 300 },
-    { value: "personnalisation", label: "Personnalisation Interface", price: 1500 },
-  ];
+  const getServiceOptions = () => {
+    return products
+      .filter(product => {
+        const category = categories.find(cat => cat.id === product.category);
+        return category?.type === 'service';
+      })
+      .map(product => ({
+        value: product.id,
+        label: product.name,
+        price: parseFloat(product.price.sale || '0'),
+        description: product.description
+      }));
+  };
 
   const handleItemSelect = (index: number, value: string) => {
     const allOptions = [...getDeviceOptions(), ...getServiceOptions()];
@@ -264,6 +278,7 @@ export function AdvancedQuoteForm({
 
     if (selectedOption) {
       form.setValue(`items.${index}.name`, selectedOption.label);
+      form.setValue(`items.${index}.description`, selectedOption.description || '');
       form.setValue(`items.${index}.unitPrice`, selectedOption.price);
     }
   };

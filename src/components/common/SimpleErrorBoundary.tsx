@@ -106,7 +106,6 @@ export class SimpleErrorBoundary extends Component<Props, State> {
             }}>
               <button
                 onClick={() => {
-                  console.log('Going home...');
                   window.location.href = '/';
                 }}
                 style={{
@@ -195,7 +194,6 @@ export class SimpleErrorBoundary extends Component<Props, State> {
                   <button
                     key={item.path}
                     onClick={() => {
-                      console.log(`Going to ${item.path}...`);
                       window.location.href = item.path;
                     }}
                     style={{

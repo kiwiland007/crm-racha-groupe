@@ -29,6 +29,7 @@ import { Filter, MoreVertical, Plus, Search, FileText, MessageCircle, Eye, Edit,
 import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
 import { pdfServiceFixed, PDFQuoteData } from "@/services/pdfServiceFixed";
 import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
+import QuoteDetails from "@/components/quotes/QuoteDetails";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -78,6 +79,8 @@ export default function Quotes() {
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showQuoteDetails, setShowQuoteDetails] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<any>(null);
 
   const handleAddQuote = (quoteData: any) => {
     const newQuote = {
@@ -201,9 +204,8 @@ export default function Quotes() {
   };
 
   const handleViewDetails = (quote: any) => {
-    toast.info("Détails du devis", {
-      description: `Affichage des détails du devis ${quote.id}`
-    });
+    setSelectedQuote(quote);
+    setShowQuoteDetails(true);
   };
 
   const handleEditQuote = (quote: any) => {
@@ -472,6 +474,14 @@ export default function Quotes() {
         onSave={editingQuote ? handleUpdateQuote : handleAddQuote}
         type="quote"
         editingData={editingQuote}
+      />
+
+      <QuoteDetails
+        quote={selectedQuote}
+        open={showQuoteDetails}
+        onOpenChange={setShowQuoteDetails}
+        onGeneratePDF={handleGeneratePDF}
+        onConvertToInvoice={handleConvertToInvoice}
       />
     </Layout>
   );

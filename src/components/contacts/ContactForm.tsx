@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -74,16 +74,7 @@ export function ContactForm({
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: editContact ? {
-      name: editContact.name || "",
-      company: editContact.company || "",
-      email: editContact.email || "",
-      phone: editContact.phone || "",
-      type: editContact.type || "prospect",
-      source: editContact.source || "Site Web",
-      notes: editContact.notes || "",
-      assignedTo: editContact.assignedTo || "",
-    } : {
+    defaultValues: {
       name: "",
       company: "",
       email: "",
@@ -94,6 +85,33 @@ export function ContactForm({
       assignedTo: "",
     },
   });
+
+  // Effet pour remplir le formulaire quand editContact change
+  useEffect(() => {
+    if (editContact) {
+      form.reset({
+        name: editContact.name || "",
+        company: editContact.company || "",
+        email: editContact.email || "",
+        phone: editContact.phone || "",
+        type: editContact.type || "prospect",
+        source: editContact.source || "Site Web",
+        notes: editContact.notes || "",
+        assignedTo: editContact.assignedTo || "",
+      });
+    } else {
+      form.reset({
+        name: "",
+        company: "",
+        email: "",
+        phone: "",
+        type: "prospect",
+        source: "Site Web",
+        notes: "",
+        assignedTo: "",
+      });
+    }
+  }, [editContact, form]);
 
   function onSubmit(data: ContactFormValues) {
     setIsSubmitting(true);

@@ -64,10 +64,20 @@ export default function Products() {
 
   
   const handleAddProduct = (productData: Omit<Product, 'id'>) => {
-    addProduct(productData);
-    toast.success("Produit ajouté", {
-      description: `Le produit ${productData.name} a été ajouté avec succès.`,
-    });
+    if (editingProduct) {
+      // Mode modification
+      updateProduct(editingProduct.id, productData);
+      toast.success("Produit mis à jour", {
+        description: `Le produit ${productData.name} a été mis à jour avec succès.`,
+      });
+    } else {
+      // Mode ajout
+      addProduct(productData);
+      toast.success("Produit ajouté", {
+        description: `Le produit ${productData.name} a été ajouté avec succès.`,
+      });
+    }
+    setEditingProduct(undefined);
   };
   
   const handleEditProduct = (product: Product) => {
@@ -79,6 +89,13 @@ export default function Products() {
     deleteProduct(productId);
     toast.success("Produit supprimé", {
       description: `Le produit a été supprimé avec succès.`,
+    });
+  };
+
+  const handleDuplicateProduct = (productData: Omit<Product, 'id'>) => {
+    addProduct(productData);
+    toast.success("Produit dupliqué", {
+      description: `Le produit ${productData.name} a été dupliqué avec succès.`,
     });
   };
   
@@ -119,6 +136,7 @@ export default function Products() {
                 products={filteredProducts}
                 onEditProduct={handleEditProduct}
                 onDeleteProduct={handleDeleteProduct}
+                onDuplicateProduct={handleDuplicateProduct}
                 isMobile={isMobile}
               />
             </CardContent>

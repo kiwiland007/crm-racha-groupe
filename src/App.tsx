@@ -13,7 +13,6 @@ import Index from "./pages/Index";
 import Contacts from "./pages/Contacts";
 import Inventory from "./pages/Inventory";
 import Events from "./pages/Events";
-import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Quotes from "./pages/Quotes";
@@ -24,7 +23,6 @@ import InvoiceForm from "./pages/InvoiceForm";
 import Invoices from "./pages/Invoices";
 import BonLivraison from "./pages/BonLivraison";
 import TechnicalSheets from "./pages/TechnicalSheets";
-import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +44,10 @@ const AppContent = () => {
       <Route path="/invoices" element={<Invoices />} />
       <Route path="/bon-livraison" element={<BonLivraison />} />
       <Route path="/technical-sheets" element={<TechnicalSheets />} />
-      <Route path="/chat" element={<Chat />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/products" element={<Products />} />
       <Route path="/services" element={<Services />} />
-      <Route path="/notifications" element={<Notifications />} />
       <Route path="/invoice/new" element={<InvoiceForm />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

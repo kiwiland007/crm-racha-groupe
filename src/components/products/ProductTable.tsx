@@ -15,6 +15,7 @@ interface ProductTableProps {
   products: Product[];
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
+  onDuplicateProduct?: (product: Omit<Product, 'id'>) => void;
   isMobile: boolean;
 }
 
@@ -22,6 +23,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   products,
   onEditProduct,
   onDeleteProduct,
+  onDuplicateProduct,
   isMobile
 }) => {
   const { getCategoryById } = useProductContext();
@@ -57,10 +59,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
               {!isMobile && <TableCell>{getCategoryLabel(product.category)}</TableCell>}
               <TableCell><ProductAvailabilityBadge availability={product.availability} /></TableCell>
               <TableCell>
-                <ProductActions 
-                  product={product} 
-                  onEdit={onEditProduct} 
-                  onDelete={onDeleteProduct} 
+                <ProductActions
+                  product={product}
+                  onEdit={onEditProduct}
+                  onDelete={onDeleteProduct}
+                  onDuplicate={onDuplicateProduct}
                 />
               </TableCell>
             </TableRow>

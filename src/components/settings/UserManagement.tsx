@@ -319,6 +319,22 @@ export function UserManagement() {
     setOpenDeleteDialog(true);
   };
 
+  const handleResetPassword = (user: User) => {
+    const newPassword = generateSecurePassword();
+
+    toast.success("Mot de passe réinitialisé", {
+      description: `Nouveau mot de passe pour ${user.fullName}: ${newPassword}`,
+      duration: 10000,
+      action: {
+        label: "Copier",
+        onClick: () => {
+          navigator.clipboard.writeText(newPassword);
+          toast.success("Mot de passe copié dans le presse-papiers");
+        }
+      }
+    });
+  };
+
   const handleRoleChange = (role: string, formContext: any) => {
     // Définir les permissions par défaut en fonction du rôle
     if (role === "admin") {
@@ -441,6 +457,10 @@ export function UserManagement() {
                     <DropdownMenuItem onClick={() => editUserClicked(user)}>
                       <UserCog className="mr-2 h-4 w-4" />
                       Modifier
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleResetPassword(user)}>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Réinitialiser mot de passe
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

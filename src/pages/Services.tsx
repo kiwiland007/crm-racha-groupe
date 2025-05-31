@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -431,10 +432,12 @@ export default function Services() {
 
             <div>
               <label className="text-sm font-medium">Description</label>
-              <Input
+              <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Description du service..."
+                placeholder="Description détaillée du service..."
+                className="min-h-[100px]"
+                rows={4}
               />
             </div>
 

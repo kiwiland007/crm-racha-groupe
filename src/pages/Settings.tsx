@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import {
   Tabs,
@@ -45,16 +45,23 @@ import { APIManagement } from "@/components/settings/APIManagement";
 
 export default function Settings() {
   const [generalSettings, setGeneralSettings] = useState({
-    companyName: "TechTouch Maroc",
-    email: "contact@techtouch.ma",
+    companyName: "Racha Business Group",
+    email: "contact@rachabusinessgroup.ma",
     phone: "0522 12 34 56",
     address: "52 Rue des Palmiers, Casablanca 20100, Maroc",
-    website: "https://techtouch.ma",
+    website: "https://rachabusinessgroup.ma",
     description: "Spécialiste des solutions d'écrans tactiles interactifs pour professionnels",
     logo: "",
-    facebook: "https://facebook.com/techtouchmaroc",
-    instagram: "https://instagram.com/techtouchmaroc",
-    linkedin: "https://linkedin.com/company/techtouch-maroc",
+    facebook: "https://facebook.com/rachabusinessgroup",
+    instagram: "https://instagram.com/rachabusinessgroup",
+    linkedin: "https://linkedin.com/company/racha-business-group",
+    // Informations légales marocaines
+    rc: "123456",
+    if: "56789012",
+    ice: "002345678901234",
+    patente: "78901234",
+    cnss: "9876543",
+    capital: "100000.00",
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -75,9 +82,26 @@ export default function Settings() {
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
+  // Charger les paramètres depuis localStorage au démarrage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('crm_company_settings');
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setGeneralSettings(prev => ({ ...prev, ...parsedSettings }));
+      } catch (error) {
+        console.error('Erreur lors du chargement des paramètres:', error);
+      }
+    }
+  }, []);
+
   const handleGeneralSettingsSave = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Paramètres généraux enregistrés");
+    // Sauvegarder dans localStorage
+    localStorage.setItem('crm_company_settings', JSON.stringify(generalSettings));
+    toast.success("Paramètres généraux enregistrés", {
+      description: "Les informations de l'entreprise ont été sauvegardées avec succès"
+    });
   };
 
   const handleNotificationSettingsSave = (e: React.FormEvent) => {
@@ -187,6 +211,71 @@ export default function Settings() {
                       value={generalSettings.description}
                       onChange={(e) => setGeneralSettings({...generalSettings, description: e.target.value})}
                     />
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <h3 className="text-lg font-medium mb-4">Informations légales (Maroc)</h3>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="rc">RC (Registre de Commerce)</Label>
+                      <Input
+                        id="rc"
+                        placeholder="123456"
+                        value={generalSettings.rc}
+                        onChange={(e) => setGeneralSettings({...generalSettings, rc: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="if">IF (Identifiant Fiscal)</Label>
+                      <Input
+                        id="if"
+                        placeholder="56789012"
+                        value={generalSettings.if}
+                        onChange={(e) => setGeneralSettings({...generalSettings, if: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="ice">ICE (Identifiant Commun de l'Entreprise)</Label>
+                      <Input
+                        id="ice"
+                        placeholder="002345678901234"
+                        value={generalSettings.ice}
+                        onChange={(e) => setGeneralSettings({...generalSettings, ice: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="patente">Patente</Label>
+                      <Input
+                        id="patente"
+                        placeholder="78901234"
+                        value={generalSettings.patente}
+                        onChange={(e) => setGeneralSettings({...generalSettings, patente: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="cnss">CNSS</Label>
+                      <Input
+                        id="cnss"
+                        placeholder="9876543"
+                        value={generalSettings.cnss}
+                        onChange={(e) => setGeneralSettings({...generalSettings, cnss: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="capital">Capital (MAD)</Label>
+                      <Input
+                        id="capital"
+                        placeholder="100000.00"
+                        value={generalSettings.capital}
+                        onChange={(e) => setGeneralSettings({...generalSettings, capital: e.target.value})}
+                      />
+                    </div>
                   </div>
                 </div>
 

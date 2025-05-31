@@ -103,11 +103,6 @@ export default function Sidebar() {
       label: "Fiches Techniques"
     },
     {
-      to: "/chat",
-      icon: <MessageSquare size={18} />,
-      label: "Messages"
-    },
-    {
       to: "/settings",
       icon: <Settings size={18} />,
       label: "Paramètres"

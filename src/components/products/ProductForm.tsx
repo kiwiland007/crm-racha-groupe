@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +29,9 @@ import ProductAvailabilityInfo from "./form/ProductAvailabilityInfo";
 import ProductDescriptionInfo from "./form/ProductDescriptionInfo";
 import ProductQRCode from "./form/ProductQRCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Upload, X, Image as ImageIcon, Plus } from "lucide-react";
 
 const productSchema = z.object({
   name: z.string().min(2, {
@@ -55,6 +58,13 @@ const productSchema = z.object({
     message: "Le SKU est requis",
   }),
   technicalSpecs: z.string().optional(),
+  // Nouveaux champs inspirés de MarocTactile
+  dimensions: z.string().optional(),
+  weight: z.string().optional(),
+  powerConsumption: z.string().optional(),
+  warranty: z.string().optional(),
+  certifications: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -72,6 +82,8 @@ export function ProductForm({
   onAddProduct,
   editProduct,
 }: ProductFormProps) {
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: editProduct || {
@@ -85,12 +97,59 @@ export function ProductForm({
       availability: "en_stock",
       sku: "",
       technicalSpecs: "",
+      dimensions: "",
+      weight: "",
+      powerConsumption: "",
+      warranty: "2 ans",
+      certifications: "",
+      images: [],
     },
   });
 
+  React.useEffect(() => {
+    if (editProduct && open) {
+      setUploadedImages(editProduct.images || []);
+      form.setValue('images', editProduct.images || []);
+    } else if (!editProduct && open) {
+      setUploadedImages([]);
+      form.setValue('images', []);
+    }
+  }, [editProduct, open, form]);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setUploadedImages(prev => {
+            const newImages = [...prev, result];
+            form.setValue('images', newImages);
+            return newImages;
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => {
+      const newImages = prev.filter((_, i) => i !== index);
+      form.setValue('images', newImages);
+      return newImages;
+    });
+  };
+
   const onSubmit = (data: ProductFormValues) => {
+    const submitData = {
+      ...data,
+      images: uploadedImages
+    };
+
     if (onAddProduct) {
-      onAddProduct(data);
+      onAddProduct(submitData);
     } else {
       toast.success(editProduct ? "Produit mis à jour" : "Produit ajouté", {
         description: `Le produit ${data.name} a été ${editProduct ? "mis à jour" : "ajouté"} avec succès.`,
@@ -99,6 +158,7 @@ export function ProductForm({
 
     if (!editProduct) {
       form.reset();
+      setUploadedImages([]);
     }
     onOpenChange(false);
   };
@@ -119,9 +179,10 @@ export function ProductForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">Détails</TabsTrigger>
-                <TabsTrigger value="technical">Fiche technique</TabsTrigger>
+                <TabsTrigger value="technical">Technique</TabsTrigger>
+                <TabsTrigger value="specifications">Spécifications</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
@@ -168,18 +229,155 @@ export function ProductForm({
                   name="technicalSpecs"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Spécifications techniques</FormLabel>
+                      <FormLabel>Description technique générale</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Dimensions, résolution, connectivité..." 
-                          className="min-h-[200px]"
-                          {...field} 
+                        <Textarea
+                          placeholder="Fonctionnalités principales, technologies utilisées..."
+                          className="min-h-[120px]"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="warranty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Garantie</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 2 ans" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="certifications"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Certifications</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: CE, FCC, RoHS" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="specifications" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="dimensions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dimensions (L x l x H)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 180 x 60 x 40 cm" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Poids</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 45 kg" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="powerConsumption"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Consommation électrique</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 150W" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Upload d'images */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-indigo-600" />
+                      Images du produit
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Zone d'upload */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-lg font-medium text-gray-900 mb-2">
+                          Cliquez pour ajouter des images
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          PNG, JPG, GIF jusqu'à 10MB chacune
+                        </p>
+                      </label>
+                    </div>
+
+                    {/* Aperçu des images */}
+                    {uploadedImages.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-3">
+                          Images ajoutées ({uploadedImages.length})
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {uploadedImages.map((image, index) => (
+                            <div key={index} className="relative group">
+                              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                                <img
+                                  src={image}
+                                  alt={`Aperçu ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
 

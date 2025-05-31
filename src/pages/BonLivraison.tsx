@@ -39,6 +39,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
+import BonLivraisonDetails from "@/components/bon-livraison/BonLivraisonDetails";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -46,6 +47,8 @@ export default function BonLivraison() {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showBLDetails, setShowBLDetails] = useState(false);
+  const [selectedBL, setSelectedBL] = useState<any>(null);
 
   const [bonLivraisons, setBonLivraisons] = useState([
     {
@@ -236,14 +239,13 @@ export default function BonLivraison() {
   };
 
   const handleViewDetails = (bl: any) => {
-    toast.info("Détails du BL", {
-      description: `Affichage des détails du BL ${bl.id}`
-    });
+    setSelectedBL(bl);
+    setShowBLDetails(true);
   };
 
   const handleEditBL = (bl: any) => {
     toast.info("Modifier le BL", {
-      description: `Modification du BL ${bl.id}`
+      description: `Modification du BL ${bl.id} - Fonctionnalité en développement`
     });
   };
 
@@ -434,6 +436,14 @@ export default function BonLivraison() {
           </CardContent>
         </Card>
       </div>
+
+      <BonLivraisonDetails
+        bonLivraison={selectedBL}
+        open={showBLDetails}
+        onOpenChange={setShowBLDetails}
+        onGeneratePDF={handleGeneratePDF}
+        onEdit={handleEditBL}
+      />
     </Layout>
   );
 }

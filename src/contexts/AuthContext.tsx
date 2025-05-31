@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { ForgotPassword } from '@/components/auth/ForgotPassword';
 
 interface User {
   id: string;
@@ -162,6 +163,7 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,6 +245,16 @@ function LoginPage() {
           </div>
 
           <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-blue-600 hover:text-blue-500 underline"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
+
+          <div className="text-center">
             <div className="text-sm text-gray-600 bg-gray-100 p-4 rounded-md">
               <p className="font-medium mb-2">Comptes de démonstration :</p>
               <div className="space-y-1 text-xs">
@@ -254,6 +266,11 @@ function LoginPage() {
             </div>
           </div>
         </form>
+
+        <ForgotPassword
+          open={showForgotPassword}
+          onOpenChange={setShowForgotPassword}
+        />
       </div>
     </div>
   );

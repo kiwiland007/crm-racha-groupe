@@ -278,6 +278,9 @@ class MonitoringService {
 
   // Envoyer les logs au serveur
   private async sendLogs(logs: LogEntry[]) {
+    // Désactivé pour le moment - pas de serveur backend
+    return;
+
     if (!this.isProduction) return;
 
     try {
@@ -295,6 +298,9 @@ class MonitoringService {
 
   // Envoyer les métriques au serveur
   private async sendMetrics(metrics: PerformanceMetric[]) {
+    // Désactivé pour le moment - pas de serveur backend
+    return;
+
     if (!this.isProduction) return;
 
     try {
@@ -312,6 +318,9 @@ class MonitoringService {
 
   // Envoyer un rapport d'erreur
   private async sendErrorReport(errorReport: ErrorReport) {
+    // Désactivé pour le moment - pas de serveur backend
+    return;
+
     if (!this.isProduction) return;
 
     try {

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { ContactForm } from "@/components/contacts/ContactForm";
 import ContactPanel from "@/components/contacts/ContactPanel";
+import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -135,6 +136,8 @@ export default function Contacts() {
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [contactPanelOpen, setContactPanelOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
+  const [openQuoteForm, setOpenQuoteForm] = useState(false);
+  const [quoteContactData, setQuoteContactData] = useState<any>(null);
 
   const handleAddContact = (contactData: any) => {
     const newContact = {
@@ -204,47 +207,7 @@ export default function Contacts() {
     });
   };
 
-  const handleCreateQuote = (contact: any) => {
-    // Rediriger vers la page de création de devis avec les données du contact
-    navigate('/quotes', {
-      state: {
-        prefilledClient: {
-          name: contact.name,
-          company: contact.company,
-          email: contact.email,
-          phone: contact.phone
-        }
-      }
-    });
-    toast.success("Création de devis", {
-      description: `Redirection vers la création de devis pour ${contact.name}`
-    });
-  };
 
-  const handleAddNote = (contact: any) => {
-    const note = prompt(`Ajouter une note pour ${contact.name}:`);
-    if (note && note.trim()) {
-      // Ajouter la note au contact (simple string pour l'instant)
-      const updatedContacts = contacts.map(c =>
-        c.id === contact.id
-          ? { ...c, notes: c.notes ? `${c.notes}\n\n[${new Date().toLocaleDateString()}] ${note.trim()}` : `[${new Date().toLocaleDateString()}] ${note.trim()}` }
-          : c
-      );
-      setContacts(updatedContacts);
-      toast.success("Note ajoutée", {
-        description: `Note ajoutée pour ${contact.name}`
-      });
-    }
-  };
-
-  const handleCreateTask = (contact: any) => {
-    const task = prompt(`Créer une tâche pour ${contact.name}:`);
-    if (task && task.trim()) {
-      toast.success("Tâche créée", {
-        description: `Tâche "${task.trim()}" créée pour ${contact.name}`
-      });
-    }
-  };
 
   const confirmAssignContact = () => {
     if (contactToAssign && selectedAgent) {
@@ -273,6 +236,49 @@ export default function Contacts() {
       setAssignDialogOpen(false);
       setSelectedAgent("");
     }
+  };
+
+  const handleCreateQuote = (contact: any) => {
+    // Préparer les données du contact pour le formulaire de devis
+    setQuoteContactData({
+      client: contact.company || contact.name,
+      clientEmail: contact.email,
+      clientPhone: contact.phone,
+      projectName: `Projet pour ${contact.company || contact.name}`,
+      description: `Devis pour ${contact.company || contact.name}`,
+      notes: contact.notes || ""
+    });
+
+    // Ouvrir le formulaire de devis
+    setOpenQuoteForm(true);
+
+    // Fermer le panel de contact s'il est ouvert
+    setContactPanelOpen(false);
+
+    toast.success("Formulaire de devis ouvert", {
+      description: `Création d'un devis pour ${contact.name}`
+    });
+  };
+
+  const handleCreateTask = (contact: any) => {
+    toast.info("Création de tâche", {
+      description: `Création d'une tâche pour ${contact.name} - Fonctionnalité à venir`
+    });
+  };
+
+  const handleAddNote = (contact: any) => {
+    // Ouvrir le panel du contact et faire défiler vers la section notes
+    setSelectedContact(contact);
+    setContactPanelOpen(true);
+
+    // Attendre que le panel s'ouvre puis faire défiler vers les notes
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea[placeholder="Ajouter une note..."]') as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 300);
   };
 
   // Filtrer les contacts en fonction de la recherche et du type
@@ -510,6 +516,43 @@ export default function Contacts() {
         onClose={() => setContactPanelOpen(false)}
         onEdit={handleEditContact}
         onDelete={handleDeleteContact}
+        onCreateQuote={handleCreateQuote}
+        onAddNote={(contact, note) => {
+          // Mettre à jour le contact avec la nouvelle note
+          const updatedContacts = contacts.map(c =>
+            c.id === contact.id
+              ? { ...c, notes: c.notes ? `${c.notes}\n\n[${new Date().toLocaleDateString()}] ${note}` : `[${new Date().toLocaleDateString()}] ${note}` }
+              : c
+          );
+          setContacts(updatedContacts);
+          toast.success("Note ajoutée", {
+            description: `Note ajoutée pour ${contact.name}`
+          });
+        }}
+      />
+
+      <AdvancedQuoteForm
+        open={openQuoteForm}
+        onOpenChange={(open) => {
+          setOpenQuoteForm(open);
+          if (!open) setQuoteContactData(null);
+        }}
+        onSave={(quoteData) => {
+          // Sauvegarder le devis (ici on peut l'ajouter à une liste locale ou l'envoyer à une API)
+          toast.success("Devis créé avec succès", {
+            description: `Devis ${quoteData.id} pour ${quoteData.client}`,
+            action: {
+              label: "Voir devis",
+              onClick: () => navigate('/quotes')
+            }
+          });
+
+          // Fermer le formulaire
+          setOpenQuoteForm(false);
+          setQuoteContactData(null);
+        }}
+        type="quote"
+        editingData={quoteContactData}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

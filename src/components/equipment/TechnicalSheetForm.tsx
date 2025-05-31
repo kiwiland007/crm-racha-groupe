@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import { Plus, X, Upload, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useProductContext } from "@/contexts/ProductContext";
 
 const technicalSheetSchema = z.object({
   name: z.string().min(1, { message: "Le nom est requis" }),
@@ -38,6 +39,8 @@ const technicalSheetSchema = z.object({
   brand: z.string().min(1, { message: "La marque est requise" }),
   category: z.string().min(1, { message: "La catégorie est requise" }),
   description: z.string().min(1, { message: "La description est requise" }),
+  relatedProduct: z.string().optional(),
+  relatedService: z.string().optional(),
   specifications: z.array(z.object({
     name: z.string().min(1, { message: "Le nom de la spécification est requis" }),
     value: z.string().min(1, { message: "La valeur est requise" }),
@@ -82,6 +85,7 @@ export function TechnicalSheetForm({
 }: TechnicalSheetFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const isEditing = !!editingSheet;
+  const { products, categories } = useProductContext();
 
   const form = useForm<TechnicalSheetFormValues>({
     resolver: zodResolver(technicalSheetSchema),
@@ -91,6 +95,8 @@ export function TechnicalSheetForm({
       brand: "",
       category: "",
       description: "",
+      relatedProduct: "",
+      relatedService: "",
       specifications: [{ name: "", value: "", unit: "" }],
       dimensions: {
         length: "",
@@ -165,15 +171,16 @@ export function TechnicalSheetForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[1000px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             {isEditing ? "Modifier la fiche technique" : "Créer une fiche technique"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm sm:text-base">
             {isEditing
-              ? "Modifier les informations de la fiche technique"
-              : "Créer une fiche technique détaillée pour l'équipement"
+              ? "Modifiez les informations techniques de l'équipement et ses associations"
+              : "Créez une fiche technique complète avec spécifications, images et associations produits/services"
             }
           </DialogDescription>
         </DialogHeader>
@@ -185,8 +192,8 @@ export function TechnicalSheetForm({
               <CardHeader>
                 <CardTitle className="text-lg">Informations générales</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <CardContent className="space-y-4 p-4 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -241,13 +248,18 @@ export function TechnicalSheetForm({
                               <SelectValue placeholder="Sélectionner une catégorie" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="ecran-tactile">Écran tactile</SelectItem>
-                            <SelectItem value="borne-interactive">Borne interactive</SelectItem>
-                            <SelectItem value="projecteur">Projecteur</SelectItem>
-                            <SelectItem value="audio">Audio</SelectItem>
-                            <SelectItem value="eclairage">Éclairage</SelectItem>
-                            <SelectItem value="accessoire">Accessoire</SelectItem>
+                          <SelectContent
+                            className="max-h-[200px] overflow-y-auto max-w-[300px]"
+                            position="popper"
+                            sideOffset={4}
+                          >
+                            {categories
+                              .filter(cat => cat.type === 'product')
+                              .map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  <span className="truncate">{category.name}</span>
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -255,6 +267,84 @@ export function TechnicalSheetForm({
                     )}
                   />
                 </div>
+
+                {/* Produits et Services associés */}
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Plus className="h-4 w-4 text-blue-600" />
+                      Associations (optionnel)
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Associez cette fiche technique à des produits ou services existants
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="relatedProduct"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Produit associé (optionnel)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner un produit" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent
+                            className="max-h-[200px] overflow-y-auto max-w-[350px]"
+                            position="popper"
+                            sideOffset={4}
+                          >
+                            <SelectItem value="none">Aucun produit</SelectItem>
+                            {products.map((product) => (
+                              <SelectItem key={product.id} value={product.id}>
+                                <span className="truncate">{product.name} - {product.sku}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="relatedService"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service associé (optionnel)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner un service" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent
+                            className="max-h-[200px] overflow-y-auto max-w-[300px]"
+                            position="popper"
+                            sideOffset={4}
+                          >
+                            <SelectItem value="none">Aucun service</SelectItem>
+                            {categories
+                              .filter(cat => cat.type === 'service')
+                              .map((service) => (
+                                <SelectItem key={service.id} value={service.id}>
+                                  <span className="truncate">{service.name}</span>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <FormField
                   control={form.control}

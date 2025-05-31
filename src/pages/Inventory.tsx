@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,10 @@ import {
 import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search, Settings, Eye, Edit, Trash2, Package, Wrench, Download } from "lucide-react";
 import QRCodeGenerator from "@/components/common/QRCodeGenerator";
 import { EquipmentForm } from "@/components/inventory/EquipmentForm";
+import { EquipmentDetails } from "@/components/inventory/EquipmentDetails";
+import { EquipmentEditForm } from "@/components/inventory/EquipmentEditForm";
+import { StockUpdateForm } from "@/components/inventory/StockUpdateForm";
+import { MaintenanceForm } from "@/components/inventory/MaintenanceForm";
 import {
   Tabs,
   TabsContent,
@@ -55,6 +59,13 @@ export default function Inventory() {
   const [selectedItemForQR, setSelectedItemForQR] = useState<any>(null);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showEquipmentForm, setShowEquipmentForm] = useState(false);
+
+  // Nouveaux états pour les modals
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
 
   const allItems = [
     {
@@ -252,32 +263,13 @@ export default function Inventory() {
   };
 
   const handleViewDetails = (item: any) => {
-    toast.info("Détails de l'équipement", {
-      description: `Affichage des détails de ${item.name}`,
-      action: {
-        label: "Fermer",
-        onClick: () => console.log("Détails fermés")
-      }
-    });
+    setSelectedEquipment(item);
+    setShowDetailsModal(true);
   };
 
   const handleEditItem = (item: any) => {
-    const newName = prompt(`Modifier le nom de l'équipement:`, item.name);
-    if (newName && newName.trim() && newName !== item.name) {
-      // Mettre à jour l'item dans la liste
-      const updatedItems = allItems.map(i =>
-        i.id === item.id ? { ...i, name: newName.trim() } : i
-      );
-      // Note: Ici on devrait mettre à jour l'état, mais comme allItems est const,
-      // on simule juste avec un toast
-      toast.success("Équipement modifié", {
-        description: `${item.name} → ${newName.trim()}`
-      });
-    } else if (newName !== null) {
-      toast.error("Modification annulée", {
-        description: "Nom invalide ou identique"
-      });
-    }
+    setSelectedEquipment(item);
+    setShowEditModal(true);
   };
 
   const handleDeleteItem = (item: any) => {
@@ -287,38 +279,116 @@ export default function Inventory() {
   };
 
   const handleUpdateStock = (item: any) => {
-    const newQuantity = prompt(`Nouvelle quantité pour ${item.name}:`, item.quantity.toString());
-    if (newQuantity && !isNaN(Number(newQuantity)) && Number(newQuantity) >= 0) {
-      const quantity = Number(newQuantity);
-      toast.success("Stock mis à jour", {
-        description: `${item.name}: ${item.quantity} → ${quantity} unités`,
-        action: {
-          label: "Voir inventaire",
-          onClick: () => console.log("Redirection inventaire")
-        }
-      });
-    } else if (newQuantity !== null) {
-      toast.error("Quantité invalide", {
-        description: "Veuillez entrer un nombre valide (≥ 0)"
-      });
-    }
+    setSelectedEquipment(item);
+    setShowStockModal(true);
   };
 
   const handleAddMaintenance = (item: any) => {
-    const maintenanceType = prompt(`Type de maintenance pour ${item.name}:`, "Maintenance préventive");
-    if (maintenanceType && maintenanceType.trim()) {
-      toast.success("Maintenance planifiée", {
-        description: `${maintenanceType} programmée pour ${item.name}`,
-        action: {
-          label: "Voir planning",
-          onClick: () => console.log("Redirection vers planning")
-        }
-      });
-    } else if (maintenanceType !== null) {
-      toast.error("Maintenance annulée", {
-        description: "Type de maintenance requis"
-      });
-    }
+    setSelectedEquipment(item);
+    setShowMaintenanceModal(true);
+  };
+
+  // Nouvelles fonctions de gestion
+  const handleSaveEquipment = (data: any) => {
+    const updatedItems = equipmentList.map(item =>
+      item.id === data.id
+        ? {
+            ...item,
+            name: data.name,
+            category: data.category,
+            status: data.status,
+            quantity: data.quantity,
+            location: data.location,
+            price: {
+              sale: data.salePrice,
+              rental: data.rentalPrice,
+            },
+            serialNumber: data.serialNumber,
+            purchaseDate: data.purchaseDate,
+            notes: data.notes,
+          }
+        : item
+    );
+    setEquipmentList(updatedItems);
+    toast.success("Équipement modifié", {
+      description: `${data.name} a été mis à jour avec succès`
+    });
+  };
+
+  const handleSaveStock = (data: any) => {
+    const updatedItems = equipmentList.map(item =>
+      item.id === data.id
+        ? { ...item, quantity: data.newQuantity }
+        : item
+    );
+    setEquipmentList(updatedItems);
+    toast.success("Stock mis à jour", {
+      description: `${selectedEquipment?.name}: ${data.operation === 'add' ? '+' : data.operation === 'remove' ? '-' : '='} ${data.quantity} → ${data.newQuantity} unités`,
+      action: {
+        label: "Voir historique",
+        onClick: () => toast.info("Historique", { description: `Raison: ${data.reason}` })
+      }
+    });
+  };
+
+  const handleSaveMaintenance = (data: any) => {
+    // Mettre l'équipement en maintenance si ce n'est pas déjà le cas
+    const updatedItems = equipmentList.map(item =>
+      item.id === data.id && item.status !== "maintenance"
+        ? { ...item, status: "maintenance", location: "Atelier technique" }
+        : item
+    );
+    setEquipmentList(updatedItems);
+
+    toast.success("Maintenance planifiée", {
+      description: `${data.type === 'preventive' ? 'Maintenance préventive' : data.type === 'corrective' ? 'Maintenance corrective' : 'Maintenance d\'urgence'} programmée pour ${selectedEquipment?.name}`,
+      action: {
+        label: "Voir détails",
+        onClick: () => toast.info("Maintenance", {
+          description: `Date: ${new Date(data.scheduledDate).toLocaleDateString('fr-FR')} - Priorité: ${data.priority}`
+        })
+      }
+    });
+  };
+
+  const handleReturnFromRental = (item: any) => {
+    const updatedItems = equipmentList.map(equipment =>
+      equipment.id === item.id
+        ? { ...equipment, status: "disponible", location: "Entrepôt principal", quantity: equipment.quantity + 1 }
+        : equipment
+    );
+    setEquipmentList(updatedItems);
+
+    toast.success("Retour enregistré", {
+      description: `${item.name} marqué comme retourné et disponible`,
+      action: {
+        label: "Voir équipement",
+        onClick: () => handleViewDetails(item)
+      }
+    });
+  };
+
+  const handleFinishMaintenance = (item: any) => {
+    const updatedItems = equipmentList.map(equipment =>
+      equipment.id === item.id
+        ? {
+            ...equipment,
+            status: "disponible",
+            location: "Entrepôt principal",
+            lastMaintenance: new Date().toLocaleDateString('fr-FR'),
+            alert: false
+          }
+        : equipment
+    );
+    setEquipmentList(updatedItems);
+
+    toast.success("Maintenance terminée", {
+      description: `${item.name} remis en service et disponible`,
+      action: {
+        label: "Voir équipement",
+        onClick: () => handleViewDetails(item)
+      }
+    });
   };
 
   const handleExport = () => {
@@ -701,11 +771,7 @@ export default function Inventory() {
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                toast.success("Retour enregistré", {
-                                  description: `${item.name} marqué comme retourné`
-                                });
-                              }}>
+                              <DropdownMenuItem onClick={() => handleReturnFromRental(item)}>
                                 <Package className="mr-2 h-4 w-4" />
                                 Enregistrer retour
                               </DropdownMenuItem>
@@ -765,11 +831,7 @@ export default function Inventory() {
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                toast.success("Maintenance terminée", {
-                                  description: `${item.name} remis en service`
-                                });
-                              }}>
+                              <DropdownMenuItem onClick={() => handleFinishMaintenance(item)}>
                                 <Wrench className="mr-2 h-4 w-4" />
                                 Terminer la maintenance
                               </DropdownMenuItem>
@@ -861,6 +923,34 @@ export default function Inventory() {
         open={showEquipmentForm}
         onOpenChange={setShowEquipmentForm}
         onAddEquipment={handleAddEquipment}
+      />
+
+      {/* Nouveaux composants modaux */}
+      <EquipmentDetails
+        equipment={selectedEquipment}
+        open={showDetailsModal}
+        onOpenChange={setShowDetailsModal}
+      />
+
+      <EquipmentEditForm
+        equipment={selectedEquipment}
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        onSave={handleSaveEquipment}
+      />
+
+      <StockUpdateForm
+        equipment={selectedEquipment}
+        open={showStockModal}
+        onOpenChange={setShowStockModal}
+        onSave={handleSaveStock}
+      />
+
+      <MaintenanceForm
+        equipment={selectedEquipment}
+        open={showMaintenanceModal}
+        onOpenChange={setShowMaintenanceModal}
+        onSave={handleSaveMaintenance}
       />
     </Layout>
   );
