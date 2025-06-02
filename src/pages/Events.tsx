@@ -2,6 +2,7 @@ import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEventContext } from "@/contexts/EventContext";
 import {
   Card,
   CardContent,
@@ -53,8 +54,11 @@ import { toast } from "sonner";
 import { EventForm } from "@/components/events/EventForm";
 import { TechnicianAssignment } from "@/components/events/TechnicianAssignment";
 import { MaterialReservation } from "@/components/events/MaterialReservation";
+import { EventDetails } from "@/components/events/EventDetails";
 
 export default function Events() {
+  const { events, addEvent, updateEvent, assignTechnicians, reserveMaterials } = useEventContext();
+
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openEventForm, setOpenEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
@@ -63,69 +67,11 @@ export default function Events() {
   const [assigningEvent, setAssigningEvent] = useState<any>(null);
   const [openMaterialReservation, setOpenMaterialReservation] = useState(false);
   const [reservingEvent, setReservingEvent] = useState<any>(null);
-
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Salon Digital Tech",
-      startDate: "12 Mai 2025",
-      endDate: "15 Mai 2025",
-      time: "09:00 - 18:00",
-      location: "Centre de Conférences, Casablanca",
-      client: "MarketPro Digital",
-      status: "planifié",
-      teamMembers: 3,
-      equipments: 8,
-      description: "Installation de stands interactifs pour le salon annuel Digital Tech.",
-      reservedMaterials: []
-    },
-    {
-      id: 2,
-      title: "Installation écrans Foire Internationale",
-      startDate: "15 Mai 2025",
-      endDate: "15 Mai 2025",
-      time: "08:00 - 14:00",
-      location: "Foire Internationale, Rabat",
-      client: "Event Masters",
-      status: "confirmé",
-      teamMembers: 2,
-      equipments: 4,
-      description: "Installation de 4 écrans tactiles pour le stand d'Event Masters.",
-      reservedMaterials: []
-    },
-    {
-      id: 3,
-      title: "Réunion commerciale MarketPro",
-      startDate: "18 Mai 2025",
-      endDate: "18 Mai 2025",
-      time: "10:00 - 12:00",
-      location: "Siège MarketPro, Casablanca",
-      client: "MarketPro Digital",
-      status: "planifié",
-      teamMembers: 1,
-      equipments: 0,
-      description: "Présentation des nouvelles offres et services.",
-      reservedMaterials: []
-    },
-    {
-      id: 4,
-      title: "Salon de l'Agriculture",
-      startDate: "22 Mai 2025",
-      endDate: "26 Mai 2025",
-      time: "09:00 - 19:00",
-      location: "Parc des Expositions, Meknès",
-      client: "AgriTech Solutions",
-      status: "en attente",
-      teamMembers: 4,
-      equipments: 12,
-      description: "Installation complète du stand AgriTech avec bornes et écrans tactiles.",
-      reservedMaterials: []
-    },
-  ]);
+  const [viewingEvent, setViewingEvent] = useState<any>(null);
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
 
   const handleAddEvent = (eventData: any) => {
-    const newEvent = {
-      id: events.length + 1,
+    const newEventData = {
       title: eventData.title,
       startDate: formatDate(new Date(eventData.startDate)),
       endDate: formatDate(new Date(eventData.endDate)),
@@ -136,32 +82,29 @@ export default function Events() {
       teamMembers: parseInt(eventData.teamMembers),
       equipments: parseInt(eventData.equipments),
       description: eventData.description,
-      reservedMaterials: []
+      reservedMaterials: [],
+      priority: eventData.priority || 'medium'
     };
 
-    setEvents([newEvent, ...events]);
+    addEvent(newEventData);
   };
 
   const handleUpdateEvent = (eventData: any) => {
-    const updatedEvents = events.map(event =>
-      event.id === eventData.id
-        ? {
-            ...event,
-            title: eventData.title,
-            startDate: formatDate(new Date(eventData.startDate)),
-            endDate: formatDate(new Date(eventData.endDate)),
-            time: `${eventData.startTime} - ${eventData.endTime}`,
-            location: eventData.location,
-            client: eventData.client,
-            status: eventData.status,
-            teamMembers: parseInt(eventData.teamMembers),
-            equipments: parseInt(eventData.equipments),
-            description: eventData.description
-          }
-        : event
-    );
+    const updatedEventData = {
+      title: eventData.title,
+      startDate: formatDate(new Date(eventData.startDate)),
+      endDate: formatDate(new Date(eventData.endDate)),
+      time: `${eventData.startTime} - ${eventData.endTime}`,
+      location: eventData.location,
+      client: eventData.client,
+      status: eventData.status,
+      teamMembers: parseInt(eventData.teamMembers),
+      equipments: parseInt(eventData.equipments),
+      description: eventData.description,
+      priority: eventData.priority || 'medium'
+    };
 
-    setEvents(updatedEvents);
+    updateEvent(eventData.id, updatedEventData);
     setEditingEvent(null);
   };
 
@@ -184,12 +127,7 @@ export default function Events() {
 
   const handleTechnicianAssignment = (technicianIds: number[]) => {
     if (assigningEvent) {
-      const updatedEvents = events.map(event =>
-        event.id === assigningEvent.id
-          ? { ...event, assignedTechnicians: technicianIds, teamMembers: technicianIds.length }
-          : event
-      );
-      setEvents(updatedEvents);
+      assignTechnicians(assigningEvent.id, technicianIds);
       setAssigningEvent(null);
     }
   };
@@ -200,17 +138,13 @@ export default function Events() {
   };
 
   const handleMaterialReservation = (eventId: number, reservedMaterials: any[]) => {
-    const updatedEvents = events.map(event =>
-      event.id === eventId
-        ? {
-            ...event,
-            reservedMaterials,
-            equipments: reservedMaterials.reduce((total, item) => total + item.quantity, 0)
-          }
-        : event
-    );
-    setEvents(updatedEvents);
+    reserveMaterials(eventId, reservedMaterials);
     setReservingEvent(null);
+  };
+
+  const handleViewDetails = (event: any) => {
+    setViewingEvent(event);
+    setOpenDetailsModal(true);
   };
 
   const formatDate = (date: Date) => {
@@ -305,11 +239,7 @@ export default function Events() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => {
-                          toast.info("Détails de l'événement", {
-                            description: `Affichage des détails de ${event.title}`
-                          });
-                        }}>
+                        <DropdownMenuItem onClick={() => handleViewDetails(event)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Voir détails
                         </DropdownMenuItem>
@@ -564,6 +494,15 @@ export default function Events() {
         onOpenChange={setOpenMaterialReservation}
         event={reservingEvent}
         onReserve={handleMaterialReservation}
+      />
+
+      <EventDetails
+        open={openDetailsModal}
+        onOpenChange={setOpenDetailsModal}
+        event={viewingEvent}
+        onEdit={handleEditEvent}
+        onAssignTechnicians={handleAssignTechnicians}
+        onReserveMaterial={handleReserveMaterial}
       />
     </Layout>
   );

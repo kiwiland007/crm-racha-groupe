@@ -1,3 +1,0 @@
-# Redirections pour Cloudflare Pages
-# Toutes les routes non-statiques vers index.html pour le routing côté client
-/*    /index.html   200

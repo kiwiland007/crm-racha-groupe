@@ -3,6 +3,7 @@ import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useQuoteContext } from "@/contexts/QuoteContext";
 import {
   Table,
   TableBody,
@@ -35,45 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Quotes() {
   const isMobile = useIsMobile();
-
-  const [quotes, setQuotes] = useState([
-    {
-      id: "DEV-001",
-      client: "Société ABC",
-      date: "05/08/2025",
-      amount: 15000,
-      advanceAmount: 5000,
-      status: "Émis",
-      paymentMethod: "Virement",
-      description: "Configuration des écrans tactiles pour salon Média",
-      clientPhone: "+212 661 234 567",
-      clientEmail: "contact@societeabc.ma"
-    },
-    {
-      id: "DEV-002",
-      client: "Event Pro Services",
-      date: "02/08/2025",
-      amount: 8500,
-      advanceAmount: 3000,
-      status: "En attente",
-      paymentMethod: "Chèque",
-      description: "Maintenance des bornes interactives",
-      clientPhone: "+212 662 345 678",
-      clientEmail: "contact@eventpro.ma"
-    },
-    {
-      id: "DEV-003",
-      client: "Hotel Marrakech",
-      date: "29/07/2025",
-      amount: 22000,
-      advanceAmount: 10000,
-      status: "Accepté",
-      paymentMethod: "Carte bancaire",
-      description: "Installation système interactif pour l'accueil",
-      clientPhone: "+212 663 456 789",
-      clientEmail: "reservation@hotelmarrakech.ma"
-    },
-  ]);
+  const { quotes, addQuote, updateQuote, deleteQuote, convertToInvoice } = useQuoteContext();
 
   const [openQuoteForm, setOpenQuoteForm] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
@@ -83,8 +46,7 @@ export default function Quotes() {
   const [selectedQuote, setSelectedQuote] = useState<any>(null);
 
   const handleAddQuote = (quoteData: any) => {
-    const newQuote = {
-      id: quoteData.id,
+    const newQuoteData = {
       client: quoteData.client,
       date: quoteData.date,
       amount: quoteData.total,
@@ -93,16 +55,18 @@ export default function Quotes() {
       paymentMethod: quoteData.paymentTerms,
       description: quoteData.description || quoteData.projectName,
       clientPhone: quoteData.clientPhone || "",
-      clientEmail: quoteData.clientEmail || ""
+      clientEmail: quoteData.clientEmail || "",
+      items: quoteData.items || [],
+      validityDays: 30
     };
 
-    setQuotes([newQuote, ...quotes]);
+    const newQuote = addQuote(newQuoteData);
 
     // Générer automatiquement le PDF
     const filename = pdfServiceFixed.generateQuotePDF(quoteData, 'quote');
     if (filename) {
-      toast.success("Devis créé et PDF généré", {
-        description: `Devis ${quoteData.id} pour ${quoteData.client}`
+      toast.success("PDF généré", {
+        description: `PDF du devis ${newQuote.id} généré`
       });
     }
 
@@ -214,53 +178,12 @@ export default function Quotes() {
   };
 
   const handleUpdateQuote = (quoteData: any) => {
-    const updatedQuotes = quotes.map(quote =>
-      quote.id === quoteData.id ? { ...quote, ...quoteData } : quote
-    );
-    setQuotes(updatedQuotes);
+    updateQuote(quoteData.id, quoteData);
     setEditingQuote(null);
-    toast.success("Devis modifié avec succès");
   };
 
   const handleConvertToInvoice = (quote: any) => {
-    // Convertir le devis en facture
-    const updatedQuotes = quotes.map(q =>
-      q.id === quote.id ? { ...q, status: "Facturé" } : q
-    );
-    setQuotes(updatedQuotes);
-
-    // Créer une nouvelle facture basée sur le devis
-    const newInvoice = {
-      id: `INV-${Date.now()}`,
-      quoteId: quote.id,
-      client: quote.client,
-      clientEmail: quote.clientEmail,
-      clientPhone: quote.clientPhone,
-      projectName: quote.description,
-      amount: quote.amount,
-      advanceAmount: quote.advanceAmount,
-      remainingAmount: quote.amount - quote.advanceAmount,
-      paymentMethod: quote.paymentMethod,
-      date: new Date().toLocaleDateString('fr-FR'),
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'), // 30 jours
-      status: "En attente",
-      items: quote.items || [],
-      notes: `Facture générée automatiquement à partir du devis ${quote.id}`,
-      createdAt: new Date().toISOString()
-    };
-
-    // Sauvegarder la facture dans le localStorage
-    const existingInvoices = JSON.parse(localStorage.getItem('crm_invoices') || '[]');
-    const updatedInvoices = [...existingInvoices, newInvoice];
-    localStorage.setItem('crm_invoices', JSON.stringify(updatedInvoices));
-
-    toast.success("Devis converti en facture", {
-      description: `Facture ${newInvoice.id} créée avec succès`,
-      action: {
-        label: "Voir factures",
-        onClick: () => window.location.href = "/invoices"
-      }
-    });
+    convertToInvoice(quote.id);
   };
 
   const handleSendEmail = (quote: any) => {
@@ -281,12 +204,7 @@ export default function Quotes() {
   };
 
   const handleDeleteQuote = (quote: any) => {
-    const updatedQuotes = quotes.filter(q => q.id !== quote.id);
-    setQuotes(updatedQuotes);
-
-    toast.success("Devis supprimé", {
-      description: `Devis ${quote.id} supprimé avec succès`
-    });
+    deleteQuote(quote.id);
   };
 
   const handleSendWhatsApp = (quote: any) => {

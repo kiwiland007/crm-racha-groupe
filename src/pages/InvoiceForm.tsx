@@ -12,7 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { FileText, ArrowLeft } from "lucide-react";
-import { generatePDF } from "@/utils/pdfGenerator";
+import { pdfServiceFixed } from "@/services/pdfServiceFixed";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -100,18 +100,35 @@ const InvoiceForm = () => {
       equipmentId: equipmentId
     };
     
+    // Préparer les données pour le PDF
+    const pdfData = {
+      id: document.id,
+      client: document.client,
+      date: document.date,
+      items: [
+        {
+          description: document.description,
+          quantity: 1,
+          unitPrice: document.amount,
+          total: document.amount
+        }
+      ],
+      subtotal: document.amount,
+      total: document.amount
+    };
+
     // Afficher un toast de succès
     toast.success(`${isQuote ? 'Devis' : 'Facture'} créé${isQuote ? '' : 'e'} avec succès pour ${data.clientName}`, {
       description: `Montant: ${parseInt(data.amount).toLocaleString()} MAD`,
       action: {
         label: 'Générer PDF',
-        onClick: () => generatePDF(document, documentType)
+        onClick: () => pdfServiceFixed.generateQuotePDF(pdfData, isQuote ? 'quote' : 'invoice')
       }
     });
-    
+
     // Option pour générer directement le PDF
     if (confirm(`Voulez-vous générer un PDF pour ce${isQuote ? ' devis' : 'tte facture'}?`)) {
-      generatePDF(document, documentType);
+      pdfServiceFixed.generateQuotePDF(pdfData, isQuote ? 'quote' : 'invoice');
     }
     
     // Rediriger vers la page appropriée après création

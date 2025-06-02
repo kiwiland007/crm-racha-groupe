@@ -37,6 +37,9 @@ import { toast } from "sonner";
 import { ContactForm } from "@/components/contacts/ContactForm";
 import ContactPanel from "@/components/contacts/ContactPanel";
 import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
+import { TaskForm } from "@/components/tasks/TaskForm";
+import { useContactContext } from "@/contexts/ContactContext";
+import { useTaskContext } from "@/contexts/TaskContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,80 +53,8 @@ import {
 
 export default function Contacts() {
   const navigate = useNavigate();
-  const [contacts, setContacts] = useState([
-    {
-      id: 1,
-      name: "Imane Alaoui",
-      company: "MarketPro Digital",
-      email: "imane.alaoui@marketpro.ma",
-      phone: "06 12 34 56 78",
-      type: "client",
-      source: "LinkedIn",
-      lastContact: "12 Avr 2025",
-      assignedTo: "sara",
-      notes: "Intéressé par nos écrans tactiles pour leur showroom"
-    },
-    {
-      id: 2,
-      name: "Mehdi Bensaid",
-      company: "TechSolutions Maroc",
-      email: "m.bensaid@techsolutions.ma",
-      phone: "06 98 76 54 32",
-      type: "prospect",
-      source: "Facebook Ads",
-      lastContact: "28 Mar 2025",
-      assignedTo: "hamid",
-      notes: "À recontacter en mai pour proposition commerciale"
-    },
-    {
-      id: 3,
-      name: "Sarah Mansouri",
-      company: "Event Masters",
-      email: "sarah@eventmasters.ma",
-      phone: "06 55 66 77 88",
-      type: "client",
-      source: "Site Web",
-      lastContact: "15 Avr 2025",
-      assignedTo: "karim",
-      notes: "Projet d'installation pour salon professionnel en juin"
-    },
-    {
-      id: 4,
-      name: "Karim El Fassi",
-      company: "MediaVision",
-      email: "k.elfassi@mediavision.ma",
-      phone: "06 11 22 33 44",
-      type: "prospect",
-      source: "Instagram",
-      lastContact: "08 Avr 2025",
-      assignedTo: "non-attribue",
-      notes: ""
-    },
-    {
-      id: 5,
-      name: "Laila Benjelloun",
-      company: "Design Studio",
-      email: "laila@designstudio.ma",
-      phone: "06 22 33 44 55",
-      type: "client",
-      source: "Recommandation",
-      lastContact: "20 Avr 2025",
-      assignedTo: "sara",
-      notes: "Client fidèle, prévoir mise à jour de son installation"
-    },
-    {
-      id: 6,
-      name: "Hamza Chraibi",
-      company: "EventPro",
-      email: "hamza@eventpro.ma",
-      phone: "06 33 44 55 66",
-      type: "prospect",
-      source: "Salon Professionnel",
-      lastContact: "05 Avr 2025",
-      assignedTo: "hamid",
-      notes: "Demande de devis envoyée le 5 avril"
-    },
-  ]);
+  const { contacts, addContact, updateContact, deleteContact } = useContactContext();
+  const { addTask } = useTaskContext();
 
   const [openContactForm, setOpenContactForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -138,23 +69,11 @@ export default function Contacts() {
   const [editingContact, setEditingContact] = useState<any>(null);
   const [openQuoteForm, setOpenQuoteForm] = useState(false);
   const [quoteContactData, setQuoteContactData] = useState<any>(null);
+  const [openTaskForm, setOpenTaskForm] = useState(false);
+  const [taskContactData, setTaskContactData] = useState<any>(null);
 
   const handleAddContact = (contactData: any) => {
-    const newContact = {
-      id: contacts.length + 1,
-      ...contactData,
-      lastContact: new Date().toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
-    };
-
-    setContacts([newContact, ...contacts]);
-
-    toast.success("Contact ajouté", {
-      description: `${contactData.name} a été ajouté avec succès.`
-    });
+    addContact(contactData);
   };
 
   const handleDeleteContact = (contactId: number) => {
@@ -164,15 +83,7 @@ export default function Contacts() {
 
   const confirmDeleteContact = () => {
     if (contactToDelete) {
-      const updatedContacts = contacts.filter(contact => contact.id !== contactToDelete);
-      setContacts(updatedContacts);
-
-      const deletedContact = contacts.find(contact => contact.id === contactToDelete);
-
-      toast.success("Contact supprimé", {
-        description: `${deletedContact?.name} a été supprimé avec succès.`
-      });
-
+      deleteContact(contactToDelete);
       setContactToDelete(null);
       setDeleteDialogOpen(false);
     }
@@ -197,33 +108,17 @@ export default function Contacts() {
   };
 
   const handleUpdateContact = (updatedContact: any) => {
-    const updatedContacts = contacts.map(contact =>
-      contact.id === updatedContact.id ? updatedContact : contact
-    );
-    setContacts(updatedContacts);
+    updateContact(updatedContact.id, updatedContact);
     setEditingContact(null);
-    toast.success("Contact modifié", {
-      description: `${updatedContact.name} a été modifié avec succès.`
-    });
   };
 
 
 
   const confirmAssignContact = () => {
     if (contactToAssign && selectedAgent) {
-      const updatedContacts = contacts.map(contact => {
-        if (contact.id === contactToAssign) {
-          return {
-            ...contact,
-            assignedTo: selectedAgent
-          };
-        }
-        return contact;
-      });
+      updateContact(contactToAssign, { assignedTo: selectedAgent });
 
-      setContacts(updatedContacts);
-
-      const assignedContact = updatedContacts.find(contact => contact.id === contactToAssign);
+      const assignedContact = contacts.find(contact => contact.id === contactToAssign);
       const agentName = selectedAgent === "hamid" ? "Hamid Alaoui" :
                         selectedAgent === "sara" ? "Sara Bennani" :
                         selectedAgent === "karim" ? "Karim Idrissi" : "Personne";
@@ -261,8 +156,19 @@ export default function Contacts() {
   };
 
   const handleCreateTask = (contact: any) => {
-    toast.info("Création de tâche", {
-      description: `Création d'une tâche pour ${contact.name} - Fonctionnalité à venir`
+    // Préparer les données du contact pour le formulaire de tâche
+    setTaskContactData({
+      contactId: contact.id,
+      contactName: contact.name,
+      title: `Tâche pour ${contact.name}`,
+      description: `Tâche liée au contact ${contact.name} de ${contact.company || 'l\'entreprise'}`
+    });
+
+    // Ouvrir le formulaire de tâche
+    setOpenTaskForm(true);
+
+    toast.success("Formulaire de tâche ouvert", {
+      description: `Création d'une tâche pour ${contact.name}`
     });
   };
 
@@ -519,12 +425,12 @@ export default function Contacts() {
         onCreateQuote={handleCreateQuote}
         onAddNote={(contact, note) => {
           // Mettre à jour le contact avec la nouvelle note
-          const updatedContacts = contacts.map(c =>
-            c.id === contact.id
-              ? { ...c, notes: c.notes ? `${c.notes}\n\n[${new Date().toLocaleDateString()}] ${note}` : `[${new Date().toLocaleDateString()}] ${note}` }
-              : c
-          );
-          setContacts(updatedContacts);
+          const newNotes = contact.notes
+            ? `${contact.notes}\n\n[${new Date().toLocaleDateString()}] ${note}`
+            : `[${new Date().toLocaleDateString()}] ${note}`;
+
+          updateContact(contact.id, { notes: newNotes });
+
           toast.success("Note ajoutée", {
             description: `Note ajoutée pour ${contact.name}`
           });
@@ -553,6 +459,21 @@ export default function Contacts() {
         }}
         type="quote"
         editingData={quoteContactData}
+      />
+
+      <TaskForm
+        open={openTaskForm}
+        onOpenChange={(open) => {
+          setOpenTaskForm(open);
+          if (!open) setTaskContactData(null);
+        }}
+        onAddTask={(taskData) => {
+          addTask(taskData);
+          setOpenTaskForm(false);
+          setTaskContactData(null);
+        }}
+        contactId={taskContactData?.contactId}
+        contactName={taskContactData?.contactName}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -2,6 +2,8 @@ import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useInvoiceContext } from "@/contexts/InvoiceContext";
+import { useBLContext } from "@/contexts/BLContext";
 import {
   Card,
   CardContent,
@@ -35,71 +37,36 @@ import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
 import { pdfServiceFixed, PDFQuoteData } from "@/services/pdfServiceFixed";
 
 export default function Invoices() {
+  const { invoices, addInvoice, updateInvoice, deleteInvoice, getTotalAmount, getPaidAmount } = useInvoiceContext();
+  const { createBLFromInvoice } = useBLContext();
+
   const [openInvoiceForm, setOpenInvoiceForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const [invoices, setInvoices] = useState([
-    {
-      id: "FAC-001",
-      client: "Société TechnoMaroc",
-      projectName: "Installation écrans tactiles",
-      date: "15/01/2025",
-      amount: 45000,
-      status: "Payée",
-      paymentMethod: "Virement",
-      description: "Installation de 5 écrans tactiles 55 pouces",
-      clientPhone: "0522-123456",
-      clientEmail: "contact@technomaroc.ma",
-    },
-    {
-      id: "FAC-002",
-      client: "Hotel Atlas",
-      projectName: "Borne interactive accueil",
-      date: "10/01/2025",
-      amount: 12500,
-      status: "En attente",
-      paymentMethod: "30 jours",
-      description: "Borne interactive pour l'accueil clients",
-      clientPhone: "0523-789012",
-      clientEmail: "direction@hotelatlas.ma",
-    },
-    {
-      id: "FAC-003",
-      client: "Centre Commercial Anfa",
-      projectName: "Système d'affichage dynamique",
-      date: "08/01/2025",
-      amount: 78000,
-      status: "Partiellement payée",
-      paymentMethod: "Chèque",
-      description: "Système complet d'affichage dynamique",
-      clientPhone: "0522-456789",
-      clientEmail: "gestion@anfa-mall.ma",
-    },
-  ]);
-
   const handleAddInvoice = (invoiceData: any) => {
-    const newInvoice = {
-      id: invoiceData.id,
+    const newInvoiceData = {
       client: invoiceData.client,
-      projectName: invoiceData.projectName,
+      clientPhone: invoiceData.clientPhone || "",
+      clientEmail: invoiceData.clientEmail || "",
+      projectName: invoiceData.projectName || invoiceData.description,
+      description: invoiceData.description || invoiceData.projectName,
       date: invoiceData.date,
       amount: invoiceData.total,
+      advanceAmount: invoiceData.advanceAmount || 0,
       status: invoiceData.status,
       paymentMethod: invoiceData.paymentTerms,
-      description: invoiceData.description || invoiceData.projectName,
-      clientPhone: invoiceData.clientPhone || "",
-      clientEmail: invoiceData.clientEmail || ""
+      items: invoiceData.items || []
     };
 
-    setInvoices([newInvoice, ...invoices]);
+    const newInvoice = addInvoice(newInvoiceData);
 
     // Générer automatiquement le PDF
     const filename = pdfServiceFixed.generateQuotePDF(invoiceData, 'invoice');
     if (filename) {
-      toast.success("Facture créée et PDF généré", {
-        description: `Facture ${invoiceData.id} pour ${invoiceData.client}`
+      toast.success("PDF généré", {
+        description: `PDF de la facture ${newInvoice.id} généré`
       });
     }
 
@@ -107,12 +74,8 @@ export default function Invoices() {
   };
 
   const handleUpdateInvoice = (invoiceData: any) => {
-    const updatedInvoices = invoices.map(invoice =>
-      invoice.id === invoiceData.id ? { ...invoice, ...invoiceData } : invoice
-    );
-    setInvoices(updatedInvoices);
+    updateInvoice(invoiceData.id, invoiceData);
     setEditingInvoice(null);
-    toast.success("Facture modifiée avec succès");
   };
 
   const handleEditInvoice = (invoice: any) => {
@@ -121,8 +84,7 @@ export default function Invoices() {
   };
 
   const handleDeleteInvoice = (invoiceId: string) => {
-    setInvoices(invoices.filter(invoice => invoice.id !== invoiceId));
-    toast.success("Facture supprimée");
+    deleteInvoice(invoiceId);
   };
 
   const handleGeneratePDF = (invoice: any) => {
@@ -172,6 +134,50 @@ export default function Invoices() {
     }
   };
 
+  const handleCreateBL = (invoice: any) => {
+    const blData = {
+      clientAdresse: "Adresse à compléter",
+      dateLivraison: new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+      livreur: "À assigner",
+      transporteur: "Transport interne",
+      modeLivraison: "livraison_directe" as const,
+      items: invoice.items?.map((item: any, index: number) => ({
+        id: index + 1,
+        productName: item.name || invoice.projectName,
+        category: "Service",
+        quantity: item.quantity || 1,
+        quantiteCommandee: item.quantity || 1,
+        quantiteLivree: 0,
+        quantiteRestante: item.quantity || 1,
+        unitPrice: item.unitPrice || invoice.amount,
+        totalPrice: item.unitPrice * item.quantity || invoice.amount
+      })) || [{
+        id: 1,
+        productName: invoice.projectName,
+        category: "Service",
+        quantity: 1,
+        quantiteCommandee: 1,
+        quantiteLivree: 0,
+        quantiteRestante: 1,
+        unitPrice: invoice.amount,
+        totalPrice: invoice.amount
+      }],
+      totalColis: 1,
+      conditionsLivraison: "Livraison standard"
+    };
+
+    const newBL = createBLFromInvoice(invoice.id, blData);
+    if (newBL) {
+      toast.success("BL créé", {
+        description: `BL ${newBL.id} créé pour la facture ${invoice.id}`,
+        action: {
+          label: "Voir BL",
+          onClick: () => window.open('/bon-livraison', '_blank')
+        }
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; color: string }> = {
       "Payée": { label: "Payée", color: "bg-green-100 text-green-800" },
@@ -201,10 +207,8 @@ export default function Invoices() {
     return matchesSearch && matchesStatus;
   });
 
-  const totalAmount = filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
-  const paidAmount = filteredInvoices
-    .filter(invoice => invoice.status === "Payée")
-    .reduce((sum, invoice) => sum + invoice.amount, 0);
+  const totalAmount = getTotalAmount();
+  const paidAmount = getPaidAmount();
 
   return (
     <Layout title="Factures">
@@ -330,6 +334,10 @@ export default function Invoices() {
                     <DropdownMenuItem onClick={() => handleGeneratePDF(invoice)}>
                       <Download className="mr-2 h-4 w-4" />
                       Télécharger PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateBL(invoice)}>
+                      <FileText className="mr-2 h-4 w-4" />
+                      Créer BL
                     </DropdownMenuItem>
                     {invoice.clientPhone && (
                       <DropdownMenuItem

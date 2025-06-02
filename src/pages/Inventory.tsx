@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search, Settings, Eye, Edit, Trash2, Package, Wrench, Download } from "lucide-react";
 import QRCodeGenerator from "@/components/common/QRCodeGenerator";
+import { qrCodeService } from "@/services/qrCodeService";
 import { EquipmentForm } from "@/components/inventory/EquipmentForm";
 import { EquipmentDetails } from "@/components/inventory/EquipmentDetails";
 import { EquipmentEditForm } from "@/components/inventory/EquipmentEditForm";
@@ -49,9 +50,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useInventoryContext } from "@/contexts/InventoryContext";
 // QR Code functionality moved to components
 
 export default function Inventory() {
+  const { inventory, addItem, updateItem, deleteItem, updateStock, updateStatus } = useInventoryContext();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -67,83 +71,10 @@ export default function Inventory() {
   const [showStockModal, setShowStockModal] = useState(false);
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
 
-  const allItems = [
-    {
-      id: 1,
-      name: "Écran tactile 32\"",
-      category: "Écran tactile",
-      status: "disponible",
-      quantity: 5,
-      location: "Entrepôt principal",
-      lastMaintenance: "15 Mar 2025",
-      alert: false,
-      price: {
-        sale: 12000,
-        rental: 2000
-      }
-    },
-    {
-      id: 2,
-      name: "Borne interactive 43\"",
-      category: "Borne",
-      status: "loué",
-      quantity: 0,
-      location: "Client: MarketPro",
-      lastMaintenance: "02 Avr 2025",
-      alert: true,
-      price: {
-        sale: 35000,
-        rental: 5000
-      }
-    },
-    {
-      id: 3,
-      name: "Table tactile 55\"",
-      category: "Table tactile",
-      status: "disponible",
-      quantity: 2,
-      location: "Entrepôt principal",
-      lastMaintenance: "10 Fév 2025",
-      alert: true,
-      price: {
-        sale: 45000,
-        rental: 6500
-      }
-    },
-    {
-      id: 4,
-      name: "Écran LED extérieur",
-      category: "Écran LED",
-      status: "maintenance",
-      quantity: 1,
-      location: "Atelier technique",
-      lastMaintenance: "30 Avr 2025",
-      alert: false,
-      price: {
-        sale: 75000,
-        rental: 12000
-      }
-    },
-    {
-      id: 5,
-      name: "Borne photo 24\"",
-      category: "Borne",
-      status: "disponible",
-      quantity: 3,
-      location: "Entrepôt principal",
-      lastMaintenance: "12 Mar 2025",
-      alert: false,
-      price: {
-        sale: 18000,
-        rental: 3000
-      }
-    },
-  ];
-
-  const [equipmentList, setEquipmentList] = useState(allItems);
+  // Utilisation de l'inventaire depuis le contexte
 
   // Filtrer les items selon la recherche et les filtres
-  const filteredItems = equipmentList.filter(item => {
+  const filteredItems = inventory.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -155,7 +86,7 @@ export default function Inventory() {
   });
 
   // Obtenir les catégories uniques pour les filtres
-  const categories = [...new Set(equipmentList.map(item => item.category))];
+  const categories = [...new Set(inventory.map(item => item.category))];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -192,7 +123,6 @@ export default function Inventory() {
 
   const handleAddEquipment = (equipmentData: any) => {
     const newEquipment = {
-      id: equipmentList.length + 1,
       name: equipmentData.name,
       category: equipmentData.category,
       status: equipmentData.status,
@@ -209,17 +139,7 @@ export default function Inventory() {
       notes: equipmentData.notes
     };
 
-    setEquipmentList([...equipmentList, newEquipment]);
-
-    toast.success("Équipement ajouté avec succès", {
-      description: `${newEquipment.name} a été ajouté à l'inventaire`,
-      action: {
-        label: "Voir détails",
-        onClick: () => toast.info("Détails", {
-          description: `Équipement: ${newEquipment.name} - ${newEquipment.category}`
-        })
-      }
-    });
+    addItem(newEquipment);
   };
 
   const handleGenerateQR = (item?: any) => {
@@ -238,22 +158,14 @@ export default function Inventory() {
           onClick: () => {
             filteredItems.forEach((equipment, index) => {
               setTimeout(() => {
-                const qrData = JSON.stringify({
-                  id: equipment.id,
-                  name: equipment.name,
-                  category: equipment.category,
-                  status: equipment.status,
-                  location: equipment.location,
-                  price: equipment.price
-                });
+                // Utiliser le service unifié pour générer le QR
+                const qrResult = qrCodeService.generateInventoryQR(equipment);
+                const qrUrl = qrCodeService.generateQRUrl(qrResult.jsonContent, 300);
 
-                // Créer un lien de téléchargement pour chaque QR
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                  // Ici on pourrait générer le QR code et le télécharger
-                  console.log(`QR généré pour ${equipment.name}:`, qrData);
-                }
+                // Télécharger le QR code
+                qrCodeService.downloadQRFromUrl(qrUrl, qrResult.filename);
+
+                console.log(`QR généré pour ${equipment.name}:`, qrResult);
               }, index * 100); // Délai pour éviter la surcharge
             });
           }
@@ -272,11 +184,7 @@ export default function Inventory() {
     setShowEditModal(true);
   };
 
-  const handleDeleteItem = (item: any) => {
-    toast.error("Supprimer l'équipement", {
-      description: `${item.name} sera supprimé`
-    });
-  };
+
 
   const handleUpdateStock = (item: any) => {
     setSelectedEquipment(item);
@@ -290,55 +198,32 @@ export default function Inventory() {
 
   // Nouvelles fonctions de gestion
   const handleSaveEquipment = (data: any) => {
-    const updatedItems = equipmentList.map(item =>
-      item.id === data.id
-        ? {
-            ...item,
-            name: data.name,
-            category: data.category,
-            status: data.status,
-            quantity: data.quantity,
-            location: data.location,
-            price: {
-              sale: data.salePrice,
-              rental: data.rentalPrice,
-            },
-            serialNumber: data.serialNumber,
-            purchaseDate: data.purchaseDate,
-            notes: data.notes,
-          }
-        : item
-    );
-    setEquipmentList(updatedItems);
-    toast.success("Équipement modifié", {
-      description: `${data.name} a été mis à jour avec succès`
+    updateItem(data.id, {
+      name: data.name,
+      category: data.category,
+      status: data.status,
+      quantity: data.quantity,
+      location: data.location,
+      price: {
+        sale: data.salePrice,
+        rental: data.rentalPrice,
+      },
+      serialNumber: data.serialNumber,
+      purchaseDate: data.purchaseDate,
+      notes: data.notes,
     });
   };
 
   const handleSaveStock = (data: any) => {
-    const updatedItems = equipmentList.map(item =>
-      item.id === data.id
-        ? { ...item, quantity: data.newQuantity }
-        : item
-    );
-    setEquipmentList(updatedItems);
-    toast.success("Stock mis à jour", {
-      description: `${selectedEquipment?.name}: ${data.operation === 'add' ? '+' : data.operation === 'remove' ? '-' : '='} ${data.quantity} → ${data.newQuantity} unités`,
-      action: {
-        label: "Voir historique",
-        onClick: () => toast.info("Historique", { description: `Raison: ${data.reason}` })
-      }
-    });
+    updateStock(data.id, data.newQuantity, data.reason);
   };
 
   const handleSaveMaintenance = (data: any) => {
     // Mettre l'équipement en maintenance si ce n'est pas déjà le cas
-    const updatedItems = equipmentList.map(item =>
-      item.id === data.id && item.status !== "maintenance"
-        ? { ...item, status: "maintenance", location: "Atelier technique" }
-        : item
-    );
-    setEquipmentList(updatedItems);
+    const item = inventory.find(item => item.id === data.id);
+    if (item && item.status !== "maintenance") {
+      updateStatus(data.id, "maintenance", "Atelier technique");
+    }
 
     toast.success("Maintenance planifiée", {
       description: `${data.type === 'preventive' ? 'Maintenance préventive' : data.type === 'corrective' ? 'Maintenance corrective' : 'Maintenance d\'urgence'} programmée pour ${selectedEquipment?.name}`,
@@ -352,43 +237,18 @@ export default function Inventory() {
   };
 
   const handleReturnFromRental = (item: any) => {
-    const updatedItems = equipmentList.map(equipment =>
-      equipment.id === item.id
-        ? { ...equipment, status: "disponible", location: "Entrepôt principal", quantity: equipment.quantity + 1 }
-        : equipment
-    );
-    setEquipmentList(updatedItems);
-
-    toast.success("Retour enregistré", {
-      description: `${item.name} marqué comme retourné et disponible`,
-      action: {
-        label: "Voir équipement",
-        onClick: () => handleViewDetails(item)
-      }
-    });
+    updateStatus(item.id, "disponible", "Entrepôt principal");
+    updateStock(item.id, item.quantity + 1, "Retour de location");
   };
 
   const handleFinishMaintenance = (item: any) => {
-    const updatedItems = equipmentList.map(equipment =>
-      equipment.id === item.id
-        ? {
-            ...equipment,
-            status: "disponible",
-            location: "Entrepôt principal",
-            lastMaintenance: new Date().toLocaleDateString('fr-FR'),
-            alert: false
-          }
-        : equipment
-    );
-    setEquipmentList(updatedItems);
+    updateStatus(item.id, "disponible", "Entrepôt principal");
+  };
 
-    toast.success("Maintenance terminée", {
-      description: `${item.name} remis en service et disponible`,
-      action: {
-        label: "Voir équipement",
-        onClick: () => handleViewDetails(item)
-      }
-    });
+  const handleDeleteItem = (item: any) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${item.name} de l'inventaire ?`)) {
+      deleteItem(item.id);
+    }
   };
 
   const handleExport = () => {
@@ -866,20 +726,19 @@ export default function Inventory() {
             </div>
 
             <div className="flex flex-col items-center space-y-4">
-              <QRCodeGenerator
-                value={JSON.stringify({
-                  id: selectedItemForQR.id,
-                  name: selectedItemForQR.name,
-                  category: selectedItemForQR.category,
-                  status: selectedItemForQR.status,
-                  location: selectedItemForQR.location,
-                  price: selectedItemForQR.price,
-                  url: `${window.location.origin}/inventory/${selectedItemForQR.id}`
-                })}
-                size={200}
-                level="M"
-                includeMargin={true}
-              />
+              {(() => {
+                const qrResult = qrCodeService.generateInventoryQR(selectedItemForQR);
+                return (
+                  <QRCodeGenerator
+                    value={qrResult.jsonContent}
+                    size={200}
+                    level="M"
+                    includeMargin={true}
+                    productId={selectedItemForQR.id}
+                    type="inventory"
+                  />
+                );
+              })()}
 
               <div className="text-center">
                 <p className="text-sm text-gray-600 mb-2">

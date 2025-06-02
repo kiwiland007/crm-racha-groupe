@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Phone, MessageSquare, MessageCircle, FileText, Edit, MoreVertical, Search } from "lucide-react";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { generatePDF } from "@/utils/pdfGenerator";
+import { pdfServiceFixed } from "@/services/pdfServiceFixed";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Données factices pour les factures récentes
@@ -79,7 +79,23 @@ export function RecentInvoices() {
   };
 
   const handleGeneratePDF = (invoice: any) => {
-    generatePDF(invoice, 'invoice');
+    const pdfData = {
+      id: invoice.id,
+      client: invoice.client,
+      date: new Date().toLocaleDateString('fr-FR'),
+      items: [
+        {
+          description: invoice.description || 'Service',
+          quantity: 1,
+          unitPrice: invoice.amount,
+          total: invoice.amount
+        }
+      ],
+      subtotal: invoice.amount,
+      total: invoice.amount
+    };
+
+    pdfServiceFixed.generateQuotePDF(pdfData, 'invoice');
     toast.success("PDF généré", {
       description: `Facture ${invoice.id} pour ${invoice.client}`
     });

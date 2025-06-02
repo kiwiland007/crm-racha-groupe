@@ -70,7 +70,21 @@ const CLEANUP_TARGETS = {
 const POTENTIAL_UNUSED = [
   'src/components/unused',
   'src/utils/deprecated',
-  'src/services/old'
+  'src/services/old',
+  'src/lib/supabase',
+  'src/test',
+  'public/unused',
+  '**/*.test.ts',
+  '**/*.test.tsx',
+  '**/*.spec.ts',
+  '**/*.spec.tsx'
+];
+
+// Dossiers vides à supprimer
+const EMPTY_DIRECTORIES = [
+  'src/lib/supabase',
+  'src/test',
+  'public/unused'
 ];
 
 function executeCommand(command, description) {

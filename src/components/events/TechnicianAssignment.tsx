@@ -13,15 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Users, UserCheck, UserX } from "lucide-react";
-
-interface Technician {
-  id: number;
-  name: string;
-  email: string;
-  speciality: string;
-  available: boolean;
-  initials: string;
-}
+import { TECHNICIANS } from "@/contexts/EventContext";
 
 interface TechnicianAssignmentProps {
   open: boolean;
@@ -31,49 +23,6 @@ interface TechnicianAssignmentProps {
   currentAssignments?: number[];
   onAssign?: (technicianIds: number[]) => void;
 }
-
-const TECHNICIANS: Technician[] = [
-  {
-    id: 1,
-    name: "Hassan Alami",
-    email: "h.alami@maroctactile.ma",
-    speciality: "Écrans tactiles",
-    available: true,
-    initials: "HA"
-  },
-  {
-    id: 2,
-    name: "Imane Mansouri",
-    email: "i.mansouri@maroctactile.ma",
-    speciality: "Bornes interactives",
-    available: true,
-    initials: "IM"
-  },
-  {
-    id: 3,
-    name: "Said Amrani",
-    email: "s.amrani@maroctactile.ma",
-    speciality: "Maintenance",
-    available: false,
-    initials: "SA"
-  },
-  {
-    id: 4,
-    name: "Fatima Benali",
-    email: "f.benali@maroctactile.ma",
-    speciality: "Installation",
-    available: true,
-    initials: "FB"
-  },
-  {
-    id: 5,
-    name: "Omar Tazi",
-    email: "o.tazi@maroctactile.ma",
-    speciality: "Formation",
-    available: true,
-    initials: "OT"
-  }
-];
 
 export function TechnicianAssignment({ 
   open, 

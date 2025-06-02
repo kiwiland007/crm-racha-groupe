@@ -2,6 +2,7 @@ import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useBLContext } from "@/contexts/BLContext";
 import {
   Table,
   TableBody,
@@ -40,96 +41,22 @@ import {
   AlertCircle
 } from "lucide-react";
 import BonLivraisonDetails from "@/components/bon-livraison/BonLivraisonDetails";
+import { BLEditModal } from "@/components/bon-livraison/BLEditModal";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function BonLivraison() {
   const isMobile = useIsMobile();
+  const { bonLivraisons, updateBL, deleteBL, updateBLStatus } = useBLContext();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showBLDetails, setShowBLDetails] = useState(false);
   const [selectedBL, setSelectedBL] = useState<any>(null);
+  const [editingBL, setEditingBL] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  const [bonLivraisons, setBonLivraisons] = useState([
-    {
-      id: "BL-25-001",
-      devisId: "DEVIS-25-001",
-      client: "Société ABC",
-      clientAdresse: "123 Rue Mohammed V, Casablanca",
-      dateCreation: "05/01/2025",
-      dateLivraison: "08/01/2025",
-      livreur: "Mohamed Alami",
-      transporteur: "Express Maroc",
-      status: "livre",
-      items: [
-        {
-          designation: "Écran tactile 55 pouces",
-          quantiteCommandee: 3,
-          quantiteLivree: 3,
-          unite: "pcs"
-        },
-        {
-          designation: "Support mural",
-          quantiteCommandee: 3,
-          quantiteLivree: 3,
-          unite: "pcs"
-        }
-      ],
-      totalColis: 6,
-      signatureClient: true,
-      signatureLivreur: true
-    },
-    {
-      id: "BL-25-002",
-      devisId: "DEVIS-25-002",
-      client: "Event Pro Services",
-      clientAdresse: "456 Avenue Hassan II, Rabat",
-      dateCreation: "03/01/2025",
-      dateLivraison: "06/01/2025",
-      livreur: "Karim Hassan",
-      transporteur: "Transport Direct",
-      status: "en_cours_livraison",
-      items: [
-        {
-          designation: "Borne interactive 43 pouces",
-          quantiteCommandee: 2,
-          quantiteLivree: 0,
-          unite: "pcs"
-        }
-      ],
-      totalColis: 2,
-      signatureClient: false,
-      signatureLivreur: true
-    },
-    {
-      id: "BL-25-003",
-      devisId: "DEVIS-25-003",
-      client: "Hotel Marrakech",
-      clientAdresse: "789 Boulevard Zerktouni, Marrakech",
-      dateCreation: "02/01/2025",
-      dateLivraison: "05/01/2025",
-      livreur: "Rachid Lamrani",
-      transporteur: "Livraison Express",
-      status: "expedie",
-      items: [
-        {
-          designation: "Table tactile 55 pouces",
-          quantiteCommandee: 1,
-          quantiteLivree: 0,
-          unite: "pcs"
-        },
-        {
-          designation: "Système audio",
-          quantiteCommandee: 1,
-          quantiteLivree: 0,
-          unite: "pcs"
-        }
-      ],
-      totalColis: 2,
-      signatureClient: false,
-      signatureLivreur: true
-    }
-  ]);
+  // Utilisation des BL depuis le contexte
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -199,7 +126,8 @@ export default function BonLivraison() {
       // Créer un nouveau BL avec des données par défaut
       const newBL = {
         id: newBLNumber,
-        devisId: `DEVIS-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
+        factureId: `FACT-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
+        devisId: `DEVIS-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`, // Optionnel
         client: "Nouveau Client",
         clientAdresse: "Adresse à définir",
         dateCreation: new Date().toLocaleDateString('fr-FR'),
@@ -220,8 +148,8 @@ export default function BonLivraison() {
         signatureLivreur: false
       };
 
-      // Ajouter le nouveau BL à la liste
-      setBonLivraisons([newBL, ...bonLivraisons]);
+      // Ajouter le nouveau BL via le contexte
+      // addBL(newBL); // À implémenter avec le contexte
 
       toast.success("Nouveau BL créé !", {
         description: `BL ${newBLNumber} créé avec succès`,
@@ -244,9 +172,8 @@ export default function BonLivraison() {
   };
 
   const handleEditBL = (bl: any) => {
-    toast.info("Modifier le BL", {
-      description: `Modification du BL ${bl.id} - Fonctionnalité en développement`
-    });
+    setEditingBL(bl);
+    setShowEditModal(true);
   };
 
   const handleGeneratePDF = async (bl: any) => {
@@ -260,7 +187,8 @@ export default function BonLivraison() {
       // Préparer les données pour le service BL avec structure correcte
       const blData = {
         id: bl.id,
-        devisId: bl.devisId,
+        factureId: bl.factureId,
+        devisId: bl.devisId, // Optionnel
 
         // Informations client (format string, pas objet)
         client: bl.client,
@@ -324,17 +252,14 @@ export default function BonLivraison() {
   };
 
   const handleDeleteBL = (bl: any) => {
-    const updatedBLs = bonLivraisons.filter(b => b.id !== bl.id);
-    setBonLivraisons(updatedBLs);
-    toast.success("BL supprimé", {
-      description: `BL ${bl.id} supprimé avec succès`
-    });
+    deleteBL(bl.id);
   };
 
   const filteredBLs = bonLivraisons.filter(bl => {
     const matchesSearch = bl.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          bl.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bl.devisId.toLowerCase().includes(searchTerm.toLowerCase());
+                         (bl.factureId && bl.factureId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (bl.devisId && bl.devisId.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === "all" || bl.status === statusFilter;
     
@@ -384,6 +309,7 @@ export default function BonLivraison() {
                   <TableRow>
                     <TableHead>N° BL</TableHead>
                     <TableHead>Client</TableHead>
+                    <TableHead className={isMobile ? "hidden" : ""}>Facture</TableHead>
                     <TableHead className={isMobile ? "hidden" : ""}>Devis</TableHead>
                     <TableHead className={isMobile ? "hidden" : ""}>Date livraison</TableHead>
                     <TableHead className={isMobile ? "hidden" : ""}>Livreur</TableHead>
@@ -396,7 +322,8 @@ export default function BonLivraison() {
                     <TableRow key={bl.id}>
                       <TableCell className="font-medium">{bl.id}</TableCell>
                       <TableCell>{bl.client}</TableCell>
-                      <TableCell className={isMobile ? "hidden" : ""}>{bl.devisId}</TableCell>
+                      <TableCell className={isMobile ? "hidden" : ""}>{bl.factureId || '-'}</TableCell>
+                      <TableCell className={isMobile ? "hidden" : ""}>{bl.devisId || '-'}</TableCell>
                       <TableCell className={isMobile ? "hidden" : ""}>{bl.dateLivraison}</TableCell>
                       <TableCell className={isMobile ? "hidden" : ""}>{bl.livreur}</TableCell>
                       <TableCell>{getStatusBadge(bl.status)}</TableCell>
@@ -443,6 +370,12 @@ export default function BonLivraison() {
         onOpenChange={setShowBLDetails}
         onGeneratePDF={handleGeneratePDF}
         onEdit={handleEditBL}
+      />
+
+      <BLEditModal
+        bl={editingBL}
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
       />
     </Layout>
   );

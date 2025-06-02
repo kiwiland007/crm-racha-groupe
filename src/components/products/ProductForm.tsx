@@ -165,12 +165,12 @@ export function ProductForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[800px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
             {editProduct ? "Modifier le produit" : "Ajouter un produit"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm sm:text-base">
             {editProduct
               ? "Modifiez les détails du produit ci-dessous"
               : "Remplissez les détails du nouveau produit"}
@@ -179,15 +179,18 @@ export function ProductForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="details">Détails</TabsTrigger>
-                <TabsTrigger value="technical">Technique</TabsTrigger>
-                <TabsTrigger value="specifications">Spécifications</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 h-auto">
+                <TabsTrigger value="details" className="text-xs sm:text-sm">Détails</TabsTrigger>
+                <TabsTrigger value="technical" className="text-xs sm:text-sm">Technique</TabsTrigger>
+                <TabsTrigger value="specifications" className="text-xs sm:text-sm">Spécifications</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ProductBasicInfo control={form.control} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <ProductBasicInfo control={form.control} />
+                    <ProductCategoryInfo control={form.control} />
+                  </div>
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
@@ -215,9 +218,8 @@ export function ProductForm({
                         </FormItem>
                       )}
                     />
+                    <ProductAvailabilityInfo control={form.control} />
                   </div>
-                  <ProductCategoryInfo control={form.control} />
-                  <ProductAvailabilityInfo control={form.control} />
                 </div>
 
                 <ProductDescriptionInfo control={form.control} />
@@ -354,7 +356,7 @@ export function ProductForm({
                         <p className="text-sm font-medium text-gray-700 mb-3">
                           Images ajoutées ({uploadedImages.length})
                         </p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                           {uploadedImages.map((image, index) => (
                             <div key={index} className="relative group">
                               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">

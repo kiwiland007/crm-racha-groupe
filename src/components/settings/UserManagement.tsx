@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -115,7 +115,8 @@ export function UserManagement() {
     return password;
   };
 
-  const [users, setUsers] = useState<User[]>([
+  // Utilisateurs par défaut
+  const defaultUsers: User[] = [
     {
       id: 1,
       fullName: "Ahmed El Mansouri",
@@ -180,7 +181,41 @@ export function UserManagement() {
         admin: false,
       }
     },
-  ]);
+  ];
+
+  const [users, setUsers] = useState<User[]>([]);
+  const STORAGE_KEY = 'crm_users';
+
+  // Charger les utilisateurs depuis localStorage au démarrage
+  useEffect(() => {
+    try {
+      const savedUsers = localStorage.getItem(STORAGE_KEY);
+      if (savedUsers) {
+        const parsedUsers = JSON.parse(savedUsers);
+        setUsers(parsedUsers);
+      } else {
+        setUsers(defaultUsers);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUsers));
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des utilisateurs:', error);
+      setUsers(defaultUsers);
+    }
+  }, []);
+
+  // Sauvegarder les utilisateurs dans localStorage à chaque modification
+  useEffect(() => {
+    if (users.length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des utilisateurs:', error);
+        toast.error('Erreur de sauvegarde', {
+          description: 'Impossible de sauvegarder les utilisateurs'
+        });
+      }
+    }
+  }, [users]);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);

@@ -254,17 +254,7 @@ function LoginPage() {
             </button>
           </div>
 
-          <div className="text-center">
-            <div className="text-sm text-gray-600 bg-gray-100 p-4 rounded-md">
-              <p className="font-medium mb-2">Comptes de démonstration :</p>
-              <div className="space-y-1 text-xs">
-                <p><strong>Admin:</strong> youssef@rachabusiness.com</p>
-                <p><strong>Manager:</strong> fatima@rachabusiness.com</p>
-                <p><strong>Employé:</strong> sara@rachabusiness.com</p>
-                <p className="mt-2"><strong>Mot de passe:</strong> demo123</p>
-              </div>
-            </div>
-          </div>
+
         </form>
 
         <ForgotPassword

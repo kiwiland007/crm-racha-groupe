@@ -16,30 +16,41 @@ import {
   Receipt,
   ShoppingBag,
   Cog,
-  Truck
+  Truck,
+  CheckSquare,
+  Bell
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface NavItemProps {
   to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
+  badge?: number;
   onClick?: () => void;
 }
 
-const NavItem = ({ to, icon, label, isActive, onClick }: NavItemProps) => (
+const NavItem = ({ to, icon, label, isActive, badge, onClick }: NavItemProps) => (
   <Link
     to={to}
     className={cn(
-      "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+      "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors relative",
       isActive
         ? "bg-racha-teal text-white"
         : "hover:bg-muted"
     )}
     onClick={onClick}
   >
-    {icon}
+    <div className="relative">
+      {icon}
+      {badge && badge > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[16px] text-[10px] font-bold">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </div>
     {label}
   </Link>
 );
@@ -48,6 +59,7 @@ export default function Sidebar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
+  const { unreadCount } = useNotificationContext();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -61,6 +73,16 @@ export default function Sidebar() {
       to: "/contacts",
       icon: <Users size={18} />,
       label: "Contacts"
+    },
+    {
+      to: "/tasks",
+      icon: <CheckSquare size={18} />,
+      label: "Tâches"
+    },
+    {
+      to: "/notifications",
+      icon: <Bell size={18} />,
+      label: "Notifications"
     },
     {
       to: "/inventory",
@@ -118,6 +140,7 @@ export default function Sidebar() {
           icon={item.icon}
           label={item.label}
           isActive={location.pathname === item.to}
+          badge={item.to === "/notifications" ? unreadCount : undefined}
           onClick={isMobile ? toggleSidebar : undefined}
         />
       ))}

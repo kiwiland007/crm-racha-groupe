@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -87,9 +87,41 @@ export function TechnicalSheetForm({
   const isEditing = !!editingSheet;
   const { products, categories } = useProductContext();
 
-  const form = useForm<TechnicalSheetFormValues>({
-    resolver: zodResolver(technicalSheetSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    if (isEditing && editingSheet) {
+      return {
+        name: editingSheet.name || "",
+        model: editingSheet.model || "",
+        brand: editingSheet.brand || "",
+        category: editingSheet.category || "",
+        description: editingSheet.description || "",
+        relatedProduct: editingSheet.relatedProduct || "",
+        relatedService: editingSheet.relatedService || "",
+        specifications: editingSheet.specifications || [{ name: "", value: "", unit: "" }],
+        dimensions: {
+          length: editingSheet.dimensions?.length || "",
+          width: editingSheet.dimensions?.width || "",
+          height: editingSheet.dimensions?.height || "",
+          weight: editingSheet.dimensions?.weight || "",
+        },
+        powerRequirements: {
+          voltage: editingSheet.powerRequirements?.voltage || "",
+          power: editingSheet.powerRequirements?.power || "",
+          frequency: editingSheet.powerRequirements?.frequency || "",
+        },
+        connectivity: editingSheet.connectivity || [],
+        operatingConditions: {
+          temperature: editingSheet.operatingConditions?.temperature || "",
+          humidity: editingSheet.operatingConditions?.humidity || "",
+        },
+        warranty: editingSheet.warranty || "",
+        certifications: editingSheet.certifications || [],
+        accessories: editingSheet.accessories || [],
+        maintenanceNotes: editingSheet.maintenanceNotes || "",
+      };
+    }
+
+    return {
       name: "",
       model: "",
       brand: "",
@@ -118,7 +150,12 @@ export function TechnicalSheetForm({
       certifications: [],
       accessories: [],
       maintenanceNotes: "",
-    },
+    };
+  };
+
+  const form = useForm<TechnicalSheetFormValues>({
+    resolver: zodResolver(technicalSheetSchema),
+    defaultValues: getDefaultValues(),
   });
 
   const { fields: specFields, append: appendSpec, remove: removeSpec } = useForm({
@@ -143,6 +180,21 @@ export function TechnicalSheetForm({
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
+
+  // Réinitialiser le formulaire quand editingSheet change
+  useEffect(() => {
+    if (open) {
+      const values = getDefaultValues();
+      form.reset(values);
+
+      // Réinitialiser les images si en mode édition
+      if (isEditing && editingSheet?.images) {
+        setImages(editingSheet.images || []);
+      } else {
+        setImages([]);
+      }
+    }
+  }, [open, editingSheet, isEditing]);
 
   function onSubmit(data: TechnicalSheetFormValues) {
     const sheetData = {

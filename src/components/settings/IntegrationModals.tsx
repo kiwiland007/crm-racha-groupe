@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,6 +108,34 @@ export function IntegrationModals({
   onAuthOpenChange,
 }: IntegrationModalsProps) {
 
+  // Clés de stockage
+  const STORAGE_KEYS = {
+    payment: 'crm_integration_payment',
+    email: 'crm_integration_email',
+    chat: 'crm_integration_chat',
+    auth: 'crm_integration_auth'
+  };
+
+  // Charger les données sauvegardées
+  const loadSavedData = (key: string) => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.error('Erreur chargement intégration:', error);
+      return null;
+    }
+  };
+
+  // Sauvegarder les données
+  const saveData = (key: string, data: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error('Erreur sauvegarde intégration:', error);
+    }
+  };
+
   // Forms
   const paymentForm = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
@@ -157,41 +185,64 @@ export function IntegrationModals({
     },
   });
 
+  // Charger les données au montage
+  useEffect(() => {
+    const paymentData = loadSavedData(STORAGE_KEYS.payment);
+    if (paymentData) {
+      paymentForm.reset(paymentData);
+    }
+
+    const emailData = loadSavedData(STORAGE_KEYS.email);
+    if (emailData) {
+      emailForm.reset(emailData);
+    }
+
+    const chatData = loadSavedData(STORAGE_KEYS.chat);
+    if (chatData) {
+      chatForm.reset(chatData);
+    }
+
+    const authData = loadSavedData(STORAGE_KEYS.auth);
+    if (authData) {
+      authForm.reset(authData);
+    }
+  }, []);
+
   // Handlers
   const handlePaymentSubmit = (data: PaymentFormValues) => {
+    saveData(STORAGE_KEYS.payment, data);
     console.log("Configuration paiement:", data);
     toast.success("Configuration paiement sauvegardée", {
       description: `${data.provider} configuré avec succès`
     });
     onPaymentOpenChange(false);
-    paymentForm.reset();
   };
 
   const handleEmailSubmit = (data: EmailFormValues) => {
+    saveData(STORAGE_KEYS.email, data);
     console.log("Configuration email:", data);
     toast.success("Configuration email sauvegardée", {
       description: `${data.provider} configuré avec succès`
     });
     onEmailOpenChange(false);
-    emailForm.reset();
   };
 
   const handleChatSubmit = (data: ChatFormValues) => {
+    saveData(STORAGE_KEYS.chat, data);
     console.log("Configuration chat:", data);
     toast.success("Configuration chat sauvegardée", {
       description: `${data.provider} configuré avec succès`
     });
     onChatOpenChange(false);
-    chatForm.reset();
   };
 
   const handleAuthSubmit = (data: AuthFormValues) => {
+    saveData(STORAGE_KEYS.auth, data);
     console.log("Configuration auth:", data);
     toast.success("Configuration authentification sauvegardée", {
       description: `${data.provider} configuré avec succès`
     });
     onAuthOpenChange(false);
-    authForm.reset();
   };
 
   const copyToClipboard = (text: string, label: string) => {

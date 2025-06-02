@@ -10,12 +10,10 @@ export const LazyQuotes = lazy(() => import('@/pages/Quotes'));
 export const LazyInvoices = lazy(() => import('@/pages/Invoices'));
 export const LazyBonLivraison = lazy(() => import('@/pages/BonLivraison'));
 export const LazyTechnicalSheets = lazy(() => import('@/pages/TechnicalSheets'));
-export const LazyChat = lazy(() => import('@/pages/Chat'));
 export const LazySettings = lazy(() => import('@/pages/Settings'));
 export const LazyAnalytics = lazy(() => import('@/pages/Analytics'));
 export const LazyProducts = lazy(() => import('@/pages/Products'));
 export const LazyServices = lazy(() => import('@/pages/Services'));
-export const LazyNotifications = lazy(() => import('@/pages/Notifications'));
 export const LazyInvoiceForm = lazy(() => import('@/pages/InvoiceForm'));
 
 // Lazy loading des composants lourds
@@ -150,11 +148,6 @@ export const PageComponents = {
       <LazyTechnicalSheets />
     </LazyWrapper>
   ),
-  Chat: () => (
-    <LazyWrapper variant="page">
-      <LazyChat />
-    </LazyWrapper>
-  ),
   Settings: () => (
     <LazyWrapper variant="page">
       <LazySettings />
@@ -173,11 +166,6 @@ export const PageComponents = {
   Services: () => (
     <LazyWrapper variant="page">
       <LazyServices />
-    </LazyWrapper>
-  ),
-  Notifications: () => (
-    <LazyWrapper variant="page">
-      <LazyNotifications />
     </LazyWrapper>
   ),
   InvoiceForm: () => (

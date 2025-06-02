@@ -79,3 +79,29 @@ coverage/
 
 # Generated files
 version.json
+cleanup-report.json
+backup-report-*.json
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Test files (si pas utilisés)
+src/test/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Fichiers de développement
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+
+# Fichiers de configuration locale
+.env.local.backup
+config.local.json

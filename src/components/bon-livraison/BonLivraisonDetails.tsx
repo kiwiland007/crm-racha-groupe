@@ -128,7 +128,7 @@ const BonLivraisonDetails: React.FC<BonLivraisonDetailsProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[900px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Truck className="h-6 w-6 text-blue-600" />

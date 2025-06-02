@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from 'sonner';
 
 export interface Category {
   id: string;
@@ -51,8 +52,8 @@ interface ProductProviderProps {
   children: ReactNode;
 }
 
-export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
-  const [categories, setCategories] = useState<Category[]>([
+// Catégories par défaut
+const defaultCategories: Category[] = [
     // Catégories Produits inspirées de MarocTactile.com
     {
       id: "1",
@@ -183,9 +184,10 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
       color: "bg-emerald-100 text-emerald-800",
       isActive: true
     }
-  ]);
+];
 
-  const [products, setProducts] = useState<Product[]>([
+// Produits par défaut
+const defaultProducts: Product[] = [
     {
       id: "PRD-001",
       name: "Borne Interactive 43\" KIMEX",
@@ -447,7 +449,76 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
       sku: "EVT-SHOWROOM",
       technicalSpecs: "Design: Showroom sur-mesure\nScénographie: Produits mise en valeur\nÉclairage: Professionnel adapté\nParcours: Client optimisé\nTechnologies: Interactives intégrées\nDurée: 3-4 semaines"
     }
-  ]);
+];
+
+export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const CATEGORIES_STORAGE_KEY = 'crm_categories';
+  const PRODUCTS_STORAGE_KEY = 'crm_products';
+
+  // Charger les catégories depuis localStorage au démarrage
+  useEffect(() => {
+    try {
+      const savedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+      if (savedCategories) {
+        const parsedCategories = JSON.parse(savedCategories);
+        setCategories(parsedCategories);
+      } else {
+        setCategories(defaultCategories);
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des catégories:', error);
+      setCategories(defaultCategories);
+    }
+  }, []);
+
+  // Charger les produits depuis localStorage au démarrage
+  useEffect(() => {
+    try {
+      const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+      if (savedProducts) {
+        const parsedProducts = JSON.parse(savedProducts);
+        setProducts(parsedProducts);
+      } else {
+        setProducts(defaultProducts);
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(defaultProducts));
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des produits:', error);
+      setProducts(defaultProducts);
+    }
+  }, []);
+
+  // Sauvegarder les catégories dans localStorage à chaque modification
+  useEffect(() => {
+    if (categories.length > 0) {
+      try {
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des catégories:', error);
+        toast.error('Erreur de sauvegarde', {
+          description: 'Impossible de sauvegarder les catégories'
+        });
+      }
+    }
+  }, [categories]);
+
+  // Sauvegarder les produits dans localStorage à chaque modification
+  useEffect(() => {
+    if (products.length > 0) {
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des produits:', error);
+        toast.error('Erreur de sauvegarde', {
+          description: 'Impossible de sauvegarder les produits'
+        });
+      }
+    }
+  }, [products]);
 
   const addCategory = (categoryData: Omit<Category, 'id'>) => {
     const newCategory: Category = {

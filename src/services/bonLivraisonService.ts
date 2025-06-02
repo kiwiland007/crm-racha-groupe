@@ -320,8 +320,13 @@ class BonLivraisonService {
     this.doc.setFont(undefined, 'normal');
     this.doc.text(data.dateLivraison, 70, yPos + 11);
 
-    // Colonne 3
-    if (data.devisId) {
+    // Colonne 3 - Priorité à la facture
+    if (data.factureId) {
+      this.doc.setFont(undefined, 'bold');
+      this.doc.text("Facture:", 118, yPos + 6);
+      this.doc.setFont(undefined, 'normal');
+      this.doc.text(data.factureId, 118, yPos + 11);
+    } else if (data.devisId) {
       this.doc.setFont(undefined, 'bold');
       this.doc.text("Devis:", 118, yPos + 6);
       this.doc.setFont(undefined, 'normal');
@@ -386,23 +391,27 @@ class BonLivraisonService {
       // Référence (centrée verticalement)
       if (item.reference) {
         this.doc.setFontSize(6);
+        this.doc.setFont(undefined, 'normal');
+        this.doc.setTextColor(80, 80, 80);
         this.doc.text(item.reference, colPositions[0] + 1, currentY + 8);
       }
 
       // Désignation (ligne 1)
-      const designation = item.designation || item.name || '';
-      const designationTrunc = designation.length > 32 ? designation.substring(0, 29) + "..." : designation;
+      const designation = item.designation || item.productName || item.name || '';
+      const designationTrunc = designation.length > 30 ? designation.substring(0, 27) + "..." : designation;
       this.doc.setFont(undefined, 'bold');
       this.doc.setFontSize(7);
+      this.doc.setTextColor(0, 0, 0);
       this.doc.text(designationTrunc, colPositions[1] + 2, currentY + 5);
 
-      // Description (ligne 2, plus discrète)
-      if (item.description) {
+      // Catégorie ou description (ligne 2, plus discrète)
+      const secondLine = item.category || item.description || '';
+      if (secondLine) {
         this.doc.setFont(undefined, 'normal');
         this.doc.setFontSize(6);
         this.doc.setTextColor(120, 120, 120);
-        const descTrunc = item.description.length > 38 ? item.description.substring(0, 35) + "..." : item.description;
-        this.doc.text(descTrunc, colPositions[1] + 2, currentY + 10);
+        const secondLineTrunc = secondLine.length > 35 ? secondLine.substring(0, 32) + "..." : secondLine;
+        this.doc.text(secondLineTrunc, colPositions[1] + 2, currentY + 10);
       }
 
       // Quantités (centrées dans les colonnes)
@@ -476,21 +485,25 @@ class BonLivraisonService {
     this.doc.setFontSize(7);
     this.doc.setFont(undefined, 'normal');
 
-    // Ligne 1: Commandé et Livré
-    this.doc.text(`Commandé: ${totalCmd}`, 102, yPos + 13);
+    // Ligne 1: Commandé et Livré avec pourcentage
+    this.doc.text(`Total commandé: ${totalCmd}`, 102, yPos + 13);
     this.doc.setTextColor(0, 150, 0);
     this.doc.setFont(undefined, 'bold');
-    this.doc.text(`Livré: ${totalLivr}`, 145, yPos + 13);
+    this.doc.text(`Total livré: ${totalLivr}`, 145, yPos + 13);
 
-    // Ligne 2: Reste (si applicable)
+    // Ligne 2: Reste et pourcentage de livraison
+    const pourcentageLivraison = totalCmd > 0 ? Math.round((totalLivr / totalCmd) * 100) : 0;
+
     if (totalReste > 0) {
       this.doc.setTextColor(200, 0, 0);
       this.doc.setFont(undefined, 'bold');
-      this.doc.text(`Reste à livrer: ${totalReste}`, 102, yPos + 19);
+      this.doc.text(`Reste: ${totalReste}`, 102, yPos + 19);
+      this.doc.setTextColor(200, 100, 0);
+      this.doc.text(`Taux: ${pourcentageLivraison}%`, 145, yPos + 19);
     } else {
       this.doc.setTextColor(0, 150, 0);
       this.doc.setFont(undefined, 'bold');
-      this.doc.text("✓ LIVRAISON COMPLÈTE", 145, yPos + 19, { align: 'center' });
+      this.doc.text("✓ LIVRAISON COMPLÈTE (100%)", 145, yPos + 19, { align: 'center' });
     }
 
     // Ligne de séparation décorative
@@ -720,7 +733,13 @@ class BonLivraisonService {
     this.doc.setFont(undefined, 'normal');
     this.doc.text(data.dateLivraison, 45, yPos + 24);
 
-    if (data.devisId) {
+    // Référence document - Priorité à la facture
+    if (data.factureId) {
+      this.doc.setFont(undefined, 'bold');
+      this.doc.text("Réf. Facture:", 22, yPos + 30);
+      this.doc.setFont(undefined, 'normal');
+      this.doc.text(data.factureId, 60, yPos + 30);
+    } else if (data.devisId) {
       this.doc.setFont(undefined, 'bold');
       this.doc.text("Réf. Devis:", 22, yPos + 30);
       this.doc.setFont(undefined, 'normal');

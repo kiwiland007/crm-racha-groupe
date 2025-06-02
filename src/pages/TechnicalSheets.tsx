@@ -30,12 +30,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { TechnicalSheetForm } from "@/components/equipment/TechnicalSheetForm";
-import { generateTechnicalSheetPDF } from "@/utils/pdfGenerator";
+import { TechnicalSheetDetails } from "@/components/equipment/TechnicalSheetDetails";
+import { technicalSheetPDFService } from "@/services/technicalSheetPDFService";
 
 export default function TechnicalSheets() {
   const [openForm, setOpenForm] = useState(false);
   const [editingSheet, setEditingSheet] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewingSheet, setViewingSheet] = useState<any>(null);
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
 
   const [technicalSheets, setTechnicalSheets] = useState([
     {
@@ -141,18 +144,49 @@ export default function TechnicalSheets() {
     setOpenForm(true);
   };
 
+  const handleViewDetails = (sheet: any) => {
+    setViewingSheet(sheet);
+    setOpenDetailsModal(true);
+  };
+
   const handleDeleteSheet = (sheetId: string) => {
     setTechnicalSheets(technicalSheets.filter(sheet => sheet.id !== sheetId));
     toast.success("Fiche technique supprimée");
   };
 
   const handleGeneratePDF = (sheet: any) => {
-    const filename = generateTechnicalSheetPDF(sheet);
-    if (filename) {
-      toast.success("PDF généré avec succès", {
-        description: `Le fichier ${filename} a été téléchargé.`,
-      });
-    }
+    // Convertir les données de la fiche technique au format attendu
+    const technicalData = {
+      id: sheet.id,
+      name: sheet.equipmentName || sheet.name,
+      brand: sheet.brand,
+      model: sheet.model,
+      category: sheet.category,
+      description: sheet.description,
+      price: {
+        sale: sheet.price || 0,
+        rental: sheet.rentalPrice || 0
+      },
+      technicalSpecs: sheet.technicalSpecs,
+      specifications: {
+        dimensions: sheet.dimensions,
+        weight: sheet.weight,
+        power: sheet.power,
+        connectivity: sheet.connectivity,
+        display: sheet.display,
+        processor: sheet.processor,
+        memory: sheet.memory,
+        storage: sheet.storage,
+        os: sheet.os
+      },
+      features: sheet.features || [],
+      maintenanceNotes: sheet.maintenanceNotes,
+      warranty: sheet.warranty,
+      availability: sheet.availability,
+      sku: sheet.sku || sheet.reference
+    };
+
+    technicalSheetPDFService.generateTechnicalSheetPDF(technicalData);
   };
 
   const handleCloseForm = (open: boolean) => {
@@ -231,7 +265,7 @@ export default function TechnicalSheets() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleViewDetails(sheet)}>
                       <Eye className="mr-2 h-4 w-4" />
                       Voir détails
                     </DropdownMenuItem>
@@ -325,6 +359,17 @@ export default function TechnicalSheets() {
         onOpenChange={handleCloseForm}
         onSave={editingSheet ? handleUpdateSheet : handleAddSheet}
         editingSheet={editingSheet}
+      />
+
+      <TechnicalSheetDetails
+        sheet={viewingSheet}
+        open={openDetailsModal}
+        onOpenChange={setOpenDetailsModal}
+        onEdit={(sheet) => {
+          setOpenDetailsModal(false);
+          handleEditSheet(sheet);
+        }}
+        onGeneratePDF={handleGeneratePDF}
       />
     </Layout>
   );

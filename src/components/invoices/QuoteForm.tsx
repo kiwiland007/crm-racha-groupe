@@ -33,7 +33,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
-import { generatePDF } from "@/utils/pdfGenerator";
+import { pdfServiceFixed } from "@/services/pdfServiceFixed";
 
 const quoteFormSchema = z.object({
   client: z.string().min(1, { message: "Le client est requis" }),
@@ -93,15 +93,22 @@ export function QuoteForm({ open, onOpenChange, onAddQuote }: QuoteFormProps) {
       
       // Générer PDF optionnel
       if (confirm("Voulez-vous générer un PDF pour ce devis?")) {
-        generatePDF({
+        const pdfData = {
           id: newQuote.id,
           client: data.client,
           date: newQuote.date,
-          amount: parseInt(data.amount),
-          advanceAmount: parseInt(data.advanceAmount) || 0,
-          status: data.paymentStatus,
-          paymentMethod: data.paymentMethod,
-        }, 'quote');
+          items: [
+            {
+              description: data.description,
+              quantity: 1,
+              unitPrice: parseInt(data.amount),
+              total: parseInt(data.amount)
+            }
+          ],
+          subtotal: parseInt(data.amount),
+          total: parseInt(data.amount)
+        };
+        pdfServiceFixed.generateQuotePDF(pdfData, 'quote');
       }
     } else {
       toast.success("Devis créé", {
