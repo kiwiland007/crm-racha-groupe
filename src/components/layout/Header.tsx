@@ -51,23 +51,6 @@ export default function Header({ title }: { title: string }) {
         {/* Logo Racha Digital */}
         <div className="flex items-center">
           <Logo variant="compact" size="md" />
-          {/* Fallback logo si le composant ne fonctionne pas */}
-          <div className="hidden">
-            <svg width="160" height="40" viewBox="0 0 160 40" className="flex-shrink-0">
-              <circle cx="20" cy="20" r="15" fill="#40E0D0" opacity="0.8"/>
-              <circle cx="12" cy="12" r="2" fill="#40E0D0"/>
-              <circle cx="28" cy="12" r="2" fill="#40E0D0"/>
-              <circle cx="12" cy="28" r="2" fill="#40E0D0"/>
-              <circle cx="28" cy="28" r="2" fill="#40E0D0"/>
-              <circle cx="20" cy="20" r="2" fill="#FFFFFF"/>
-              <line x1="12" y1="12" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-              <line x1="28" y1="12" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-              <line x1="12" y1="28" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-              <line x1="28" y1="28" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-              <text x="45" y="18" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#40E0D0">RACHA</text>
-              <text x="45" y="30" fontFamily="Arial, sans-serif" fontSize="10" fill="#666666">DIGITAL</text>
-            </svg>
-          </div>
         </div>
         <div className="h-6 w-px bg-gray-300 md:h-8" />
         <h1 className="text-lg font-semibold text-gray-800 md:text-xl">{title}</h1>

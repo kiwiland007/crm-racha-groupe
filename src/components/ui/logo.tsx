@@ -31,86 +31,81 @@ const Logo: React.FC<LogoProps> = ({
 
   const { width, height } = getSizeValues();
 
-  // Logo SVG intégré pour éviter les problèmes de chargement
+  // Logo SVG basé sur votre design RACHA DIGITAL
   const renderLogo = () => {
     if (variant === 'icon') {
       return (
-        <svg width={height} height={height} viewBox="0 0 32 32" className={cn('flex-shrink-0', className)}>
-          {/* Cercle principal */}
-          <circle cx="16" cy="16" r="12" fill="#40E0D0" opacity="0.8"/>
+        <svg width={height} height={height} viewBox="0 0 40 40" className={cn('flex-shrink-0', className)}>
+          {/* Forme principale - cercle avec nœuds */}
+          <circle cx="20" cy="20" r="18" fill="#40E0D0" fillOpacity="0.1" stroke="#40E0D0" strokeWidth="1"/>
 
-          {/* Nœuds connectés */}
-          <circle cx="10" cy="10" r="2" fill="#40E0D0"/>
-          <circle cx="22" cy="10" r="2" fill="#40E0D0"/>
-          <circle cx="10" cy="22" r="2" fill="#40E0D0"/>
-          <circle cx="22" cy="22" r="2" fill="#40E0D0"/>
-          <circle cx="16" cy="16" r="2" fill="#FFFFFF"/>
+          {/* Nœuds connectés - design réseau */}
+          <circle cx="20" cy="8" r="3" fill="#40E0D0"/>
+          <circle cx="32" cy="20" r="3" fill="#40E0D0"/>
+          <circle cx="20" cy="32" r="3" fill="#40E0D0"/>
+          <circle cx="8" cy="20" r="3" fill="#40E0D0"/>
+          <circle cx="20" cy="20" r="4" fill="#40E0D0"/>
 
           {/* Lignes de connexion */}
-          <line x1="10" y1="10" x2="16" y2="16" stroke="#40E0D0" strokeWidth="1.5"/>
-          <line x1="22" y1="10" x2="16" y2="16" stroke="#40E0D0" strokeWidth="1.5"/>
-          <line x1="10" y1="22" x2="16" y2="16" stroke="#40E0D0" strokeWidth="1.5"/>
-          <line x1="22" y1="22" x2="16" y2="16" stroke="#40E0D0" strokeWidth="1.5"/>
+          <line x1="20" y1="8" x2="20" y2="16" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="32" y1="20" x2="24" y2="20" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="20" y1="32" x2="20" y2="24" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="8" y1="20" x2="16" y2="20" stroke="#40E0D0" strokeWidth="2"/>
         </svg>
       );
     }
 
     if (variant === 'full') {
       return (
-        <svg width={width} height={height} viewBox="0 0 240 60" className={cn('flex-shrink-0', className)}>
-          {/* Cercle principal */}
-          <circle cx="30" cy="30" r="20" fill="#40E0D0" opacity="0.8"/>
+        <svg width={width} height={height} viewBox="0 0 300 60" className={cn('flex-shrink-0', className)}>
+          {/* Icône réseau */}
+          <circle cx="30" cy="30" r="25" fill="#40E0D0" fillOpacity="0.1" stroke="#40E0D0" strokeWidth="1"/>
+          <circle cx="30" cy="12" r="4" fill="#40E0D0"/>
+          <circle cx="48" cy="30" r="4" fill="#40E0D0"/>
+          <circle cx="30" cy="48" r="4" fill="#40E0D0"/>
+          <circle cx="12" cy="30" r="4" fill="#40E0D0"/>
+          <circle cx="30" cy="30" r="5" fill="#40E0D0"/>
 
-          {/* Nœuds connectés */}
-          <circle cx="20" cy="20" r="3" fill="#40E0D0"/>
-          <circle cx="40" cy="20" r="3" fill="#40E0D0"/>
-          <circle cx="20" cy="40" r="3" fill="#40E0D0"/>
-          <circle cx="40" cy="40" r="3" fill="#40E0D0"/>
-          <circle cx="30" cy="30" r="3" fill="#FFFFFF"/>
+          {/* Connexions */}
+          <line x1="30" y1="12" x2="30" y2="25" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="48" y1="30" x2="35" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="30" y1="48" x2="30" y2="35" stroke="#40E0D0" strokeWidth="2"/>
+          <line x1="12" y1="30" x2="25" y2="30" stroke="#40E0D0" strokeWidth="2"/>
 
-          {/* Lignes de connexion */}
-          <line x1="20" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-          <line x1="40" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-          <line x1="20" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-          <line x1="40" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+          {/* Séparateur */}
+          <line x1="70" y1="15" x2="70" y2="45" stroke="#E5E7EB" strokeWidth="1"/>
 
           {/* Texte RACHA DIGITAL */}
-          <text x="70" y="25" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#40E0D0">
-            RACHA
-          </text>
-          <text x="70" y="42" fontFamily="Arial, sans-serif" fontSize="14" fill="#666666">
-            DIGITAL
+          <text x="85" y="35" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#40E0D0" letterSpacing="2px">
+            RACHA DIGITAL
           </text>
         </svg>
       );
     }
 
-    // Variant compact
+    // Variant compact pour header
     return (
-      <svg width={width} height={height} viewBox="0 0 160 40" className={cn('flex-shrink-0', className)}>
-        {/* Cercle principal */}
-        <circle cx="20" cy="20" r="15" fill="#40E0D0" opacity="0.8"/>
+      <svg width={width} height={height} viewBox="0 0 200 40" className={cn('flex-shrink-0', className)}>
+        {/* Icône réseau compacte */}
+        <circle cx="20" cy="20" r="16" fill="#40E0D0" fillOpacity="0.1" stroke="#40E0D0" strokeWidth="1"/>
+        <circle cx="20" cy="8" r="2.5" fill="#40E0D0"/>
+        <circle cx="32" cy="20" r="2.5" fill="#40E0D0"/>
+        <circle cx="20" cy="32" r="2.5" fill="#40E0D0"/>
+        <circle cx="8" cy="20" r="2.5" fill="#40E0D0"/>
+        <circle cx="20" cy="20" r="3" fill="#40E0D0"/>
 
-        {/* Nœuds connectés */}
-        <circle cx="12" cy="12" r="2" fill="#40E0D0"/>
-        <circle cx="28" cy="12" r="2" fill="#40E0D0"/>
-        <circle cx="12" cy="28" r="2" fill="#40E0D0"/>
-        <circle cx="28" cy="28" r="2" fill="#40E0D0"/>
-        <circle cx="20" cy="20" r="2" fill="#FFFFFF"/>
+        {/* Connexions */}
+        <line x1="20" y1="8" x2="20" y2="17" stroke="#40E0D0" strokeWidth="1.5"/>
+        <line x1="32" y1="20" x2="23" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
+        <line x1="20" y1="32" x2="20" y2="23" stroke="#40E0D0" strokeWidth="1.5"/>
+        <line x1="8" y1="20" x2="17" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
 
-        {/* Lignes de connexion */}
-        <line x1="12" y1="12" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-        <line x1="28" y1="12" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-        <line x1="12" y1="28" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
-        <line x1="28" y1="28" x2="20" y2="20" stroke="#40E0D0" strokeWidth="1.5"/>
+        {/* Séparateur */}
+        <line x1="45" y1="8" x2="45" y2="32" stroke="#E5E7EB" strokeWidth="1"/>
 
-        {/* Texte RACHA */}
-        <text x="45" y="18" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#40E0D0">
-          RACHA
-        </text>
-        {/* Texte DIGITAL */}
-        <text x="45" y="30" fontFamily="Arial, sans-serif" fontSize="10" fill="#666666">
-          DIGITAL
+        {/* Texte RACHA DIGITAL */}
+        <text x="55" y="25" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#40E0D0" letterSpacing="1px">
+          RACHA DIGITAL
         </text>
       </svg>
     );

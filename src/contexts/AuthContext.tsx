@@ -226,30 +226,28 @@ function LoginPage() {
         <div>
           <div className="mx-auto flex items-center justify-center mb-6">
             <div className="flex flex-col items-center">
-              {/* Logo SVG intégré */}
-              <svg width="200" height="60" viewBox="0 0 200 60" className="mb-2">
-                {/* Cercle principal */}
-                <circle cx="30" cy="30" r="20" fill="#40E0D0" opacity="0.8"/>
+              {/* Logo RACHA DIGITAL intégré */}
+              <svg width="300" height="60" viewBox="0 0 300 60" className="mb-2">
+                {/* Icône réseau */}
+                <circle cx="30" cy="30" r="25" fill="#40E0D0" fillOpacity="0.1" stroke="#40E0D0" strokeWidth="1"/>
+                <circle cx="30" cy="12" r="4" fill="#40E0D0"/>
+                <circle cx="48" cy="30" r="4" fill="#40E0D0"/>
+                <circle cx="30" cy="48" r="4" fill="#40E0D0"/>
+                <circle cx="12" cy="30" r="4" fill="#40E0D0"/>
+                <circle cx="30" cy="30" r="5" fill="#40E0D0"/>
 
-                {/* Nœuds connectés */}
-                <circle cx="20" cy="20" r="3" fill="#40E0D0"/>
-                <circle cx="40" cy="20" r="3" fill="#40E0D0"/>
-                <circle cx="20" cy="40" r="3" fill="#40E0D0"/>
-                <circle cx="40" cy="40" r="3" fill="#40E0D0"/>
-                <circle cx="30" cy="30" r="3" fill="#FFFFFF"/>
+                {/* Connexions */}
+                <line x1="30" y1="12" x2="30" y2="25" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="48" y1="30" x2="35" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="30" y1="48" x2="30" y2="35" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="12" y1="30" x2="25" y2="30" stroke="#40E0D0" strokeWidth="2"/>
 
-                {/* Lignes de connexion */}
-                <line x1="20" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-                <line x1="40" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-                <line x1="20" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
-                <line x1="40" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+                {/* Séparateur */}
+                <line x1="70" y1="15" x2="70" y2="45" stroke="#E5E7EB" strokeWidth="1"/>
 
                 {/* Texte RACHA DIGITAL */}
-                <text x="70" y="25" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#40E0D0">
-                  RACHA
-                </text>
-                <text x="70" y="42" fontFamily="Arial, sans-serif" fontSize="14" fill="#666666">
-                  DIGITAL
+                <text x="85" y="35" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#40E0D0" letterSpacing="2px">
+                  RACHA DIGITAL
                 </text>
               </svg>
             </div>
