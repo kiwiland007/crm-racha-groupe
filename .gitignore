@@ -105,3 +105,10 @@ src/test/
 # Fichiers de configuration locale
 .env.local.backup
 config.local.json
+
+# Deployment files
+ovh-deployment/
+*.zip
+*.tar.gz
+*.rar
+deploy-*.log

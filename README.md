@@ -174,4 +174,3 @@ Ce projet est sous licence propriétaire - voir le fichier [LICENSE](LICENSE) po
   <p>Développé avec ❤️ par <strong>Racha Business Group</strong></p>
   <p>© 2025 Racha Business Group. Tous droits réservés.</p>
 </div>
-# racha-business-crm
