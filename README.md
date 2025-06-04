@@ -1,182 +1,176 @@
-# Racha Business CRM
+# 🚀 Racha Business CRM
 
-## Project info
+<div align="center">
+  <img src="public/racha-digital-logo.svg" alt="Racha Digital" width="300">
+  
+  **Système de gestion CRM complet pour Racha Business Group**
+  
+  [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+  [![Vite](https://img.shields.io/badge/Vite-5.0-purple.svg)](https://vitejs.dev/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-cyan.svg)](https://tailwindcss.com/)
+</div>
 
-**Description**: Système de gestion CRM pour Racha Business Group - Solutions complètes de gestion d'entreprise
+---
 
-## Comment modifier ce code ?
+## 📋 **Description**
 
-Plusieurs façons de modifier cette application.
+**Racha Business CRM** est un système de gestion client complet développé pour Racha Business Group. Il offre une solution moderne et intuitive pour gérer tous les aspects de votre entreprise : clients, produits, devis, factures, inventaire et bien plus.
 
-**Utiliser votre IDE préféré**
+### ✨ **Fonctionnalités Principales**
 
-Vous pouvez cloner ce repo et pousser les changements.
+- 👥 **Gestion des contacts** - Base de données clients complète
+- 📦 **Catalogue produits/services** - Gestion avancée avec catégories
+- 📋 **Devis et factures** - Génération PDF professionnelle
+- 📊 **Inventaire intelligent** - Suivi stock avec codes QR
+- 📅 **Planification événements** - Gestion complète des projets
+- 💬 **Intégration WhatsApp** - Communication client directe
+- 📄 **Fiches techniques** - Documentation produits détaillée
+- 🚚 **Bons de livraison** - Gestion logistique complète
 
-La seule exigence est d'avoir Node.js et npm installés - [installer avec nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Suivez ces étapes :
+## 🛠 **Technologies**
 
-```sh
-# Étape 1: Cloner le repository
-git clone https://github.com/kiwiland007/racha-business-crm.git
+| Catégorie | Technologies |
+|-----------|-------------|
+| **Frontend** | React 18, TypeScript, Vite |
+| **Styling** | Tailwind CSS, shadcn/ui |
+| **Routing** | React Router v6 |
+| **Forms** | React Hook Form, Zod |
+| **PDF** | jsPDF, html2canvas |
+| **Charts** | Recharts |
+| **Icons** | Lucide React |
+| **QR Codes** | qrcode.react |
 
-# Étape 2: Naviguer vers le répertoire du projet
-cd racha-business-crm
+---
 
-# Étape 3: Installer les dépendances nécessaires
-npm i
+## 🚀 **Installation**
 
-# Étape 4: Démarrer le serveur de développement
-npm run dev
-```
+### **Prérequis**
+- Node.js 18+ 
+- npm ou yarn
+- Git
 
-**Modifier un fichier directement dans GitHub**
-
-- Naviguer vers le(s) fichier(s) désiré(s).
-- Cliquer sur le bouton "Edit" (icône crayon) en haut à droite de la vue du fichier.
-- Faire vos changements et commiter les modifications.
-
-**Utiliser GitHub Codespaces**
-
-- Naviguer vers la page principale de votre repository.
-- Cliquer sur le bouton "Code" (bouton vert) près du coin supérieur droit.
-- Sélectionner l'onglet "Codespaces".
-- Cliquer sur "New codespace" pour lancer un nouvel environnement Codespace.
-- Modifier les fichiers directement dans le Codespace et commiter et pousser vos changements une fois terminé.
-
-## Quelles technologies sont utilisées pour ce projet ?
-
-Ce projet est construit avec :
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- React Hook Form
-- Zod (Validation)
-- Lucide React (Icônes)
-
-## Comment déployer ce projet ?
-
-### Déploiement sur Cloudflare Pages (Recommandé)
-
-1. **Préparer le projet pour la production :**
-```sh
-npm run build
-```
-
-2. **Déployer sur Cloudflare Pages :**
-   - Connectez votre repository GitHub à Cloudflare Pages
-   - Configuration de build :
-     - **Build command:** `npm run build`
-     - **Build output directory:** `dist`
-     - **Root directory:** `/`
-
-3. **Variables d'environnement (optionnelles) :**
-   - Configurez dans le dashboard Cloudflare Pages si nécessaire
-
-### Autres plateformes supportées :
-
-- **Vercel** - Déploiement automatique depuis GitHub
-- **Netlify** - Configuration similaire à Cloudflare
-- **GitHub Pages** - Pour les projets publics
-- **Serveur VPS** - Servir les fichiers statiques du dossier `dist`
-
-## Fonctionnalités principales
-
-### 🔐 **Authentification & Sécurité**
-- Système de connexion sécurisé avec 3 niveaux d'accès (Admin, Manager, Employé)
-- Gestion des profils utilisateurs avec modification des informations
-- Protection des routes et persistance de session
-- Comptes de démonstration intégrés
-
-### 📊 **Dashboard Intelligent**
-- Vue d'ensemble personnalisée avec salutation utilisateur
-- Statistiques en temps réel (CA, factures, clients, etc.)
-- 3 onglets spécialisés : Vue générale, Ventes, Opérations
-- Alertes automatiques pour stock critique et factures impayées
-
-### 👥 **Gestion CRM Complète**
-- **Contacts** : CRUD complet avec import/export
-- **Devis** : Génération, PDF, WhatsApp, suivi des statuts
-- **Factures** : Avances, PDF professionnel, modification
-- **Événements** : Planification avec réservation matériel
-
-### 📦 **Inventaire & Produits**
-- **Produits** : Filtres avancés par catégorie, stock, prix
-- **Services** : Durées en jours, techniciens assignés
-- **Fiches techniques** : PDF détaillé, images, spécifications
-- **Catégories** : Gestion flexible produits/services
-
-### 💰 **Gestion Commerciale**
-- **PDF professionnels** : Logo, informations légales marocaines
-- **WhatsApp intégré** : Messages automatiques pour tous contacts
-- **Calculs précis** : TVA, remises, avances, formatage français
-- **Suivi complet** : Statuts, échéances, relances
-
-### 🎨 **Interface Moderne**
-- Design responsive adapté mobile/desktop
-- Filtres intelligents avec badges visuels
-- Menus déroulants avec actions complètes
-- Notifications toast informatives
-
-## 🎯 **Comptes de démonstration**
-
-L'application inclut 3 comptes de test avec différents niveaux d'accès :
-
-### 👨‍💼 **Administrateur**
-- **Email** : `youssef@rachabusiness.com`
-- **Mot de passe** : `demo123`
-- **Accès** : Complet à toutes les fonctionnalités
-
-### 👩‍💼 **Manager Commercial**
-- **Email** : `fatima@rachabusiness.com`
-- **Mot de passe** : `demo123`
-- **Accès** : Fonctions commerciales étendues
-
-### 👨‍🔧 **Employé Technique**
-- **Email** : `sara@rachabusiness.com`
-- **Mot de passe** : `demo123`
-- **Accès** : Fonctions opérationnelles standard
-
-## 🚀 **Déploiement rapide**
-
-Utilisez le script de déploiement optimisé :
+### **Installation rapide**
 
 ```bash
-# Rendre le script exécutable
-chmod +x deploy.sh
+# 1. Cloner le repository
+git clone https://github.com/rachabusiness/racha-business-crm.git
 
-# Lancer le déploiement
-./deploy.sh
+# 2. Naviguer vers le projet
+cd racha-business-crm
+
+# 3. Installer les dépendances
+npm install
+
+# 4. Lancer en mode développement
+npm run dev
+
+# 5. Ouvrir dans le navigateur
+# http://localhost:8080
 ```
 
-Le script vérifie automatiquement :
-- ✅ Prérequis (Node.js, npm)
-- ✅ Syntaxe TypeScript
-- ✅ Standards de code (ESLint)
-- ✅ Build de production
-- ✅ Fichiers critiques
-- ✅ Optimisations
+### **Scripts disponibles**
 
-## 📊 **Performances & Optimisations**
+```bash
+npm run dev          # Serveur de développement
+npm run build        # Build de production
+npm run preview      # Prévisualiser le build
+npm run type-check   # Vérification TypeScript
+npm run lint         # Linter ESLint
+```
 
-### ⚡ **Optimisations techniques**
-- Configuration centralisée dans `src/config/app.ts`
-- Composants React.memo pour les performances
-- Validation des données PDF avec gestion d'erreurs
-- Formatage des nombres selon les standards français
-- Lazy loading et code splitting
+---
 
-### 🔧 **Gestion d'erreurs**
-- Validation complète des données avant génération PDF
-- Gestion des erreurs réseau et API
-- Messages d'erreur informatifs pour l'utilisateur
-- Logs de débogage en mode développement
+## 🎯 **Utilisation**
 
-### 📱 **Responsive Design**
-- Interface adaptée mobile/tablette/desktop
-- Menus optimisés pour écrans tactiles
-- Filtres et actions accessibles sur mobile
-- Navigation intuitive sur tous supports
+### **Première connexion**
+
+L'application utilise un système d'authentification local. Créez votre premier utilisateur via la gestion des utilisateurs dans les paramètres.
+
+### **Navigation**
+
+- **Dashboard** - Vue d'ensemble des activités
+- **Contacts** - Gestion de la clientèle
+- **Produits/Services** - Catalogue complet
+- **Devis** - Création et suivi des devis
+- **Factures** - Facturation et paiements
+- **Inventaire** - Gestion des stocks
+- **Événements** - Planification projets
+- **Paramètres** - Configuration système
+
+---
+
+## 📱 **Responsive Design**
+
+L'application est entièrement responsive et optimisée pour :
+- 💻 **Desktop** - Interface complète
+- 📱 **Mobile** - Navigation tactile optimisée
+- 📟 **Tablet** - Expérience adaptée
+
+---
+
+## 🔧 **Configuration**
+
+### **Variables d'environnement**
+
+Créez un fichier `.env.local` :
+
+```env
+VITE_APP_NAME="Racha Business CRM"
+VITE_COMPANY_NAME="Racha Business Group"
+VITE_COMPANY_LOGO="/racha-digital-logo.svg"
+```
+
+### **Personnalisation**
+
+- **Logo** : Remplacez les fichiers dans `public/`
+- **Couleurs** : Modifiez `tailwind.config.ts`
+- **Données** : Configurez les données par défaut dans `src/contexts/`
+
+---
+
+## 📦 **Structure du projet**
+
+```
+src/
+├── components/          # Composants réutilisables
+├── contexts/           # Contextes React (état global)
+├── pages/              # Pages de l'application
+├── services/           # Services (PDF, API, etc.)
+├── types/              # Types TypeScript
+├── utils/              # Utilitaires
+└── lib/                # Configuration des librairies
+```
+
+---
+
+## 🤝 **Contribution**
+
+1. Fork le projet
+2. Créez une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit vos changements (`git commit -m 'Add AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+---
+
+## 📄 **Licence**
+
+Ce projet est sous licence propriétaire - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+## 📞 **Support**
+
+- **Email** : support@rachabusiness.com
+- **Website** : [rachabusiness.com](https://rachabusiness.com)
+- **Documentation** : [docs.rachabusiness.com](https://docs.rachabusiness.com)
+
+---
+
+<div align="center">
+  <p>Développé avec ❤️ par <strong>Racha Business Group</strong></p>
+  <p>© 2025 Racha Business Group. Tous droits réservés.</p>
+</div>
