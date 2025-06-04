@@ -65,7 +65,7 @@ npm run build
 # Via l'interface Netlify ou CLI
 ```
 
-### **Option 3 : OVH VPS**
+### **Option 3 : Serveur VPS**
 
 ```bash
 # 1. Build de production

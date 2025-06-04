@@ -29,7 +29,7 @@
 - ✅ `.env.development` - Nom de l'entreprise
 - ✅ `.env.production` - URLs et nom de l'entreprise
 - ✅ `.env.example` - URLs et configuration
-- ✅ `.env.ovh` - Configuration serveur
+
 
 ##### **Composants et Services**
 - ✅ `src/components/dashboard/RecentQuotes.tsx` - Messages WhatsApp
@@ -43,11 +43,7 @@
 - ✅ Supprimé `scripts/cleanup.js`
 - ✅ Supprimé `scripts/git-backup.ps1`
 - ✅ Supprimé `scripts/git-backup.sh`
-- ✅ Supprimé `GUIDE_DEPLOIEMENT_OVH.md`
-- ✅ Supprimé `MIGRATION_DATABASE.md`
-- ✅ Supprimé `deploy-ovh.sh`
-- ✅ Supprimé `nginx-ovh.conf`
-- ✅ Supprimé `setup-ovh-server.sh`
+- ✅ Supprimé fichiers de déploiement inutiles
 - ✅ Supprimé le dossier `scripts/` vide
 
 #### **5. Corrections et Optimisations**

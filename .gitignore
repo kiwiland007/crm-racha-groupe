@@ -107,7 +107,6 @@ src/test/
 config.local.json
 
 # Deployment files
-ovh-deployment/
 *.zip
 *.tar.gz
 *.rar

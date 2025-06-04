@@ -1,10 +1,10 @@
 /**
- * Service de base de données pour la migration vers OVH
- * Gère la synchronisation entre localStorage et la base de données MySQL
+ * Service de base de données pour l'API backend
+ * Gère la synchronisation entre localStorage et la base de données
  */
 
-// Configuration de l'API backend (à adapter selon votre serveur OVH)
-const API_BASE_URL = process.env.VITE_API_URL || 'https://your-ovh-domain.com/api';
+// Configuration de l'API backend
+const API_BASE_URL = process.env.VITE_API_URL || 'https://api.rachabusiness.com/api';
 
 // Types pour les réponses API
 interface ApiResponse<T = any> {
