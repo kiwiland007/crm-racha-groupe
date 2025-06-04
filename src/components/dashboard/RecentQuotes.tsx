@@ -61,12 +61,12 @@ export const RecentQuotes = React.memo(() => {
 
   const handleWhatsappContact = (contact: string, quoteId: string, clientName: string) => {
     const cleanPhone = contact.replace(/\s+/g, '').replace(/[^\d+]/g, '');
-    const message = `Bonjour ${clientName},\n\nVotre devis ${quoteId} est disponible.\n\nCordialement,\nMarocTactile`;
+    const message = `Bonjour ${clientName},\n\nVotre devis ${quoteId} est disponible.\n\nCordialement,\nRacha Business Group`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-    
+
     window.open(whatsappUrl, '_blank');
-    
+
     toast.success("WhatsApp ouvert", {
       description: `Message préparé pour ${clientName}`
     });

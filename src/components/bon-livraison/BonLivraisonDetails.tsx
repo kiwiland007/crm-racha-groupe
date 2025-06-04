@@ -34,7 +34,8 @@ interface BonLivraisonItem {
 
 interface BonLivraison {
   id: string;
-  devisId: string;
+  factureId: string;
+  devisId?: string; // Optionnel pour compatibilité
   client: string;
   clientAdresse: string;
   dateCreation: string;
@@ -155,8 +156,8 @@ const BonLivraisonDetails: React.FC<BonLivraisonDetailsProps> = ({
                   <p className="text-lg font-semibold">{bonLivraison.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">N° Devis associé</p>
-                  <p className="text-lg font-semibold text-blue-600">{bonLivraison.devisId}</p>
+                  <p className="text-sm font-medium text-gray-600">N° Facture associée</p>
+                  <p className="text-lg font-semibold text-blue-600">{bonLivraison.factureId}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Date de création</p>

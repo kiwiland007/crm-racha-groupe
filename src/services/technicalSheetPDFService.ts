@@ -238,7 +238,8 @@ class TechnicalSheetPDFService {
         yPos += 6;
 
         this.doc.setFont(undefined, 'normal');
-        const lines = this.doc.splitTextToSize(String(data.description), 160);
+        const descriptionText = typeof data.description === 'string' ? data.description : String(data.description);
+        const lines = this.doc.splitTextToSize(descriptionText, 160);
         this.doc.text(lines, 22, yPos);
         yPos += lines.length * 5 + 10;
       }
@@ -264,43 +265,43 @@ class TechnicalSheetPDFService {
     this.doc.setFontSize(10);
 
     // Spécifications structurées
-    if (data.specifications) {
+    if (data.specifications && typeof data.specifications === 'object') {
       const specs = data.specifications;
-      
+
       if (specs.dimensions) {
-        this.addSpecLine("Dimensions:", specs.dimensions, 22, yPos);
+        this.addSpecLine("Dimensions:", String(specs.dimensions), 22, yPos);
         yPos += 6;
       }
       if (specs.weight) {
-        this.addSpecLine("Poids:", specs.weight, 22, yPos);
+        this.addSpecLine("Poids:", String(specs.weight), 22, yPos);
         yPos += 6;
       }
       if (specs.display) {
-        this.addSpecLine("Écran:", specs.display, 22, yPos);
+        this.addSpecLine("Écran:", String(specs.display), 22, yPos);
         yPos += 6;
       }
       if (specs.processor) {
-        this.addSpecLine("Processeur:", specs.processor, 22, yPos);
+        this.addSpecLine("Processeur:", String(specs.processor), 22, yPos);
         yPos += 6;
       }
       if (specs.memory) {
-        this.addSpecLine("Mémoire:", specs.memory, 22, yPos);
+        this.addSpecLine("Mémoire:", String(specs.memory), 22, yPos);
         yPos += 6;
       }
       if (specs.storage) {
-        this.addSpecLine("Stockage:", specs.storage, 22, yPos);
+        this.addSpecLine("Stockage:", String(specs.storage), 22, yPos);
         yPos += 6;
       }
       if (specs.connectivity) {
-        this.addSpecLine("Connectivité:", specs.connectivity, 22, yPos);
+        this.addSpecLine("Connectivité:", String(specs.connectivity), 22, yPos);
         yPos += 6;
       }
       if (specs.power) {
-        this.addSpecLine("Alimentation:", specs.power, 22, yPos);
+        this.addSpecLine("Alimentation:", String(specs.power), 22, yPos);
         yPos += 6;
       }
       if (specs.os) {
-        this.addSpecLine("Système:", specs.os, 22, yPos);
+        this.addSpecLine("Système:", String(specs.os), 22, yPos);
         yPos += 6;
       }
     }
@@ -309,7 +310,8 @@ class TechnicalSheetPDFService {
     if (data.technicalSpecs) {
       yPos += 5;
       this.doc.setFont(undefined, 'normal');
-      const lines = this.doc.splitTextToSize(data.technicalSpecs, 160);
+      const specsText = typeof data.technicalSpecs === 'string' ? data.technicalSpecs : String(data.technicalSpecs);
+      const lines = this.doc.splitTextToSize(specsText, 160);
       this.doc.text(lines, 22, yPos);
       yPos += lines.length * 5 + 10;
     }
@@ -317,11 +319,12 @@ class TechnicalSheetPDFService {
     return yPos;
   }
 
-  private addSpecLine(label: string, value: string, x: number, y: number): void {
+  private addSpecLine(label: string, value: string | any, x: number, y: number): void {
     this.doc.setFont(undefined, 'bold');
     this.doc.text(label, x, y);
     this.doc.setFont(undefined, 'normal');
-    this.doc.text(value, x + 35, y);
+    const valueText = typeof value === 'string' ? value : String(value);
+    this.doc.text(valueText, x + 35, y);
   }
 
   private addFeatures(data: TechnicalSheetData, yPos: number): number {
@@ -341,7 +344,8 @@ class TechnicalSheetPDFService {
     this.doc.setFont(undefined, 'normal');
 
     data.features.forEach(feature => {
-      this.doc.text("• " + feature, 22, yPos);
+      const featureText = typeof feature === 'string' ? feature : String(feature);
+      this.doc.text("• " + featureText, 22, yPos);
       yPos += 6;
     });
 
@@ -385,9 +389,10 @@ class TechnicalSheetPDFService {
       this.doc.setFont(undefined, 'bold');
       this.doc.text("Notes de maintenance:", 22, yPos);
       yPos += 6;
-      
+
       this.doc.setFont(undefined, 'normal');
-      const lines = this.doc.splitTextToSize(data.maintenanceNotes, 160);
+      const notesText = typeof data.maintenanceNotes === 'string' ? data.maintenanceNotes : String(data.maintenanceNotes);
+      const lines = this.doc.splitTextToSize(notesText, 160);
       this.doc.text(lines, 22, yPos);
       yPos += lines.length * 5;
     }

@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { 
   Filter, 
@@ -281,10 +282,63 @@ export default function BonLivraison() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="sm" className="hidden md:flex gap-2">
-              <Filter size={16} />
-              Filtres
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Filter size={16} />
+                  Filtres
+                  {statusFilter !== "all" && (
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                      1
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+                  <div className="flex items-center justify-between w-full">
+                    Tous les BL
+                    {statusFilter === "all" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("en_preparation")}>
+                  <div className="flex items-center justify-between w-full">
+                    En préparation
+                    {statusFilter === "en_preparation" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("pret_livraison")}>
+                  <div className="flex items-center justify-between w-full">
+                    Prêt à livrer
+                    {statusFilter === "pret_livraison" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("en_cours_livraison")}>
+                  <div className="flex items-center justify-between w-full">
+                    En cours de livraison
+                    {statusFilter === "en_cours_livraison" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("livre")}>
+                  <div className="flex items-center justify-between w-full">
+                    Livré
+                    {statusFilter === "livre" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("retour")}>
+                  <div className="flex items-center justify-between w-full">
+                    Retour
+                    {statusFilter === "retour" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+                  Effacer les filtres
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex gap-2 w-full md:w-auto">
             <Button className="gap-2 flex-1 md:flex-auto" onClick={handleCreateBL}>

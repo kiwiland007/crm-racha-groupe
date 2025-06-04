@@ -88,41 +88,64 @@ export default function Invoices() {
   };
 
   const handleGeneratePDF = (invoice: any) => {
-    // Convertir les données de facture au format attendu par le service PDF
-    const pdfData: PDFQuoteData = {
-      id: invoice.id,
-      client: invoice.client,
-      clientEmail: invoice.clientEmail,
-      clientPhone: invoice.clientPhone,
-      clientAddress: "",
-      projectName: invoice.projectName,
-      description: invoice.description,
-      date: invoice.date,
-      items: [
-        {
-          type: "service" as const,
-          name: invoice.projectName,
-          description: invoice.description,
-          quantity: 1,
-          unitPrice: invoice.amount,
-          discount: 0,
-        }
-      ],
-      subtotal: invoice.amount,
-      discount: 0,
-      tax: 0,
-      total: invoice.amount,
-      taxRate: 0,
-      paymentTerms: invoice.paymentMethod,
-      validityDays: 30,
-      notes: "",
-      status: invoice.status,
-    };
+    console.log("=== GÉNÉRATION PDF FACTURE ===");
+    console.log("Données facture:", invoice);
 
-    const filename = pdfServiceFixed.generateQuotePDF(pdfData, 'invoice');
-    if (filename) {
-      toast.success("PDF généré avec succès", {
-        description: `Le fichier ${filename} a été téléchargé.`,
+    try {
+      // Convertir les données de facture au format attendu par le service PDF
+      const pdfData: PDFQuoteData = {
+        id: invoice.id || `FAC-${Date.now()}`,
+        client: invoice.client || "Client non spécifié",
+        clientEmail: invoice.clientEmail || "",
+        clientPhone: invoice.clientPhone || "",
+        clientAddress: invoice.clientAddress || "",
+        projectName: invoice.projectName || "Projet",
+        description: invoice.description || "Service",
+        date: invoice.date || new Date().toLocaleDateString('fr-FR'),
+        items: invoice.items && invoice.items.length > 0 ? invoice.items.map((item: any) => ({
+          type: item.type || "service" as const,
+          name: item.name || item.description || "Service",
+          description: item.description || item.name || "Description",
+          quantity: item.quantity || 1,
+          unitPrice: item.unitPrice || item.price || invoice.amount || 0,
+          discount: item.discount || 0,
+        })) : [
+          {
+            type: "service" as const,
+            name: invoice.projectName || "Service",
+            description: invoice.description || "Service fourni",
+            quantity: 1,
+            unitPrice: invoice.amount || 0,
+            discount: 0,
+          }
+        ],
+        subtotal: invoice.amount || 0,
+        discount: 0,
+        tax: invoice.tax || 0,
+        total: invoice.amount || 0,
+        taxRate: invoice.taxRate || 0,
+        paymentTerms: invoice.paymentMethod || "Selon conditions convenues",
+        validityDays: 30,
+        notes: invoice.notes || "",
+        status: invoice.status || "En attente",
+      };
+
+      console.log("Données PDF formatées:", pdfData);
+
+      const filename = pdfServiceFixed.generateQuotePDF(pdfData, 'invoice');
+      if (filename) {
+        toast.success("PDF généré avec succès", {
+          description: `Le fichier ${filename} a été téléchargé.`,
+        });
+      } else {
+        toast.error("Erreur génération PDF", {
+          description: "Impossible de générer le PDF de la facture"
+        });
+      }
+    } catch (error) {
+      console.error("Erreur génération PDF facture:", error);
+      toast.error("Erreur génération PDF", {
+        description: `Erreur: ${error.message || 'Erreur inconnue'}`
       });
     }
   };

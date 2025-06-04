@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ export default function Services() {
   });
 
   // Services par défaut
-  const [services, setServices] = useState<Service[]>([
+  const defaultServices: Service[] = [
     {
       id: "SRV-001",
       name: "Installation Écran Tactile",
@@ -70,7 +70,7 @@ export default function Services() {
       status: "active"
     },
     {
-      id: "SRV-002", 
+      id: "SRV-002",
       name: "Maintenance Préventive",
       description: "Maintenance préventive trimestrielle des équipements tactiles",
       category: "8", // Maintenance & Support
@@ -109,7 +109,42 @@ export default function Services() {
       technicians: 1,
       status: "active"
     }
-  ]);
+  ];
+
+  const [services, setServices] = useState<Service[]>([]);
+  const STORAGE_KEY = 'crm_services';
+
+  // Charger les services depuis localStorage au démarrage
+  useEffect(() => {
+    try {
+      const savedServices = localStorage.getItem(STORAGE_KEY);
+      if (savedServices) {
+        const parsedServices = JSON.parse(savedServices);
+        setServices(parsedServices);
+      } else {
+        // Si aucun service sauvegardé, utiliser les services par défaut
+        setServices(defaultServices);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultServices));
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des services:', error);
+      setServices(defaultServices);
+    }
+  }, []);
+
+  // Sauvegarder les services dans localStorage à chaque modification
+  useEffect(() => {
+    if (services.length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(services));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des services:', error);
+        toast.error('Erreur de sauvegarde', {
+          description: 'Impossible de sauvegarder les services'
+        });
+      }
+    }
+  }, [services]);
 
   const serviceCategories = categories.filter(cat => cat.type === "service");
 

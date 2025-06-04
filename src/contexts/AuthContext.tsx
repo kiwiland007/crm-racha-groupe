@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ForgotPassword } from '@/components/auth/ForgotPassword';
+import Logo from '@/components/ui/logo';
 
 interface User {
   id: string;
@@ -74,26 +75,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Simulation d'une authentification
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Vérification des identifiants de démonstration
-      const foundUser = demoUsers.find(u => u.email === email);
-      
-      if (foundUser && (password === 'demo123' || password === 'admin')) {
-        setUser(foundUser);
+      // Vérifier d'abord les utilisateurs de démonstration
+      const foundDemoUser = demoUsers.find(u => u.email === email);
+      if (foundDemoUser && (password === 'demo123' || password === 'admin')) {
+        setUser(foundDemoUser);
         setIsAuthenticated(true);
-        localStorage.setItem('crm_user', JSON.stringify(foundUser));
-        
+        localStorage.setItem('crm_user', JSON.stringify(foundDemoUser));
+
         toast.success('Connexion réussie', {
-          description: `Bienvenue ${foundUser.name} !`
+          description: `Bienvenue ${foundDemoUser.name} !`
         });
-        
+
         return true;
-      } else {
-        toast.error('Identifiants incorrects', {
-          description: 'Vérifiez votre email et mot de passe'
-        });
-        return false;
       }
+
+      // Vérifier les utilisateurs créés via la gestion des utilisateurs
+      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]');
+
+      const foundCredential = storedCredentials.find((cred: any) =>
+        cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
+      );
+
+      if (foundCredential) {
+        const foundStoredUser = storedUsers.find((user: any) => user.id === foundCredential.userId);
+
+        if (foundStoredUser && foundStoredUser.isActive) {
+          // Convertir l'utilisateur au format AuthContext
+          const authUser: User = {
+            id: String(foundStoredUser.id),
+            name: foundStoredUser.fullName,
+            email: foundStoredUser.email,
+            role: foundStoredUser.role as 'admin' | 'manager' | 'employee',
+            phone: foundStoredUser.phone,
+            department: foundStoredUser.role === 'admin' ? 'Direction' :
+                       foundStoredUser.role === 'manager' ? 'Management' :
+                       foundStoredUser.role === 'commercial' ? 'Commercial' : 'Technique'
+          };
+
+          setUser(authUser);
+          setIsAuthenticated(true);
+          localStorage.setItem('crm_user', JSON.stringify(authUser));
+
+          toast.success('Connexion réussie', {
+            description: `Bienvenue ${authUser.name} !`
+          });
+
+          return true;
+        } else if (foundStoredUser && !foundStoredUser.isActive) {
+          toast.error('Compte désactivé', {
+            description: 'Votre compte a été désactivé. Contactez l\'administrateur.'
+          });
+          return false;
+        }
+      }
+
+      toast.error('Identifiants incorrects', {
+        description: 'Vérifiez votre email et mot de passe'
+      });
+      return false;
     } catch (error) {
+      console.error('Erreur de connexion:', error);
       toast.error('Erreur de connexion', {
         description: 'Une erreur est survenue lors de la connexion'
       });
@@ -182,18 +224,34 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-auto flex items-center justify-center">
-            <img 
-              src="/logo.png" 
-              alt="Racha Business Digital" 
-              className="h-12 w-auto"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling!.style.display = 'block';
-              }}
-            />
-            <div className="hidden text-2xl font-bold text-blue-600">
-              Racha Digital
+          <div className="mx-auto flex items-center justify-center mb-6">
+            <div className="flex flex-col items-center">
+              {/* Logo SVG intégré */}
+              <svg width="200" height="60" viewBox="0 0 200 60" className="mb-2">
+                {/* Cercle principal */}
+                <circle cx="30" cy="30" r="20" fill="#40E0D0" opacity="0.8"/>
+
+                {/* Nœuds connectés */}
+                <circle cx="20" cy="20" r="3" fill="#40E0D0"/>
+                <circle cx="40" cy="20" r="3" fill="#40E0D0"/>
+                <circle cx="20" cy="40" r="3" fill="#40E0D0"/>
+                <circle cx="40" cy="40" r="3" fill="#40E0D0"/>
+                <circle cx="30" cy="30" r="3" fill="#FFFFFF"/>
+
+                {/* Lignes de connexion */}
+                <line x1="20" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="40" y1="20" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="20" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+                <line x1="40" y1="40" x2="30" y2="30" stroke="#40E0D0" strokeWidth="2"/>
+
+                {/* Texte RACHA DIGITAL */}
+                <text x="70" y="25" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#40E0D0">
+                  RACHA
+                </text>
+                <text x="70" y="42" fontFamily="Arial, sans-serif" fontSize="14" fill="#666666">
+                  DIGITAL
+                </text>
+              </svg>
             </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -253,6 +311,7 @@ function LoginPage() {
               Mot de passe oublié ?
             </button>
           </div>
+
 
 
         </form>

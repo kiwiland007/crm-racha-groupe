@@ -17,7 +17,7 @@ import { Product } from "@/contexts/ProductContext";
 import ProductDetails from "./ProductDetails";
 import ProductDuplicate from "./ProductDuplicate";
 import QRCodeGenerator from "@/components/common/QRCodeGenerator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Download } from "lucide-react";
 
 interface ProductActionsProps {
   product: Product;
@@ -205,6 +205,28 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product, onEdit, onDele
                   Compatible avec tous les lecteurs QR
                 </p>
               </div>
+
+              <Button
+                className="w-full gap-2"
+                onClick={() => {
+                  // Télécharger le QR code exactement comme dans l'inventaire
+                  const canvas = document.querySelector('canvas');
+                  if (canvas) {
+                    const url = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = url;
+                    const qrResult = qrCodeService.generateProductQR(product);
+                    link.download = qrResult.filename;
+                    link.click();
+                    toast.success("QR Code téléchargé", {
+                      description: `QR Code pour ${product.name} téléchargé`
+                    });
+                  }
+                }}
+              >
+                <Download size={16} />
+                Télécharger le QR Code
+              </Button>
             </div>
           </div>
         </div>

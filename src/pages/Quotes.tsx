@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Filter, MoreVertical, Plus, Search, FileText, MessageCircle, Eye, Edit, Trash2, Receipt, Mail, ArrowRight, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
@@ -240,10 +241,57 @@ export default function Quotes() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="sm" className="hidden md:flex gap-2">
-              <Filter size={16} />
-              Filtres
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Filter size={16} />
+                  Filtres
+                  {statusFilter !== "all" && (
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                      1
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+                  <div className="flex items-center justify-between w-full">
+                    Tous les devis
+                    {statusFilter === "all" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Émis")}>
+                  <div className="flex items-center justify-between w-full">
+                    Émis
+                    {statusFilter === "Émis" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("En attente")}>
+                  <div className="flex items-center justify-between w-full">
+                    En attente
+                    {statusFilter === "En attente" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Accepté")}>
+                  <div className="flex items-center justify-between w-full">
+                    Accepté
+                    {statusFilter === "Accepté" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Facturé")}>
+                  <div className="flex items-center justify-between w-full">
+                    Facturé
+                    {statusFilter === "Facturé" && <CheckCircle className="h-4 w-4" />}
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+                  Effacer les filtres
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex gap-2 w-full md:w-auto">
             <Button className="gap-2 flex-1 md:flex-auto" onClick={() => setOpenQuoteForm(true)}>

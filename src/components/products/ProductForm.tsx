@@ -27,7 +27,7 @@ import ProductPriceInfo from "./form/ProductPriceInfo";
 import ProductCategoryInfo from "./form/ProductCategoryInfo";
 import ProductAvailabilityInfo from "./form/ProductAvailabilityInfo";
 import ProductDescriptionInfo from "./form/ProductDescriptionInfo";
-import ProductQRCode from "./form/ProductQRCode";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,7 @@ const productSchema = z.object({
     message: "Le SKU est requis",
   }),
   technicalSpecs: z.string().optional(),
-  // Nouveaux champs inspirés de MarocTactile
+  // Champs techniques détaillés
   dimensions: z.string().optional(),
   weight: z.string().optional(),
   powerConsumption: z.string().optional(),
@@ -86,7 +86,7 @@ export function ProductForm({
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: editProduct || {
+    defaultValues: {
       name: "",
       description: "",
       price: {
@@ -106,13 +106,52 @@ export function ProductForm({
     },
   });
 
+  // Effet pour charger les données du produit à modifier
   React.useEffect(() => {
     if (editProduct && open) {
+      // Réinitialiser le formulaire avec les données du produit
+      form.reset({
+        name: editProduct.name || "",
+        description: editProduct.description || "",
+        price: {
+          sale: editProduct.price?.sale || "",
+          rental: editProduct.price?.rental || "",
+        },
+        category: editProduct.category || "",
+        availability: editProduct.availability || "en_stock",
+        sku: editProduct.sku || "",
+        technicalSpecs: editProduct.technicalSpecs || "",
+        dimensions: editProduct.dimensions || "",
+        weight: editProduct.weight || "",
+        powerConsumption: editProduct.powerConsumption || "",
+        warranty: editProduct.warranty || "2 ans",
+        certifications: editProduct.certifications || "",
+        images: editProduct.images || [],
+      });
+
+      // Charger les images
       setUploadedImages(editProduct.images || []);
-      form.setValue('images', editProduct.images || []);
     } else if (!editProduct && open) {
+      // Réinitialiser pour un nouveau produit
+      form.reset({
+        name: "",
+        description: "",
+        price: {
+          sale: "",
+          rental: "",
+        },
+        category: "",
+        availability: "en_stock",
+        sku: "",
+        technicalSpecs: "",
+        dimensions: "",
+        weight: "",
+        powerConsumption: "",
+        warranty: "2 ans",
+        certifications: "",
+        images: [],
+      });
       setUploadedImages([]);
-      form.setValue('images', []);
     }
   }, [editProduct, open, form]);
 
@@ -148,18 +187,17 @@ export function ProductForm({
       images: uploadedImages
     };
 
+    // Toujours appeler onAddProduct qui gère à la fois l'ajout et la modification
     if (onAddProduct) {
       onAddProduct(submitData);
-    } else {
-      toast.success(editProduct ? "Produit mis à jour" : "Produit ajouté", {
-        description: `Le produit ${data.name} a été ${editProduct ? "mis à jour" : "ajouté"} avec succès.`,
-      });
     }
 
+    // Réinitialiser seulement pour un nouveau produit
     if (!editProduct) {
       form.reset();
       setUploadedImages([]);
     }
+
     onOpenChange(false);
   };
 
@@ -383,15 +421,7 @@ export function ProductForm({
               </TabsContent>
             </Tabs>
 
-            <div className="flex justify-end">
-              {editProduct && (
-                <ProductQRCode
-                  productId={editProduct.id}
-                  productName={editProduct.name}
-                  productPrice={editProduct.price}
-                />
-              )}
-            </div>
+
 
             <DialogFooter>
               <Button type="submit">

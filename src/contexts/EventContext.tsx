@@ -151,7 +151,7 @@ export const TECHNICIANS: EventTechnician[] = [
   {
     id: 1,
     name: "Hassan Alami",
-    email: "h.alami@maroctactile.ma",
+    email: "h.alami@rachabusiness.com",
     speciality: "Écrans tactiles",
     initials: "HA",
     available: true
@@ -159,7 +159,7 @@ export const TECHNICIANS: EventTechnician[] = [
   {
     id: 2,
     name: "Imane Mansouri",
-    email: "i.mansouri@maroctactile.ma",
+    email: "i.mansouri@rachabusiness.com",
     speciality: "Bornes interactives",
     initials: "IM",
     available: true
@@ -167,7 +167,7 @@ export const TECHNICIANS: EventTechnician[] = [
   {
     id: 3,
     name: "Said Amrani",
-    email: "s.amrani@maroctactile.ma",
+    email: "s.amrani@rachabusiness.com",
     speciality: "Maintenance",
     initials: "SA",
     available: false
@@ -175,7 +175,7 @@ export const TECHNICIANS: EventTechnician[] = [
   {
     id: 4,
     name: "Fatima Benali",
-    email: "f.benali@maroctactile.ma",
+    email: "f.benali@rachabusiness.com",
     speciality: "Installation",
     initials: "FB",
     available: true
@@ -183,7 +183,7 @@ export const TECHNICIANS: EventTechnician[] = [
   {
     id: 5,
     name: "Omar Tazi",
-    email: "o.tazi@maroctactile.ma",
+    email: "o.tazi@rachabusiness.com",
     speciality: "Formation",
     initials: "OT",
     available: true

@@ -31,6 +31,8 @@ import {
   FileText
 } from "lucide-react";
 import { TECHNICIANS } from "@/contexts/EventContext";
+import { toast } from "sonner";
+import { eventReportPDFService, EventReportData } from "@/services/eventReportPDFService";
 
 interface EventDetailsProps {
   event: any;
@@ -50,6 +52,48 @@ export function EventDetails({
   onReserveMaterial
 }: EventDetailsProps) {
   if (!event) return null;
+
+  const generateEventReport = (event: any) => {
+    console.log("=== GÉNÉRATION RAPPORT ÉVÉNEMENT PDF ===");
+    console.log("Données événement:", event);
+
+    try {
+      // Convertir les données d'événement au format attendu par le service PDF
+      const reportData: EventReportData = {
+        id: event.id || `EVT-${Date.now()}`,
+        title: event.title || "Événement",
+        client: event.client || "Client non spécifié",
+        date: event.startDate || new Date().toLocaleDateString('fr-FR'),
+        time: event.time || "Non spécifié",
+        location: event.location || "Lieu non spécifié",
+        status: event.status || "En attente",
+        description: event.description || "",
+        assignedTechnicians: event.assignedTechnicians || [],
+        reservedMaterials: event.reservedMaterials || [],
+        notes: event.notes || "",
+        budget: event.budget || undefined,
+        actualCost: event.actualCost || undefined
+      };
+
+      console.log("Données rapport formatées:", reportData);
+
+      const filename = eventReportPDFService.generateEventReport(reportData);
+      if (filename) {
+        toast.success("Rapport PDF généré avec succès", {
+          description: `Le fichier ${filename} a été téléchargé.`,
+        });
+      } else {
+        toast.error("Erreur génération rapport", {
+          description: "Impossible de générer le rapport de l'événement"
+        });
+      }
+    } catch (error) {
+      console.error("Erreur génération rapport événement:", error);
+      toast.error("Erreur génération rapport", {
+        description: `Erreur: ${error.message || 'Erreur inconnue'}`
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -252,9 +296,11 @@ export function EventDetails({
                           <Package className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{material.name}</div>
+                          <div className="font-medium text-gray-900">
+                            {material.productName || material.name || "Produit non spécifié"}
+                          </div>
                           <div className="text-sm text-gray-600">
-                            Quantité: <span className="font-medium">{material.quantity}</span>
+                            Quantité: <span className="font-medium">{material.quantity || 1}</span>
                             {material.category && (
                               <span className="ml-2">• {material.category}</span>
                             )}
@@ -360,7 +406,7 @@ export function EventDetails({
               variant="outline"
               onClick={() => {
                 // Générer un rapport d'événement
-                console.log("Génération rapport événement:", event);
+                generateEventReport(event);
               }}
               className="gap-2"
             >

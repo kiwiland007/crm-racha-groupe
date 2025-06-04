@@ -1,8 +1,8 @@
 {
-  "name": "maroctactile-crm-hub",
+  "name": "racha-business-crm",
   "private": true,
   "version": "1.0.0",
-  "description": "Système de gestion CRM pour Racha Business Digital - Solutions tactiles et digitales",
+  "description": "Système de gestion CRM pour Racha Business Group - Solutions complètes de gestion d'entreprise",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,8 +13,7 @@
     "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "clean": "rm -rf dist node_modules/.cache",
-    "cleanup": "node scripts/cleanup.js",
-    "deploy": "./deploy.sh",
+
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -29,9 +28,9 @@
     "tailwindcss",
     "shadcn",
     "morocco",
-    "tactile"
+    "business-management"
   ],
-  "author": "Racha Business Digital",
+  "author": "Racha Business Group",
   "license": "MIT",
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

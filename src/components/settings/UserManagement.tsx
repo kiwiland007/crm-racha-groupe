@@ -196,6 +196,19 @@ export function UserManagement() {
       } else {
         setUsers(defaultUsers);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUsers));
+
+        // Initialiser les identifiants pour les utilisateurs par défaut
+        const defaultCredentials = [
+          { email: "a.elmansouri@example.ma", password: "admin123", userId: 1 },
+          { email: "f.benkirane@example.ma", password: "manager123", userId: 2 },
+          { email: "y.alami@example.ma", password: "commercial123", userId: 3 },
+          { email: "s.zouiten@example.ma", password: "tech123", userId: 4 }
+        ];
+
+        const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+        if (existingCredentials.length === 0) {
+          localStorage.setItem('crm_user_credentials', JSON.stringify(defaultCredentials));
+        }
       }
     } catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error);
@@ -263,32 +276,65 @@ export function UserManagement() {
   });
 
   const handleAddUser = (data: UserFormValues) => {
-    // Assurez-vous que toutes les permissions sont définies
-    const newUser: User = {
-      id: users.length + 1,
-      fullName: data.fullName,
-      email: data.email,
-      phone: data.phone || "",
-      role: data.role,
-      isActive: data.isActive,
-      permissions: {
-        contacts: data.permissions.contacts,
-        inventory: data.permissions.inventory,
-        events: data.permissions.events,
-        quotes: data.permissions.quotes,
-        settings: data.permissions.settings,
-        admin: data.permissions.admin,
+    try {
+      // Vérifier si l'email existe déjà
+      const emailExists = users.some(user => user.email.toLowerCase() === data.email.toLowerCase());
+      if (emailExists) {
+        toast.error("Email déjà utilisé", {
+          description: "Cet email est déjà associé à un autre utilisateur"
+        });
+        return;
       }
-    };
 
-    setUsers([...users, newUser]);
+      // Générer un ID unique basé sur timestamp
+      const newId = Date.now();
 
-    toast.success("Utilisateur ajouté", {
-      description: `${data.fullName} a été ajouté avec succès.`
-    });
+      // Créer le nouvel utilisateur
+      const newUser: User = {
+        id: newId,
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone || "",
+        role: data.role,
+        isActive: data.isActive,
+        permissions: {
+          contacts: data.permissions.contacts,
+          inventory: data.permissions.inventory,
+          events: data.permissions.events,
+          quotes: data.permissions.quotes,
+          settings: data.permissions.settings,
+          admin: data.permissions.admin,
+        }
+      };
 
-    setOpenAddDialog(false);
-    form.reset();
+      // Ajouter l'utilisateur à la liste
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+
+      // Sauvegarder le mot de passe séparément (simulé)
+      const userCredentials = {
+        email: data.email,
+        password: data.password,
+        userId: newId
+      };
+
+      // Stocker les identifiants de connexion
+      const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+      existingCredentials.push(userCredentials);
+      localStorage.setItem('crm_user_credentials', JSON.stringify(existingCredentials));
+
+      toast.success("Utilisateur ajouté", {
+        description: `${data.fullName} a été ajouté avec succès. Email: ${data.email}, Mot de passe: ${data.password}`
+      });
+
+      setOpenAddDialog(false);
+      form.reset();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'utilisateur:', error);
+      toast.error("Erreur", {
+        description: "Impossible d'ajouter l'utilisateur"
+      });
+    }
   };
 
   const handleEditUser = (data: UserFormValues) => {
@@ -328,15 +374,28 @@ export function UserManagement() {
 
   const handleDeleteUser = () => {
     if (currentUser) {
-      const updatedUsers = users.filter(user => user.id !== currentUser.id);
-      setUsers(updatedUsers);
+      try {
+        // Supprimer l'utilisateur de la liste
+        const updatedUsers = users.filter(user => user.id !== currentUser.id);
+        setUsers(updatedUsers);
 
-      toast.success("Utilisateur supprimé", {
-        description: `${currentUser.fullName} a été supprimé avec succès.`
-      });
+        // Supprimer les identifiants associés
+        const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+        const updatedCredentials = existingCredentials.filter((cred: any) => cred.email !== currentUser.email);
+        localStorage.setItem('crm_user_credentials', JSON.stringify(updatedCredentials));
 
-      setOpenDeleteDialog(false);
-      setCurrentUser(null);
+        toast.success("Utilisateur supprimé", {
+          description: `${currentUser.fullName} a été supprimé avec succès.`
+        });
+
+        setOpenDeleteDialog(false);
+        setCurrentUser(null);
+      } catch (error) {
+        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+        toast.error("Erreur", {
+          description: "Impossible de supprimer l'utilisateur"
+        });
+      }
     }
   };
 
@@ -355,19 +414,36 @@ export function UserManagement() {
   };
 
   const handleResetPassword = (user: User) => {
-    const newPassword = generateSecurePassword();
+    try {
+      const newPassword = generateSecurePassword();
 
-    toast.success("Mot de passe réinitialisé", {
-      description: `Nouveau mot de passe pour ${user.fullName}: ${newPassword}`,
-      duration: 10000,
-      action: {
-        label: "Copier",
-        onClick: () => {
-          navigator.clipboard.writeText(newPassword);
-          toast.success("Mot de passe copié dans le presse-papiers");
+      // Mettre à jour les identifiants stockés
+      const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+      const updatedCredentials = existingCredentials.map((cred: any) => {
+        if (cred.email === user.email) {
+          return { ...cred, password: newPassword };
         }
-      }
-    });
+        return cred;
+      });
+      localStorage.setItem('crm_user_credentials', JSON.stringify(updatedCredentials));
+
+      toast.success("Mot de passe réinitialisé", {
+        description: `Nouveau mot de passe pour ${user.fullName}: ${newPassword}`,
+        duration: 10000,
+        action: {
+          label: "Copier",
+          onClick: () => {
+            navigator.clipboard.writeText(newPassword);
+            toast.success("Mot de passe copié dans le presse-papiers");
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+      toast.error("Erreur", {
+        description: "Impossible de réinitialiser le mot de passe"
+      });
+    }
   };
 
   const handleRoleChange = (role: string, formContext: any) => {
@@ -438,6 +514,17 @@ export function UserManagement() {
           <Plus size={16} />
           Nouvel utilisateur
         </Button>
+      </div>
+
+      {/* Informations de connexion pour les utilisateurs par défaut */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="font-medium text-blue-900 mb-2">Identifiants de connexion par défaut :</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-800">
+          <div>• a.elmansouri@example.ma → admin123</div>
+          <div>• f.benkirane@example.ma → manager123</div>
+          <div>• y.alami@example.ma → commercial123</div>
+          <div>• s.zouiten@example.ma → tech123</div>
+        </div>
       </div>
 
       <Table>

@@ -82,7 +82,7 @@ export default function TechnicalSheets() {
       id: "2",
       name: "Borne Interactive Kiosque",
       model: "BK-32-HD",
-      brand: "MarocTactile",
+      brand: "Racha Business Group",
       category: "borne-interactive",
       description: "Borne interactive robuste pour usage intensif en extérieur",
       specifications: [

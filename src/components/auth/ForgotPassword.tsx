@@ -67,31 +67,83 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
 
   const handleForgotPassword = async (data: ForgotPasswordFormValues) => {
     setIsLoading(true);
-    
-    // Simuler l'envoi d'email
-    setTimeout(() => {
-      setEmail(data.email);
-      setStep('code');
+
+    try {
+      // Vérifier si l'email existe dans le système
+      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]');
+
+      const foundCredential = storedCredentials.find((cred: any) =>
+        cred.email.toLowerCase() === data.email.toLowerCase()
+      );
+
+      const foundUser = storedUsers.find((user: any) =>
+        user.email.toLowerCase() === data.email.toLowerCase()
+      );
+
+      // Simuler l'envoi d'email
+      setTimeout(() => {
+        if (foundCredential || foundUser) {
+          setEmail(data.email);
+          setStep('code');
+          setIsLoading(false);
+
+          toast.success("Email envoyé", {
+            description: `Un code de récupération a été envoyé à ${data.email}`,
+          });
+        } else {
+          setIsLoading(false);
+          toast.error("Email non trouvé", {
+            description: "Aucun compte n'est associé à cette adresse email",
+          });
+        }
+      }, 2000);
+    } catch (error) {
       setIsLoading(false);
-      
-      toast.success("Email envoyé", {
-        description: `Un code de récupération a été envoyé à ${data.email}`,
+      toast.error("Erreur", {
+        description: "Une erreur est survenue lors de la vérification de l'email",
       });
-    }, 2000);
+    }
   };
 
   const handleResetPassword = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
-    
-    // Simuler la réinitialisation
-    setTimeout(() => {
-      setStep('success');
-      setIsLoading(false);
-      
-      toast.success("Mot de passe réinitialisé", {
-        description: "Votre mot de passe a été mis à jour avec succès",
+
+    try {
+      // Vérifier le code (pour la démo, accepter "123456")
+      if (data.code !== "123456") {
+        setIsLoading(false);
+        toast.error("Code incorrect", {
+          description: "Le code de récupération est incorrect",
+        });
+        return;
+      }
+
+      // Mettre à jour le mot de passe dans les identifiants stockés
+      const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
+      const updatedCredentials = existingCredentials.map((cred: any) => {
+        if (cred.email.toLowerCase() === email.toLowerCase()) {
+          return { ...cred, password: data.newPassword };
+        }
+        return cred;
       });
-    }, 1500);
+      localStorage.setItem('crm_user_credentials', JSON.stringify(updatedCredentials));
+
+      // Simuler la réinitialisation
+      setTimeout(() => {
+        setStep('success');
+        setIsLoading(false);
+
+        toast.success("Mot de passe réinitialisé", {
+          description: "Votre mot de passe a été mis à jour avec succès",
+        });
+      }, 1500);
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Erreur", {
+        description: "Une erreur est survenue lors de la réinitialisation",
+      });
+    }
   };
 
   const handleClose = () => {

@@ -30,6 +30,7 @@ import {
   Edit,
   UserPlus,
   PackageCheck,
+  FileText,
   X
 } from "lucide-react";
 import {
@@ -55,6 +56,7 @@ import { EventForm } from "@/components/events/EventForm";
 import { TechnicianAssignment } from "@/components/events/TechnicianAssignment";
 import { MaterialReservation } from "@/components/events/MaterialReservation";
 import { EventDetails } from "@/components/events/EventDetails";
+import { eventReportPDFService, EventReportData } from "@/services/eventReportPDFService";
 
 export default function Events() {
   const { events, addEvent, updateEvent, assignTechnicians, reserveMaterials } = useEventContext();
@@ -147,6 +149,48 @@ export default function Events() {
     setOpenDetailsModal(true);
   };
 
+  const handleGenerateReport = (event: any) => {
+    console.log("=== GÉNÉRATION RAPPORT ÉVÉNEMENT ===");
+    console.log("Données événement:", event);
+
+    try {
+      // Convertir les données d'événement au format attendu par le service PDF
+      const reportData: EventReportData = {
+        id: event.id || `EVT-${Date.now()}`,
+        title: event.title || "Événement",
+        client: event.client || "Client non spécifié",
+        date: event.startDate || new Date().toLocaleDateString('fr-FR'),
+        time: event.time || "Non spécifié",
+        location: event.location || "Lieu non spécifié",
+        status: event.status || "En attente",
+        description: event.description || "",
+        assignedTechnicians: event.assignedTechnicians || [],
+        reservedMaterials: event.reservedMaterials || [],
+        notes: event.notes || "",
+        budget: event.budget || undefined,
+        actualCost: event.actualCost || undefined
+      };
+
+      console.log("Données rapport formatées:", reportData);
+
+      const filename = eventReportPDFService.generateEventReport(reportData);
+      if (filename) {
+        toast.success("Rapport généré avec succès", {
+          description: `Le fichier ${filename} a été téléchargé.`,
+        });
+      } else {
+        toast.error("Erreur génération rapport", {
+          description: "Impossible de générer le rapport de l'événement"
+        });
+      }
+    } catch (error) {
+      console.error("Erreur génération rapport événement:", error);
+      toast.error("Erreur génération rapport", {
+        description: `Erreur: ${error.message || 'Erreur inconnue'}`
+      });
+    }
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -154,6 +198,20 @@ export default function Events() {
       year: 'numeric'
     });
   };
+
+  // Filtrer les événements du jour sélectionné
+  const getEventsForDate = (selectedDate: Date | undefined) => {
+    if (!selectedDate) return [];
+
+    const dateString = formatDate(selectedDate);
+    return events.filter(event =>
+      event.startDate === dateString ||
+      event.endDate === dateString ||
+      (event.startDate <= dateString && event.endDate >= dateString)
+    );
+  };
+
+  const todayEvents = getEventsForDate(date);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -257,6 +315,11 @@ export default function Events() {
                           Réserver matériel
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleGenerateReport(event)}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          Générer rapport PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600" onClick={() => {
                           toast.success("Événement annulé", {
                             description: `${event.title} a été annulé`
@@ -307,20 +370,38 @@ export default function Events() {
                     </div>
 
                     {event.reservedMaterials && event.reservedMaterials.length > 0 && (
-                      <div className="mt-3 pt-3 border-t">
-                        <div className="text-sm font-medium text-gray-700 mb-2">
-                          Matériel réservé:
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Package className="h-3 w-3 text-blue-600" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">
+                            Matériel réservé ({event.reservedMaterials.length})
+                          </span>
                         </div>
-                        <div className="space-y-1">
+                        <div className="grid gap-2">
                           {event.reservedMaterials.slice(0, 3).map((material: any, index: number) => (
-                            <div key={index} className="text-xs text-gray-600 flex justify-between">
-                              <span>{material.productName}</span>
-                              <span>×{material.quantity}</span>
+                            <div key={index} className="flex items-center justify-between p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
+                                  <Package className="h-3 w-3 text-white" />
+                                </div>
+                                <span className="text-xs font-medium text-gray-800 truncate">
+                                  {material.productName}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Badge variant="outline" className="bg-white text-blue-700 border-blue-200 text-xs px-2 py-0.5">
+                                  ×{material.quantity}
+                                </Badge>
+                              </div>
                             </div>
                           ))}
                           {event.reservedMaterials.length > 3 && (
-                            <div className="text-xs text-gray-500">
-                              +{event.reservedMaterials.length - 3} autres...
+                            <div className="text-center py-2">
+                              <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-xs">
+                                +{event.reservedMaterials.length - 3} équipements supplémentaires
+                              </Badge>
                             </div>
                           )}
                         </div>
@@ -352,7 +433,10 @@ export default function Events() {
             <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Évènements du jour</CardTitle>
-                <CardDescription>3 Mai 2025</CardDescription>
+                <CardDescription>
+                  {date ? formatDate(date) : "Sélectionnez une date"}
+                  {todayEvents.length > 0 && ` (${todayEvents.length} événement${todayEvents.length > 1 ? 's' : ''})`}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -366,104 +450,86 @@ export default function Events() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">Formation tactile ZHC</div>
-                          <div className="text-sm text-muted-foreground">10:00 - 12:00</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">ZHC Corporate</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="flex -space-x-2">
-                          <Avatar className="h-6 w-6 border-2 border-background">
-                            <AvatarFallback className="bg-racha-blue/10 text-racha-blue text-xs">
-                              HA
-                            </AvatarFallback>
-                          </Avatar>
-                          <Avatar className="h-6 w-6 border-2 border-background">
-                            <AvatarFallback className="bg-racha-blue/10 text-racha-blue text-xs">
-                              IM
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                          Confirmé
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
+                    {todayEvents.length > 0 ? (
+                      todayEvents.map((event) => (
+                        <TableRow key={event.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{event.title}</div>
+                              <div className="text-sm text-muted-foreground">{event.time}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">{event.client}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex -space-x-2">
+                              {event.assignedTechnicians?.slice(0, 3).map((techId, index) => (
+                                <Avatar key={techId} className="h-6 w-6 border-2 border-background">
+                                  <AvatarFallback className="bg-racha-blue/10 text-racha-blue text-xs">
+                                    T{techId}
+                                  </AvatarFallback>
+                                </Avatar>
+                              ))}
+                              {event.assignedTechnicians && event.assignedTechnicians.length > 3 && (
+                                <div className="h-6 w-6 border-2 border-background rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                                  +{event.assignedTechnicians.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(event.status)}</TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewDetails(event)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Voir détails
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Modifier
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleAssignTechnicians(event)}>
+                                  <UserPlus className="mr-2 h-4 w-4" />
+                                  Assigner techniciens
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleReserveMaterial(event)}>
+                                  <PackageCheck className="mr-2 h-4 w-4" />
+                                  Réserver matériel
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleGenerateReport(event)}>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Générer rapport PDF
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                          <div className="flex flex-col items-center gap-2">
+                            <Calendar className="h-8 w-8 text-gray-300" />
+                            <p>Aucun événement prévu pour cette date</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setOpenEventForm(true)}
+                              className="mt-2"
+                            >
+                              Créer un événement
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              toast.info("Détails de l'événement", {
-                                description: "Formation tactile ZHC - Détails complets"
-                              });
-                            }}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditEvent(events[0])}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Modifier
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-
-                    <TableRow>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">Maintenance bornes MediTech</div>
-                          <div className="text-sm text-muted-foreground">14:30 - 16:00</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">MediTech Labs</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="flex -space-x-2">
-                          <Avatar className="h-6 w-6 border-2 border-background">
-                            <AvatarFallback className="bg-racha-blue/10 text-racha-blue text-xs">
-                              SA
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                          Planifié
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              toast.info("Détails de l'événement", {
-                                description: "Maintenance bornes MediTech - Détails complets"
-                              });
-                            }}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditEvent(events[1])}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Modifier
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

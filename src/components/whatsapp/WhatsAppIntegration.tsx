@@ -36,22 +36,22 @@ export function WhatsAppIntegration({ contactPhone, contactName, className }: Wh
     {
       id: 1,
       title: "Devis disponible",
-      content: `Bonjour ${contactName || '[Nom]'},\n\nVotre devis est prêt ! Nous avons préparé une proposition personnalisée pour vos besoins en solutions tactiles.\n\nSouhaitez-vous que nous planifions un rendez-vous pour en discuter ?\n\nCordialement,\nL'équipe MarocTactile`
+      content: `Bonjour ${contactName || '[Nom]'},\n\nVotre devis est prêt ! Nous avons préparé une proposition personnalisée pour vos besoins.\n\nSouhaitez-vous que nous planifions un rendez-vous pour en discuter ?\n\nCordialement,\nL'équipe Racha Business Group`
     },
     {
       id: 2,
       title: "Rappel rendez-vous",
-      content: `Bonjour ${contactName || '[Nom]'},\n\nJe vous rappelle notre rendez-vous prévu demain à [HEURE] pour discuter de votre projet.\n\nN'hésitez pas à me contacter si vous avez des questions.\n\nÀ bientôt,\nMarocTactile`
+      content: `Bonjour ${contactName || '[Nom]'},\n\nJe vous rappelle notre rendez-vous prévu demain à [HEURE] pour discuter de votre projet.\n\nN'hésitez pas à me contacter si vous avez des questions.\n\nÀ bientôt,\nRacha Business Group`
     },
     {
       id: 3,
       title: "Suivi installation",
-      content: `Bonjour ${contactName || '[Nom]'},\n\nJ'espère que l'installation s'est bien déroulée. Nos équipes sont-elles intervenues selon vos attentes ?\n\nN'hésitez pas à nous faire part de vos retours.\n\nCordialement,\nMarocTactile`
+      content: `Bonjour ${contactName || '[Nom]'},\n\nJ'espère que l'installation s'est bien déroulée. Nos équipes sont-elles intervenues selon vos attentes ?\n\nN'hésitez pas à nous faire part de vos retours.\n\nCordialement,\nRacha Business Group`
     },
     {
       id: 4,
       title: "Maintenance programmée",
-      content: `Bonjour ${contactName || '[Nom]'},\n\nNous avons programmé la maintenance de vos équipements tactiles pour [DATE].\n\nNos techniciens interviendront entre [HEURE DÉBUT] et [HEURE FIN].\n\nCordialement,\nMarocTactile`
+      content: `Bonjour ${contactName || '[Nom]'},\n\nNous avons programmé la maintenance de vos équipements pour [DATE].\n\nNos techniciens interviendront entre [HEURE DÉBUT] et [HEURE FIN].\n\nCordialement,\nRacha Business Group`
     }
   ];
 
@@ -241,12 +241,12 @@ export function useWhatsApp() {
   };
 
   const sendQuote = (phone: string, clientName: string, quoteId: string) => {
-    const message = `Bonjour ${clientName},\n\nVotre devis ${quoteId} est disponible. Vous pouvez le consulter et le télécharger depuis votre espace client.\n\nN'hésitez pas à nous contacter pour toute question.\n\nCordialement,\nMarocTactile`;
+    const message = `Bonjour ${clientName},\n\nVotre devis ${quoteId} est disponible. Vous pouvez le consulter et le télécharger depuis votre espace client.\n\nN'hésitez pas à nous contacter pour toute question.\n\nCordialement,\nRacha Business Group`;
     sendQuickMessage(phone, message);
   };
 
   const sendAppointmentReminder = (phone: string, clientName: string, date: string, time: string) => {
-    const message = `Bonjour ${clientName},\n\nRappel de votre rendez-vous prévu le ${date} à ${time}.\n\nNous vous attendons dans nos locaux.\n\nÀ bientôt,\nMarocTactile`;
+    const message = `Bonjour ${clientName},\n\nRappel de votre rendez-vous prévu le ${date} à ${time}.\n\nNous vous attendons dans nos locaux.\n\nÀ bientôt,\nRacha Business Group`;
     sendQuickMessage(phone, message);
   };
 

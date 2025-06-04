@@ -54,7 +54,7 @@ interface ProductProviderProps {
 
 // Catégories par défaut
 const defaultCategories: Category[] = [
-    // Catégories Produits inspirées de MarocTactile.com
+    // Catégories Produits pour solutions d'entreprise
     {
       id: "1",
       name: "Borne Tactile",

@@ -1,19 +1,19 @@
 // Configuration centralisée de l'application
 export const APP_CONFIG = {
   // Informations de l'application
-  name: 'Racha Business Digital CRM',
+  name: 'Racha Business CRM',
   version: '1.0.0',
-  description: 'Système de gestion CRM pour solutions tactiles et digitales',
-  
+  description: 'Système de gestion CRM pour Racha Business Group - Solutions complètes de gestion d\'entreprise',
+
   // URLs et domaines
-  baseUrl: process.env.NODE_ENV === 'production' 
-    ? 'https://maroctactile-crm.pages.dev' 
+  baseUrl: process.env.NODE_ENV === 'production'
+    ? 'https://racha-business-crm.pages.dev'
     : 'http://localhost:8080',
-  
+
   // Informations de l'entreprise
   company: {
-    name: 'Racha Business Digital',
-    legalName: 'RACHA BUSINESS DIGITAL SARL AU',
+    name: 'Racha Business Group',
+    legalName: 'RACHA BUSINESS GROUP SARL AU',
     address: 'Résidence Yasmine 2, Bloc B, App 12\nHay Riad, Rabat 10100\nMaroc',
     phone: '+212 6 69 38 28 28',
     email: 'contact@rachabusiness.com',

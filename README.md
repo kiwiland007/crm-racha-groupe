@@ -1,8 +1,8 @@
-# MarocTactile CRM Hub
+# Racha Business CRM
 
 ## Project info
 
-**Description**: Système de gestion CRM pour MarocTactile - Solutions d'écrans tactiles interactifs
+**Description**: Système de gestion CRM pour Racha Business Group - Solutions complètes de gestion d'entreprise
 
 ## Comment modifier ce code ?
 
@@ -18,10 +18,10 @@ Suivez ces étapes :
 
 ```sh
 # Étape 1: Cloner le repository
-git clone https://github.com/kiwiland007/maroctactile-crm-hub.git
+git clone https://github.com/kiwiland007/racha-business-crm.git
 
 # Étape 2: Naviguer vers le répertoire du projet
-cd maroctactile-crm-hub
+cd racha-business-crm
 
 # Étape 3: Installer les dépendances nécessaires
 npm i

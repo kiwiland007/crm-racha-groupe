@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/ui/logo";
 import { UserProfile } from "./UserProfile";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -46,7 +47,12 @@ export default function Header({ title }: { title: string }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4">
-      <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Logo Racha Digital */}
+        <Logo variant="compact" size="md" />
+        <div className="h-6 w-px bg-gray-300 md:h-8" />
+        <h1 className="text-lg font-semibold text-gray-800 md:text-xl">{title}</h1>
+      </div>
       
       <div className="flex items-center gap-4">
         {/* Notifications */}
