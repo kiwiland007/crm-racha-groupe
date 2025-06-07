@@ -1,25 +1,14 @@
 import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProductProvider } from "@/contexts/ProductContext";
-import { AuthProvider, ProtectedRoute } from "@/contexts/AuthContext";
-import { ContactProvider } from "@/contexts/ContactContext";
-import { TaskProvider } from "@/contexts/TaskContext";
-import { NotificationProvider } from "@/contexts/NotificationContext";
-import { InventoryProvider } from "@/contexts/InventoryContext";
-import { QuoteProvider } from "@/contexts/QuoteContext";
-import { InvoiceProvider } from "@/contexts/InvoiceContext";
-import { EventProvider } from "@/contexts/EventContext";
-import { BLProvider } from "@/contexts/BLContext";
+import { Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/contexts/AuthContext";
 import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
+import { AppProviders } from "@/providers/AppProviders";
 
 import { useMonitoring } from "@/utils/monitoring";
 import { LoadingFallback } from "@/components/common/LoadingFallback";
 import Index from "./pages/Index";
-import { ThemeProvider } from "next-themes";
 
 // Lazy load routes
 const Contacts = React.lazy(() => import("./pages/Contacts"));
@@ -39,8 +28,6 @@ const BonLivraison = React.lazy(() => import("./pages/BonLivraison"));
 const TechnicalSheets = React.lazy(() => import("./pages/TechnicalSheets"));
 
 import { crmDatabase } from "./services/crmDatabaseService";
-
-const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { recordPageView } = useMonitoring();
@@ -77,41 +64,15 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <ProductProvider>
-              <ContactProvider>
-                <TaskProvider>
-                  <NotificationProvider>
-                    <InventoryProvider>
-                      <QuoteProvider>
-                        <InvoiceProvider>
-                          <EventProvider>
-                            <BLProvider>
-                              <TooltipProvider>
-                                <RouterErrorBoundary>
-                                  <Suspense fallback={<LoadingFallback />}>
-                                    <AppContent />
-                                  </Suspense>
-                                </RouterErrorBoundary>
-                                <Toaster />
-                                <Sonner />
-                              </TooltipProvider>
-                            </BLProvider>
-                          </EventProvider>
-                        </InvoiceProvider>
-                      </QuoteProvider>
-                    </InventoryProvider>
-                  </NotificationProvider>
-                </TaskProvider>
-              </ContactProvider>
-            </ProductProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <AppProviders>
+      <RouterErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <AppContent />
+        </Suspense>
+      </RouterErrorBoundary>
+      <Toaster />
+      <Sonner />
+    </AppProviders>
   );
 };
 
