@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,23 +17,27 @@ import { BLProvider } from "@/contexts/BLContext";
 import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
 import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
 import { useMonitoring } from "@/utils/monitoring";
+import { LoadingFallback } from "@/components/common/LoadingFallback";
 import Index from "./pages/Index";
-import Contacts from "./pages/Contacts";
-import Tasks from "./pages/Tasks";
-import Notifications from "./pages/Notifications";
-import Inventory from "./pages/Inventory";
-import Events from "./pages/Events";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import Quotes from "./pages/Quotes";
-import Analytics from "./pages/Analytics";
-import Products from "./pages/Products";
-import Services from "./pages/Services";
-import InvoiceForm from "./pages/InvoiceForm";
-import Invoices from "./pages/Invoices";
-import BonLivraison from "./pages/BonLivraison";
-import TechnicalSheets from "./pages/TechnicalSheets";
-import DatabaseAdmin from "./components/DatabaseAdmin";
+import { ThemeProvider } from "next-themes";
+
+// Lazy load routes
+const Contacts = React.lazy(() => import("./pages/Contacts"));
+const Tasks = React.lazy(() => import("./pages/Tasks"));
+const Notifications = React.lazy(() => import("./pages/Notifications"));
+const Inventory = React.lazy(() => import("./pages/Inventory"));
+const Events = React.lazy(() => import("./pages/Events"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const Quotes = React.lazy(() => import("./pages/Quotes"));
+const Analytics = React.lazy(() => import("./pages/Analytics"));
+const Products = React.lazy(() => import("./pages/Products"));
+const Services = React.lazy(() => import("./pages/Services"));
+const InvoiceForm = React.lazy(() => import("./pages/InvoiceForm"));
+const Invoices = React.lazy(() => import("./pages/Invoices"));
+const BonLivraison = React.lazy(() => import("./pages/BonLivraison"));
+const TechnicalSheets = React.lazy(() => import("./pages/TechnicalSheets"));
+const DatabaseAdmin = React.lazy(() => import("./components/DatabaseAdmin"));
 import { crmDatabase } from "./services/crmDatabaseService";
 
 const queryClient = new QueryClient();
@@ -72,40 +76,44 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <RouterErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ContactProvider>
-          <TaskProvider>
-            <NotificationProvider>
-              <InventoryProvider>
-                <EventProvider>
-                  <QuoteProvider>
-                    <InvoiceProvider>
-                      <BLProvider>
-                        <ProductProvider>
-                          <TooltipProvider>
-                            <Toaster />
-                            <Sonner />
-                            <BrowserRouter>
-                              <ProtectedRoute>
-                                <AppContent />
-                              </ProtectedRoute>
-                            </BrowserRouter>
-                          </TooltipProvider>
-                        </ProductProvider>
-                      </BLProvider>
-                    </InvoiceProvider>
-                  </QuoteProvider>
-                </EventProvider>
-              </InventoryProvider>
-            </NotificationProvider>
-          </TaskProvider>
-        </ContactProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </RouterErrorBoundary>
-);
+const App = () => {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ProductProvider>
+              <ContactProvider>
+                <TaskProvider>
+                  <NotificationProvider>
+                    <InventoryProvider>
+                      <QuoteProvider>
+                        <InvoiceProvider>
+                          <EventProvider>
+                            <BLProvider>
+                              <TooltipProvider>
+                                <RouterErrorBoundary>
+                                  <Suspense fallback={<LoadingFallback />}>
+                                    <AppContent />
+                                  </Suspense>
+                                </RouterErrorBoundary>
+                                <Toaster />
+                                <Sonner />
+                              </TooltipProvider>
+                            </BLProvider>
+                          </EventProvider>
+                        </InvoiceProvider>
+                      </QuoteProvider>
+                    </InventoryProvider>
+                  </NotificationProvider>
+                </TaskProvider>
+              </ContactProvider>
+            </ProductProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+};
 
 export default App;

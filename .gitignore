@@ -81,33 +81,26 @@ coverage/
 version.json
 cleanup-report.json
 backup-report-*.json
+connection-test-report.json
 
-# TypeScript build info
-*.tsbuildinfo
-
-# Test files (si pas utilisés)
-src/test/
-**/*.test.ts
-**/*.test.tsx
-**/*.spec.ts
-**/*.spec.tsx
-
-# Fichiers de développement
-.vscode/settings.json
-.idea/
-*.swp
-*.swo
-
-# Fichiers de sauvegarde
+# Backup files
+backups/
 *.bak
 *.backup
+*.old
 
-# Fichiers de configuration locale
-.env.local.backup
-config.local.json
-
-# Deployment files
+# Archive files
 *.zip
 *.tar.gz
 *.rar
+*.7z
+
+# Deployment logs
 deploy-*.log
+deployment-*.json
+
+# Cache and temporary
+.npm/
+.yarn/
+.pnpm/
+.turbo/

@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -116,4 +115,79 @@
 
 .gradient-teal {
   @apply bg-gradient-to-r from-racha-teal to-racha-blue text-white;
+}
+
+/* Accessibilité */
+:root {
+  --font-size-base: 16px;
+}
+
+html {
+  font-size: var(--font-size-base);
+}
+
+/* Mode contraste élevé */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #ffff00;
+  --secondary: #00ffff;
+  
+  /* Augmenter les contrastes */
+  --border-color: #ffffff;
+  --text-color: #ffffff;
+  --link-color: #ffff00;
+}
+
+/* Réduction des animations */
+.reduced-motion * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Focus visible */
+.focus-visible :focus {
+  outline: 3px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Support des lecteurs d'écran */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Navigation au clavier */
+[tabindex]:focus {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Support du mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --foreground: #ffffff;
+  }
+}
+
+/* Media queries pour l'accessibilité */
+@media screen and (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media screen and (forced-colors: active) {
+  * {
+    forced-color-adjust: auto;
+  }
 }
