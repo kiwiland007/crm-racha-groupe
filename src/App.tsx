@@ -15,7 +15,7 @@ import { InvoiceProvider } from "@/contexts/InvoiceContext";
 import { EventProvider } from "@/contexts/EventContext";
 import { BLProvider } from "@/contexts/BLContext";
 import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
-import { useKeyboardNavigation } from "@/components/common/AccessibleComponents";
+
 import { useMonitoring } from "@/utils/monitoring";
 import { LoadingFallback } from "@/components/common/LoadingFallback";
 import Index from "./pages/Index";
@@ -43,7 +43,6 @@ import { crmDatabase } from "./services/crmDatabaseService";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  useKeyboardNavigation();
   const { recordPageView } = useMonitoring();
 
   React.useEffect(() => {

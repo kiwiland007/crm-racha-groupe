@@ -41,7 +41,7 @@ import { LeadCaptureForm } from "@/components/marketing/LeadCaptureForm";
 import { WhatsAppStats } from "@/components/whatsapp/WhatsAppIntegration";
 import { IntegrationModals } from "@/components/settings/IntegrationModals";
 import { APIManagement } from "@/components/settings/APIManagement";
-import { AccessibilitySettings } from "@/components/settings/AccessibilitySettings";
+
 
 export default function Settings() {
   const [generalSettings, setGeneralSettings] = useState({
@@ -722,10 +722,7 @@ export default function Settings() {
         onAuthOpenChange={setAuthModalOpen}
       />
 
-      {/* Paramètres d'accessibilité */}
-      <section>
-        <AccessibilitySettings />
-      </section>
+
     </Layout>
   );
 }

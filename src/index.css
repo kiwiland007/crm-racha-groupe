@@ -164,30 +164,10 @@ html {
   border: 0;
 }
 
-/* Navigation au clavier */
-[tabindex]:focus {
-  outline: 3px solid var(--primary);
-  outline-offset: 2px;
-}
-
 /* Support du mode sombre */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #000000;
     --foreground: #ffffff;
-  }
-}
-
-/* Media queries pour l'accessibilité */
-@media screen and (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-@media screen and (forced-colors: active) {
-  * {
-    forced-color-adjust: auto;
   }
 }
