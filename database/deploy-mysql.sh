@@ -18,7 +18,7 @@ DB_HOST="localhost"
 DB_PORT="3306"
 DB_NAME="admin_crm"
 DB_USER="kiwiland"
-DB_PASSWORD="a16rC_44t"
+DB_PASSWORD="YOUR_SECURE_PASSWORD"
 MYSQL_ROOT_PASSWORD=""
 
 # Fonctions utilitaires

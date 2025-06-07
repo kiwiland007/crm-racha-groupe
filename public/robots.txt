@@ -1,14 +1,19 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Bloquer les dossiers sensibles
+Disallow: /admin/
+Disallow: /api/
+Disallow: /database/
+Disallow: /*.json$
+Disallow: /*.md$
+
+# Permettre les assets publics
+Allow: /assets/*.css
+Allow: /assets/*.js
+Allow: /assets/*.png
+Allow: /assets/*.jpg
+Allow: /assets/*.svg
+
+# Sitemap (à créer après déploiement)
+Sitemap: https://votre-domaine-ovh.com/sitemap.xml

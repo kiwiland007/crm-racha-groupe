@@ -1,0 +1,130 @@
+# Configuration Apache pour Racha Business CRM sur OVH
+# Optimisé pour les applications React SPA
+
+# Activer la réécriture d'URL
+RewriteEngine On
+
+# Forcer HTTPS (recommandé pour OVH)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Gestion des routes React (SPA)
+# Rediriger toutes les requêtes vers index.html sauf les fichiers existants
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule . /index.html [L]
+
+# Configuration du cache pour les assets statiques
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Cache des images (1 mois)
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
+    
+    # Cache des fichiers CSS et JS (1 semaine)
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+    
+    # Cache des polices (1 mois)
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+    ExpiresByType application/font-woff "access plus 1 month"
+    ExpiresByType application/font-woff2 "access plus 1 month"
+    
+    # Pas de cache pour HTML (pour les mises à jour)
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# Configuration de la compression GZIP
+<IfModule mod_deflate.c>
+    # Compresser les fichiers texte
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Sécurité - Headers de sécurité
+<IfModule mod_headers.c>
+    # Protection XSS
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Empêcher le MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Protection contre le clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Politique de référent
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # CSP basique (à ajuster selon les besoins)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
+</IfModule>
+
+# Bloquer l'accès aux fichiers sensibles
+<Files ~ "^\.">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bloquer l'accès aux fichiers de configuration
+<FilesMatch "\.(json|md|txt|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Permettre l'accès aux fichiers nécessaires
+<FilesMatch "^(robots\.txt|favicon\.ico|manifest\.json)$">
+    Order deny,allow
+    Allow from all
+</FilesMatch>
+
+# Configuration pour les erreurs personnalisées
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html
+
+# Optimisation des performances
+<IfModule mod_headers.c>
+    # Cache des assets avec hash
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    
+    # Pas de cache pour les fichiers HTML
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Configuration pour les API (si nécessaire)
+<IfModule mod_rewrite.c>
+    # Redirection des API vers le backend (à configurer selon votre setup)
+    # RewriteRule ^api/(.*)$ http://your-backend-url/api/$1 [P,L]
+</IfModule>
+
+# Optimisation pour OVH
+# Désactiver les signatures de serveur
+ServerTokens Prod
+
+# Limiter la taille des uploads (ajustable)
+LimitRequestBody 10485760
+
+# Configuration du charset
+AddDefaultCharset UTF-8

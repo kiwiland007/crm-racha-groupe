@@ -14,13 +14,13 @@ interface DatabaseResponse<T> {
 // Configuration de l'API backend
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Configuration de la base de données MySQL (pour information)
+// Configuration de la base de données MySQL (à configurer en production)
 const DB_CONFIG = {
-  host: 'localhost',
-  port: 3306,
-  database: 'admin_crm',
-  user: 'kiwiland',
-  password: 'j_ZAWdxkw91*fvq0'
+  host: process.env.VITE_DB_HOST || 'localhost',
+  port: parseInt(process.env.VITE_DB_PORT || '3306'),
+  database: process.env.VITE_DB_NAME || 'admin_crm',
+  user: process.env.VITE_DB_USER || 'your_user',
+  password: process.env.VITE_DB_PASSWORD || 'your_password'
 };
 
 export class CRMDatabaseService {
