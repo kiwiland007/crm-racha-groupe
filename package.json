@@ -1,8 +1,8 @@
 {
-  "name": "racha-business-crm",
+  "name": "crm-racha-groupe",
   "private": true,
   "version": "1.0.0",
-  "description": "Système de gestion CRM pour Racha Business Group - Solutions complètes de gestion d'entreprise",
+  "description": "Système de gestion CRM professionnel pour Racha Groupe - Solutions complètes de gestion d'entreprise",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,9 +1,9 @@
-# 🚀 Racha Business CRM
+# 🏢 CRM Racha Groupe
 
 <div align="center">
-  <img src="public/racha-digital-logo.svg" alt="Racha Digital" width="300">
-  
-  **Système de gestion CRM complet pour Racha Business Group**
+  <img src="public/racha-digital-logo.svg" alt="Racha Groupe" width="300">
+
+  **Système de gestion CRM professionnel pour Racha Groupe**
   
   [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
@@ -15,7 +15,7 @@
 
 ## 📋 **Description**
 
-**Racha Business CRM** est un système de gestion client complet développé pour Racha Business Group. Il offre une solution moderne et intuitive pour gérer tous les aspects de votre entreprise : clients, produits, devis, factures, inventaire et bien plus.
+**CRM Racha Groupe** est un système de gestion client complet développé pour Racha Groupe. Il offre une solution moderne et intuitive pour gérer tous les aspects de votre entreprise : clients, produits, devis, factures, inventaire et bien plus.
 
 ### ✨ **Fonctionnalités Principales**
 
@@ -56,10 +56,10 @@
 
 ```bash
 # 1. Cloner le repository
-git clone https://github.com/rachabusiness/racha-business-crm.git
+git clone https://github.com/kiwiland007/crm-racha-groupe.git
 
 # 2. Naviguer vers le projet
-cd racha-business-crm
+cd crm-racha-groupe
 
 # 3. Installer les dépendances
 npm install
@@ -118,8 +118,8 @@ L'application est entièrement responsive et optimisée pour :
 Créez un fichier `.env.local` :
 
 ```env
-VITE_APP_NAME="Racha Business CRM"
-VITE_COMPANY_NAME="Racha Business Group"
+VITE_APP_NAME="CRM Racha Groupe"
+VITE_COMPANY_NAME="Racha Groupe"
 VITE_COMPANY_LOGO="/racha-digital-logo.svg"
 ```
 
@@ -150,7 +150,7 @@ src/
 
 ### **✅ STATUT : PRÊT POUR LA PRODUCTION**
 
-Le projet Racha Business CRM est **100% prêt** pour le déploiement !
+Le projet CRM Racha Groupe est **100% prêt** pour le déploiement !
 
 ### **📦 Build Optimisé**
 - ✅ **Taille** : ~2.3 MB (optimisé)
@@ -210,13 +210,13 @@ Ce projet est sous licence propriétaire - voir le fichier [LICENSE](LICENSE) po
 
 ## 📞 **Support**
 
-- **Email** : support@rachabusiness.com
-- **Website** : [rachabusiness.com](https://rachabusiness.com)
-- **Documentation** : [docs.rachabusiness.com](https://docs.rachabusiness.com)
+- **Email** : support@rachagroupe.com
+- **Website** : [rachagroupe.com](https://rachagroupe.com)
+- **Documentation** : [docs.rachagroupe.com](https://docs.rachagroupe.com)
 
 ---
 
 <div align="center">
-  <p>Développé avec ❤️ par <strong>Racha Business Group</strong></p>
-  <p>© 2025 Racha Business Group. Tous droits réservés.</p>
+  <p>Développé avec ❤️ par <strong>Racha Groupe</strong></p>
+  <p>© 2025 Racha Groupe. Tous droits réservés.</p>
 </div>
