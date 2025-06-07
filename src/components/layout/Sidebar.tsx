@@ -168,13 +168,13 @@ export default function Sidebar() {
                 <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center gap-3">
                     <img
-                      src="/lovable-uploads/77a566ed-4d6b-4239-b742-d056f1b7ba66.png"
+                      src="/racha-digital-logo-compact.svg"
                       alt="Racha Digital"
                       className="h-10 w-auto"
                     />
                     <div>
                       <span className="font-bold text-xl text-racha-teal">CRM</span>
-                      <p className="text-xs text-gray-500">Racha Business</p>
+                      <p className="text-xs text-gray-500">Racha Digital</p>
                     </div>
                   </div>
                   <button
@@ -200,7 +200,7 @@ export default function Sidebar() {
     <div className="hidden md:flex flex-col w-64 border-r bg-white p-4 h-screen">
       <div className="flex items-center gap-2 mb-6">
         <img
-          src="/lovable-uploads/77a566ed-4d6b-4239-b742-d056f1b7ba66.png"
+          src="/racha-digital-logo-compact.svg"
           alt="Racha Digital"
           className="h-10"
         />

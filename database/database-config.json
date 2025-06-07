@@ -1,0 +1,138 @@
+{
+  "database": {
+    "type": "mariadb",
+    "version": "10.3.39",
+    "host": "localhost",
+    "port": 3306,
+    "name": "admin_crm",
+    "user": "kiwiland",
+    "password": "a16rC_44t",
+    "charset": "utf8mb4",
+    "collation": "utf8mb4_unicode_ci",
+    "timezone": "+00:00",
+    "ssl": false,
+    "pool": {
+      "min": 2,
+      "max": 10,
+      "idle": 10000,
+      "acquire": 30000
+    }
+  },
+  "connection": {
+    "url": "mysql://kiwiland:a16rC_44t@localhost:3306/admin_crm",
+    "options": {
+      "connectTimeout": 30000,
+      "acquireTimeout": 30000,
+      "timeout": 30000,
+      "reconnect": true,
+      "multipleStatements": false
+    }
+  },
+  "features": {
+    "transactions": true,
+    "foreign_keys": true,
+    "triggers": true,
+    "stored_procedures": true,
+    "views": true,
+    "json_support": true,
+    "full_text_search": true
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention_days": 30,
+    "compression": true,
+    "location": "./backups",
+    "user": "kiwiland",
+    "password": "a16rC_44t"
+  },
+  "monitoring": {
+    "enabled": true,
+    "slow_query_log": true,
+    "slow_query_time": 2,
+    "log_queries": false,
+    "performance_schema": true
+  },
+  "security": {
+    "ssl_required": false,
+    "password_validation": true,
+    "max_connections": 100,
+    "connection_timeout": 30,
+    "interactive_timeout": 28800,
+    "wait_timeout": 28800
+  },
+  "deployment": {
+    "environment": "production",
+    "deployed_at": "2024-12-19T15:30:00Z",
+    "version": "1.0.0",
+    "schema_version": "1.0.0",
+    "last_migration": null
+  },
+  "tables": {
+    "users": {
+      "primary_key": "id",
+      "auto_increment": false,
+      "uuid": true,
+      "timestamps": true,
+      "soft_delete": false
+    },
+    "contacts": {
+      "primary_key": "id",
+      "auto_increment": false,
+      "uuid": true,
+      "timestamps": true,
+      "soft_delete": false
+    },
+    "products": {
+      "primary_key": "id",
+      "auto_increment": false,
+      "uuid": true,
+      "timestamps": true,
+      "soft_delete": false
+    },
+    "quotes": {
+      "primary_key": "id",
+      "auto_increment": false,
+      "uuid": true,
+      "timestamps": true,
+      "soft_delete": false
+    },
+    "invoices": {
+      "primary_key": "id",
+      "auto_increment": false,
+      "uuid": true,
+      "timestamps": true,
+      "soft_delete": false
+    }
+  },
+  "indexes": {
+    "performance_critical": [
+      "contacts.email",
+      "contacts.phone",
+      "products.sku",
+      "quotes.quote_number",
+      "invoices.invoice_number"
+    ],
+    "search_indexes": [
+      "contacts.name",
+      "contacts.company",
+      "products.name",
+      "products.description"
+    ]
+  },
+  "maintenance": {
+    "auto_optimize": true,
+    "optimize_schedule": "0 3 * * 0",
+    "analyze_tables": true,
+    "check_tables": true,
+    "repair_tables": false
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "file": "./logs/database.log",
+    "max_size": "10MB",
+    "max_files": 5,
+    "rotate": true
+  }
+}

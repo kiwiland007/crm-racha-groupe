@@ -1,0 +1,28 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icône Racha Digital seule - Design moderne avec nœuds connectés -->
+  
+  <!-- Icône - Design réseau avec nœuds -->
+  <g transform="translate(10, 10)">
+    <!-- Forme de base elliptique -->
+    <ellipse cx="20" cy="20" rx="18" ry="15" fill="#5DADE2" opacity="0.1" stroke="#5DADE2" stroke-width="1.5"/>
+    
+    <!-- Nœuds connectés - design réseau -->
+    <circle cx="8" cy="8" r="3" fill="#5DADE2"/>
+    <circle cx="32" cy="8" r="3" fill="#5DADE2"/>
+    <circle cx="35" cy="20" r="3" fill="#5DADE2"/>
+    <circle cx="32" cy="32" r="3" fill="#5DADE2"/>
+    <circle cx="8" cy="32" r="3" fill="#5DADE2"/>
+    <circle cx="5" cy="20" r="3" fill="#5DADE2"/>
+    
+    <!-- Nœud central plus grand -->
+    <circle cx="20" cy="20" r="4" fill="#5DADE2"/>
+    
+    <!-- Lignes de connexion -->
+    <line x1="8" y1="8" x2="16" y2="16" stroke="#5DADE2" stroke-width="2.5"/>
+    <line x1="32" y1="8" x2="24" y2="16" stroke="#5DADE2" stroke-width="2.5"/>
+    <line x1="35" y1="20" x2="24" y2="20" stroke="#5DADE2" stroke-width="2.5"/>
+    <line x1="32" y1="32" x2="24" y2="24" stroke="#5DADE2" stroke-width="2.5"/>
+    <line x1="8" y1="32" x2="16" y2="24" stroke="#5DADE2" stroke-width="2.5"/>
+    <line x1="5" y1="20" x2="16" y2="20" stroke="#5DADE2" stroke-width="2.5"/>
+  </g>
+</svg>

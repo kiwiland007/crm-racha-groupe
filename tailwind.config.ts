@@ -64,12 +64,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				racha: {
-					teal: '#1AB8B0',
-					'teal-dark': '#0F8A84',
-					blue: '#00B2FF',
-					'blue-light': '#55D6FF',
+					teal: '#5DADE2',
+					'teal-dark': '#3498DB',
+					blue: '#5DADE2',
+					'blue-light': '#85C1E9',
 					dark: '#1A2B3C',
 					gray: '#F0F5F9',
+					primary: '#5DADE2',
+					secondary: '#85C1E9',
 				}
 			},
 			borderRadius: {

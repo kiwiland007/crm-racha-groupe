@@ -33,6 +33,8 @@ import InvoiceForm from "./pages/InvoiceForm";
 import Invoices from "./pages/Invoices";
 import BonLivraison from "./pages/BonLivraison";
 import TechnicalSheets from "./pages/TechnicalSheets";
+import DatabaseAdmin from "./components/DatabaseAdmin";
+import { crmDatabase } from "./services/crmDatabaseService";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,9 @@ const AppContent = () => {
 
   React.useEffect(() => {
     recordPageView(window.location.pathname);
+
+    // Initialiser la base de données au démarrage
+    crmDatabase.initialize().catch(console.error);
   }, [recordPageView]);
 
   return (
@@ -61,6 +66,7 @@ const AppContent = () => {
       <Route path="/products" element={<Products />} />
       <Route path="/services" element={<Services />} />
       <Route path="/invoice/new" element={<InvoiceForm />} />
+      <Route path="/database-admin" element={<DatabaseAdmin />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

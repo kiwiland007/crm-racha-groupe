@@ -1,0 +1,16 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Placeholder image générique -->
+  <rect width="400" height="300" fill="#F3F4F6"/>
+  
+  <!-- Icône image -->
+  <g transform="translate(175, 125)">
+    <rect x="0" y="0" width="50" height="40" rx="4" fill="#D1D5DB" stroke="#9CA3AF" stroke-width="1"/>
+    <circle cx="15" cy="15" r="5" fill="#9CA3AF"/>
+    <path d="M5 30 L20 20 L30 25 L45 15 L45 35 L5 35 Z" fill="#9CA3AF"/>
+  </g>
+  
+  <!-- Texte -->
+  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6B7280">
+    Image non disponible
+  </text>
+</svg>
