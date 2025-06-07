@@ -169,10 +169,10 @@ mysqldump -h localhost -u kiwiland -p admin_crm | gzip > backup_$(date +%Y%m%d).
 ### **Restauration**
 ```bash
 # Depuis un fichier SQL
-mysql -h localhost -u kiwiland -p admin_crm < backup_20241219.sql
+mysql -h localhost -u your_username -p admin_crm < backup_20241219.sql
 
 # Depuis un fichier compressé
-gunzip -c backup_20241219.sql.gz | mysql -h localhost -u kiwiland -p admin_crm
+gunzip -c backup_20241219.sql.gz | mysql -h localhost -u your_username -p admin_crm
 ```
 
 ### **Sauvegarde Automatique**
