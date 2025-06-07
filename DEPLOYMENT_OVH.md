@@ -109,12 +109,14 @@ Dans l'espace client OVH :
 
 Mettez à jour vos variables d'environnement :
 ```env
-VITE_DB_HOST=votre-serveur-mysql.mysql.db
+VITE_DB_HOST=localhost
 VITE_DB_PORT=3306
-VITE_DB_NAME=votre_base
-VITE_DB_USER=votre_utilisateur
-VITE_DB_PASSWORD=votre_mot_de_passe
+VITE_DB_NAME=admin_crm
+VITE_DB_USER=kiwiland
+VITE_DB_PASSWORD=8Z!ZHbm7uo9rjiv#
 ```
+
+**Note** : Pour OVH, remplacez `localhost` par l'adresse de votre serveur MySQL OVH.
 
 ## 🔧 Vérifications Post-Déploiement
 

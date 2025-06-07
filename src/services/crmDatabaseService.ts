@@ -14,13 +14,19 @@ interface DatabaseResponse<T> {
 // Configuration de l'API backend
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Configuration de la base de données MySQL (à configurer en production)
+// Configuration de la base de données MySQL/MariaDB
 const DB_CONFIG = {
   host: process.env.VITE_DB_HOST || 'localhost',
   port: parseInt(process.env.VITE_DB_PORT || '3306'),
   database: process.env.VITE_DB_NAME || 'admin_crm',
-  user: process.env.VITE_DB_USER || 'your_user',
-  password: process.env.VITE_DB_PASSWORD || 'your_password'
+  user: process.env.VITE_DB_USER || 'kiwiland',
+  password: process.env.VITE_DB_PASSWORD || '8Z!ZHbm7uo9rjiv#',
+  // Configuration spécifique MariaDB v10.3.39
+  charset: 'utf8mb4',
+  timezone: '+00:00',
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true
 };
 
 export class CRMDatabaseService {

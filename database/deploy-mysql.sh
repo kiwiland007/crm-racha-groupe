@@ -18,7 +18,8 @@ DB_HOST="localhost"
 DB_PORT="3306"
 DB_NAME="admin_crm"
 DB_USER="kiwiland"
-DB_PASSWORD="YOUR_SECURE_PASSWORD"
+DB_PASSWORD="8Z!ZHbm7uo9rjiv#"
+DB_VERSION="MariaDB v10.3.39"
 MYSQL_ROOT_PASSWORD=""
 
 # Fonctions utilitaires
@@ -130,17 +131,40 @@ import_schema() {
     fi
 }
 
+# Test de connexion utilisateur
+test_user_connection() {
+    print_status "Test de connexion avec l'utilisateur $DB_USER..."
+
+    mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" -e "SELECT VERSION() as version, DATABASE() as current_db;" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        print_success "Connexion utilisateur réussie"
+
+        # Test avec Node.js si disponible
+        if command -v node &> /dev/null && [ -f "test-connection.js" ]; then
+            print_status "Test de connexion Node.js..."
+            DB_HOST="$DB_HOST" DB_PORT="$DB_PORT" DB_NAME="$DB_NAME" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" node test-connection.js
+        fi
+    else
+        print_error "Échec de la connexion utilisateur"
+        print_warning "Vérifiez les credentials: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
+    fi
+}
+
 # Vérifier l'installation
 verify_installation() {
     print_status "Vérification de l'installation..."
-    
+
+    # Test de connexion utilisateur
+    test_user_connection
+
     # Compter les tables créées
     TABLE_COUNT=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SHOW TABLES;" | wc -l)
     TABLE_COUNT=$((TABLE_COUNT - 1)) # Soustraire la ligne d'en-tête
-    
+
     if [ $TABLE_COUNT -gt 0 ]; then
         print_success "$TABLE_COUNT tables créées"
-        
+
         # Lister les tables principales
         echo ""
         print_status "Tables principales créées:"
