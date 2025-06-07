@@ -2,11 +2,14 @@
 
 ## 📋 Prérequis
 
-### Hébergement OVH
+### Hébergement OVH - Configuration Racha Digital
+- **Host** : 217.182.70.41
+- **User** : crm@rachadigital.com
+- **Password** : G13c8c_f3
+- **Domain** : crm.rachadigital.com
 - **Hébergement web** avec support PHP/Apache
 - **Espace disque** : minimum 100 MB
-- **Base de données** : MySQL/MariaDB (optionnel)
-- **Nom de domaine** configuré
+- **Base de données** : MariaDB v10.3.39
 
 ### Outils de développement
 - Node.js 18+ 
@@ -65,14 +68,17 @@ npm run build
 ### Méthode 2 : FTP/SFTP
 
 ```bash
-# Avec rsync (recommandé)
-rsync -avz --delete dist/ user@ftp.votre-domaine.com:www/
+# Avec rsync (recommandé) - Racha Digital OVH
+rsync -avz --delete dist/ crm@rachadigital.com@217.182.70.41:www/
 
-# Avec scp
-scp -r dist/* user@ftp.votre-domaine.com:www/
+# Avec scp - Racha Digital OVH
+scp -r dist/* crm@rachadigital.com@217.182.70.41:www/
 
-# Avec FileZilla ou autre client FTP
-# Uploadez le contenu de dist/ vers www/
+# Configuration FTP pour FileZilla
+# Host: 217.182.70.41
+# User: crm@rachadigital.com
+# Password: G13c8c_f3
+# Directory: www/
 ```
 
 ### Méthode 3 : Git (si disponible)
@@ -109,14 +115,21 @@ Dans l'espace client OVH :
 
 Mettez à jour vos variables d'environnement :
 ```env
-VITE_DB_HOST=localhost
+# Production OVH - Racha Digital
+VITE_DB_HOST=217.182.70.41
 VITE_DB_PORT=3306
 VITE_DB_NAME=admin_crm
 VITE_DB_USER=kiwiland
 VITE_DB_PASSWORD=8Z!ZHbm7uo9rjiv#
+
+# Configuration OVH
+OVH_HOST=217.182.70.41
+OVH_USER=crm@rachadigital.com
+OVH_PASSWORD=G13c8c_f3
+OVH_DOMAIN=crm.rachadigital.com
 ```
 
-**Note** : Pour OVH, remplacez `localhost` par l'adresse de votre serveur MySQL OVH.
+**Note** : Le fichier `.env.production` est déjà configuré avec ces valeurs.
 
 ## 🔧 Vérifications Post-Déploiement
 

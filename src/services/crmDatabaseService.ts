@@ -15,18 +15,38 @@ interface DatabaseResponse<T> {
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Configuration de la base de données MySQL/MariaDB
+// Détection automatique de l'environnement (développement vs production)
+const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
+
 const DB_CONFIG = {
-  host: process.env.VITE_DB_HOST || 'localhost',
-  port: parseInt(process.env.VITE_DB_PORT || '3306'),
-  database: process.env.VITE_DB_NAME || 'admin_crm',
-  user: process.env.VITE_DB_USER || 'kiwiland',
-  password: process.env.VITE_DB_PASSWORD || '8Z!ZHbm7uo9rjiv#',
+  // Configuration dynamique selon l'environnement
+  host: isProduction
+    ? (import.meta.env.VITE_DB_HOST_PROD || '217.182.70.41')
+    : (import.meta.env.VITE_DB_HOST || 'localhost'),
+  port: parseInt(isProduction
+    ? (import.meta.env.VITE_DB_PORT_PROD || '3306')
+    : (import.meta.env.VITE_DB_PORT || '3306')),
+  database: isProduction
+    ? (import.meta.env.VITE_DB_NAME_PROD || 'admin_crm')
+    : (import.meta.env.VITE_DB_NAME || 'admin_crm'),
+  user: isProduction
+    ? (import.meta.env.VITE_DB_USER_PROD || 'kiwiland')
+    : (import.meta.env.VITE_DB_USER || 'kiwiland'),
+  password: isProduction
+    ? (import.meta.env.VITE_DB_PASSWORD_PROD || '8Z!ZHbm7uo9rjiv#')
+    : (import.meta.env.VITE_DB_PASSWORD || '8Z!ZHbm7uo9rjiv#'),
+
   // Configuration spécifique MariaDB v10.3.39
   charset: 'utf8mb4',
   timezone: '+00:00',
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true
+  acquireTimeout: isProduction ? 30000 : 60000, // Plus court en production
+  timeout: isProduction ? 30000 : 60000,
+  reconnect: true,
+
+  // Configuration OVH spécifique
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  connectTimeout: isProduction ? 20000 : 60000,
+  multipleStatements: false, // Sécurité
 };
 
 export class CRMDatabaseService {

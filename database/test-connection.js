@@ -8,14 +8,31 @@
 const mysql = require('mysql2/promise');
 
 // Configuration de la base de données
+// Détection automatique de l'environnement
+const isProduction = process.env.NODE_ENV === 'production';
+
 const DB_CONFIG = {
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  database: process.env.DB_NAME || 'admin_crm',
-  user: process.env.DB_USER || 'kiwiland',
-  password: process.env.DB_PASSWORD || '8Z!ZHbm7uo9rjiv#',
+  host: isProduction
+    ? (process.env.DB_HOST_PROD || '217.182.70.41')
+    : (process.env.DB_HOST || 'localhost'),
+  port: parseInt(isProduction
+    ? (process.env.DB_PORT_PROD || '3306')
+    : (process.env.DB_PORT || '3306')),
+  database: isProduction
+    ? (process.env.DB_NAME_PROD || 'admin_crm')
+    : (process.env.DB_NAME || 'admin_crm'),
+  user: isProduction
+    ? (process.env.DB_USER_PROD || 'kiwiland')
+    : (process.env.DB_USER || 'kiwiland'),
+  password: isProduction
+    ? (process.env.DB_PASSWORD_PROD || '8Z!ZHbm7uo9rjiv#')
+    : (process.env.DB_PASSWORD || '8Z!ZHbm7uo9rjiv#'),
   charset: 'utf8mb4',
-  timezone: '+00:00'
+  timezone: '+00:00',
+
+  // Configuration OVH spécifique
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  connectTimeout: isProduction ? 20000 : 60000,
 };
 
 // Couleurs pour les messages
