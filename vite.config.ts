@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// Configuration optimisée pour déploiement OVH
+// Configuration optimisée pour la production
 export default defineConfig(({ mode }) => ({
-  base: './', // Chemins relatifs pour OVH
+  base: './', // Chemins relatifs
   server: {
     host: true,
     port: 3000,
@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Optimisations pour la production OVH
-    target: 'es2015', // Compatibilité navigateurs plus large
+    // Optimisations pour la production
+    target: 'es2015', // Compatibilité navigateurs
     minify: 'esbuild',
     sourcemap: false, // Pas de sourcemap en production
     outDir: 'dist',
@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Optimisation pour le cache OVH
+          // Optimisation pour le cache
           vendor: ['react', 'react-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
           utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: 'assets/[name]-[hash].[ext]'
       },
     },
-    // Optimiser pour OVH
+    // Optimisations de build
     chunkSizeWarningLimit: 500,
     reportCompressedSize: false, // Plus rapide en build
   },

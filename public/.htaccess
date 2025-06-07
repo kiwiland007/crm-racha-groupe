@@ -1,10 +1,10 @@
-# Configuration Apache pour Racha Business CRM sur OVH
+# Configuration Apache pour Racha Business CRM
 # Optimisé pour les applications React SPA
 
 # Activer la réécriture d'URL
 RewriteEngine On
 
-# Forcer HTTPS (recommandé pour OVH)
+# Forcer HTTPS (recommandé)
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
@@ -119,7 +119,7 @@ ErrorDocument 403 /index.html
     # RewriteRule ^api/(.*)$ http://your-backend-url/api/$1 [P,L]
 </IfModule>
 
-# Optimisation pour OVH
+# Optimisations serveur
 # Désactiver les signatures de serveur
 ServerTokens Prod
 

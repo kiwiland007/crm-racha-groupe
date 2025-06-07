@@ -15,5 +15,5 @@ Allow: /assets/*.png
 Allow: /assets/*.jpg
 Allow: /assets/*.svg
 
-# Sitemap (à créer après déploiement)
-Sitemap: https://votre-domaine-ovh.com/sitemap.xml
+# Sitemap (à configurer selon votre domaine)
+Sitemap: https://your-domain.com/sitemap.xml

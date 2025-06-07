@@ -8,11 +8,11 @@
 - **Version** : MariaDB v10.3.39+
 - **Base de données** : `admin_crm`
 - **Utilisateur** : `kiwiland`
-- **Mot de passe** : `8Z!ZHbm7uo9rjiv#`
+- **Mot de passe** : `your_password`
 
 ### **URL de Connexion**
 ```
-mysql://kiwiland:8Z!ZHbm7uo9rjiv#@localhost:3306/admin_crm
+mysql://your_username:your_password@localhost:3306/admin_crm
 ```
 
 ---

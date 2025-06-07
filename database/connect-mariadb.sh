@@ -17,9 +17,8 @@ NC='\033[0m' # No Color
 DB_HOST="localhost"
 DB_PORT="3306"
 DB_NAME="admin_crm"
-DB_USER="kiwiland"
-DB_PASSWORD="8Z!ZHbm7uo9rjiv#"
-DB_VERSION="MariaDB v10.3.39"
+DB_USER="your_username"
+DB_PASSWORD="your_password"
 
 # Fonctions utilitaires
 print_header() {
