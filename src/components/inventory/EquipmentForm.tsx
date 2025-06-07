@@ -41,7 +41,7 @@ import { Badge } from "@/components/ui/badge";
 import { Settings } from "lucide-react";
 import { toast } from "sonner";
 import CategoryManager from "./CategoryManager";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   name: z.string().min(2, {

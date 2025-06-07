@@ -37,7 +37,7 @@ const InvoiceForm = React.lazy(() => import("./pages/InvoiceForm"));
 const Invoices = React.lazy(() => import("./pages/Invoices"));
 const BonLivraison = React.lazy(() => import("./pages/BonLivraison"));
 const TechnicalSheets = React.lazy(() => import("./pages/TechnicalSheets"));
-const DatabaseAdmin = React.lazy(() => import("./components/DatabaseAdmin"));
+
 import { crmDatabase } from "./services/crmDatabaseService";
 
 const queryClient = new QueryClient();
@@ -69,7 +69,7 @@ const AppContent = () => {
       <Route path="/products" element={<Products />} />
       <Route path="/services" element={<Services />} />
       <Route path="/invoice/new" element={<InvoiceForm />} />
-      <Route path="/database-admin" element={<DatabaseAdmin />} />
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
