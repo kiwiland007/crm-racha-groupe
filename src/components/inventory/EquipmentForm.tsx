@@ -98,7 +98,8 @@ export function EquipmentForm({
     { id: '4', name: 'Installation', type: 'service', description: 'Service d\'installation', icon: 'Wrench', color: 'orange', isActive: true },
     { id: '5', name: 'Maintenance', type: 'service', description: 'Service de maintenance', icon: 'Wrench', color: 'red', isActive: true },
   ]);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isMobile = useIsMobile();
+  const isDesktop = !isMobile;
 
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(formSchema),
