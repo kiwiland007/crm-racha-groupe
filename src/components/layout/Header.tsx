@@ -15,7 +15,7 @@ import { UserProfile } from "./UserProfile";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function Header({ title }: { title: string }) {
+export default function Header({ title }: { title?: string }) {
   const navigate = useNavigate();
 
 
@@ -52,8 +52,12 @@ export default function Header({ title }: { title: string }) {
         <div className="flex items-center">
           <Logo variant="compact" size="md" />
         </div>
-        <div className="h-6 w-px bg-gray-300 md:h-8" />
-        <h1 className="text-lg font-semibold text-gray-800 md:text-xl">{title}</h1>
+        {title && (
+          <>
+            <div className="h-6 w-px bg-gray-300 md:h-8" />
+            <h1 className="text-lg font-semibold text-gray-800 md:text-xl">{title}</h1>
+          </>
+        )}
       </div>
       
       <div className="flex items-center gap-4">

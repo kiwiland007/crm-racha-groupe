@@ -117,31 +117,39 @@ export default function Settings() {
   };
 
   return (
-    <Layout title="Paramètres">
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 md:w-auto md:grid-cols-6">
-          <TabsTrigger value="general" className="flex gap-2 items-center">
-            <Settings2 size={16} />
+    <Layout>
+      <div className="container mx-auto space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+          <p className="text-muted-foreground">
+            Gérez les paramètres de votre CRM et configurez vos intégrations.
+          </p>
+        </div>
+
+        <Tabs defaultValue="general" className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 lg:w-auto lg:grid-cols-6">
+          <TabsTrigger value="general" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <Settings2 size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">Général</span>
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex gap-2 items-center">
-            <Users size={16} />
+          <TabsTrigger value="users" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <Users size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">Utilisateurs</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex gap-2 items-center">
-            <BellRing size={16} />
+          <TabsTrigger value="notifications" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <BellRing size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="flex gap-2 items-center">
-            <Globe size={16} />
+          <TabsTrigger value="integrations" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <Globe size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">Intégrations</span>
           </TabsTrigger>
-          <TabsTrigger value="api" className="flex gap-2 items-center">
-            <CreditCard size={16} />
+          <TabsTrigger value="api" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <CreditCard size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">API</span>
           </TabsTrigger>
-          <TabsTrigger value="whatsapp" className="flex gap-2 items-center">
-            <MessageSquare size={16} />
+          <TabsTrigger value="whatsapp" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <MessageSquare size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">WhatsApp</span>
           </TabsTrigger>
         </TabsList>
@@ -631,106 +639,102 @@ export default function Settings() {
         </TabsContent>
 
         {/* WhatsApp Business */}
-        <TabsContent value="whatsapp">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-green-600" />
-                  Configuration WhatsApp Business
-                </CardTitle>
-                <CardDescription>
-                  Gérez votre intégration WhatsApp Business pour communiquer avec vos clients.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Statut de connexion */}
-                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-green-100 p-2 rounded-md">
-                        <MessageSquare className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-green-900">WhatsApp Business API</h3>
-                        <p className="text-sm text-green-700">
-                          Connexion active et opérationnelle
-                        </p>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                      ✓ Connecté
-                    </Badge>
+        <TabsContent value="whatsapp" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MessageSquare className="h-5 w-5 text-green-600" />
+                Configuration WhatsApp Business
+              </CardTitle>
+              <CardDescription>
+                Gérez votre intégration WhatsApp Business pour communiquer avec vos clients.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Statut de connexion */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200 gap-3">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-green-100 p-2 rounded-md">
+                    <MessageSquare className="h-5 w-5 text-green-600" />
                   </div>
-
-                  {/* Informations de configuration */}
-                  <div className="grid gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="whatsapp-number" className="text-sm font-medium">
-                          Numéro WhatsApp Business
-                        </Label>
-                        <Input
-                          id="whatsapp-number"
-                          value="+212 661 234 567"
-                          disabled
-                          className="bg-gray-50 border-gray-200"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="business-name" className="text-sm font-medium">
-                          Nom de l'entreprise
-                        </Label>
-                        <Input
-                          id="business-name"
-                          value="Racha Business Group"
-                          disabled
-                          className="bg-gray-50 border-gray-200"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="webhook-url" className="text-sm font-medium">
-                        URL Webhook
-                      </Label>
-                      <Input
-                        id="webhook-url"
-                        value="https://api.rachabusinessgroup.com/webhook/whatsapp"
-                        disabled
-                        className="bg-gray-50 border-gray-200"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Cette URL reçoit les messages WhatsApp en temps réel
-                      </p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Actions */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <h4 className="font-medium">Reconfiguration</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Utilisez l'assistant pour modifier votre configuration WhatsApp
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={handleWhatsAppReconfigure}
-                      className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
-                    >
-                      <Settings size={16} className="mr-2" />
-                      Assistant de reconfiguration
-                    </Button>
+                  <div>
+                    <h3 className="font-medium text-green-900">WhatsApp Business API</h3>
+                    <p className="text-sm text-green-700">
+                      Connexion active et opérationnelle
+                    </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 w-fit">
+                  ✓ Connecté
+                </Badge>
+              </div>
 
-            <WhatsAppStats />
-          </div>
+              {/* Informations de configuration */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="whatsapp-number" className="text-sm font-medium">
+                      Numéro WhatsApp Business
+                    </Label>
+                    <Input
+                      id="whatsapp-number"
+                      value="+212 661 234 567"
+                      disabled
+                      className="bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="business-name" className="text-sm font-medium">
+                      Nom de l'entreprise
+                    </Label>
+                    <Input
+                      id="business-name"
+                      value="Racha Business Group"
+                      disabled
+                      className="bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="webhook-url" className="text-sm font-medium">
+                    URL Webhook
+                  </Label>
+                  <Input
+                    id="webhook-url"
+                    value="https://api.rachabusinessgroup.com/webhook/whatsapp"
+                    disabled
+                    className="bg-gray-50 border-gray-200 text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cette URL reçoit les messages WhatsApp en temps réel
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="space-y-1">
+                  <h4 className="font-medium">Reconfiguration</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Utilisez l'assistant pour modifier votre configuration WhatsApp
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleWhatsAppReconfigure}
+                  className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 whitespace-nowrap"
+                >
+                  <Settings size={16} className="mr-2" />
+                  Assistant de reconfiguration
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <WhatsAppStats />
         </TabsContent>
       </Tabs>
 
@@ -754,8 +758,7 @@ export default function Settings() {
         open={whatsappWizardOpen}
         onOpenChange={setWhatsappWizardOpen}
       />
-
-
+      </div>
     </Layout>
   );
 }
