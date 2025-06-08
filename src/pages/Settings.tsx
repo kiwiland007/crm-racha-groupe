@@ -41,6 +41,8 @@ import { LeadCaptureForm } from "@/components/marketing/LeadCaptureForm";
 
 import { IntegrationModals } from "@/components/settings/IntegrationModals";
 import { APIManagement } from "@/components/settings/APIManagement";
+import { runAuthTests } from "@/utils/authTest";
+import { runIntegrationTests } from "@/utils/integrationTest";
 
 
 export default function Settings() {
@@ -116,10 +118,32 @@ export default function Settings() {
     <Layout>
       <div className="container mx-auto space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
-          <p className="text-muted-foreground">
-            Gérez les paramètres de votre CRM et configurez vos intégrations.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+              <p className="text-muted-foreground">
+                Gérez les paramètres de votre CRM et configurez vos intégrations.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runAuthTests()}
+                className="gap-2"
+              >
+                🧪 Test Auth
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runIntegrationTests()}
+                className="gap-2"
+              >
+                🔌 Test Intégrations
+              </Button>
+            </div>
+          </div>
         </div>
 
         <Tabs defaultValue="general" className="w-full space-y-6">
