@@ -31,6 +31,7 @@ import {
   Mail,
   MessageSquare,
   Save,
+  Settings,
   Settings2,
   UserPlus,
   Users,
@@ -643,16 +644,17 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
+                <div className="space-y-6">
+                  {/* Statut de connexion */}
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center space-x-3">
                       <div className="bg-green-100 p-2 rounded-md">
-                        <MessageSquare className="h-6 w-6 text-green-600" />
+                        <MessageSquare className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-medium">WhatsApp Business API</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Statut de la connexion à l'API WhatsApp Business
+                        <h3 className="font-medium text-green-900">WhatsApp Business API</h3>
+                        <p className="text-sm text-green-700">
+                          Connexion active et opérationnelle
                         </p>
                       </div>
                     </div>
@@ -661,39 +663,64 @@ export default function Settings() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="whatsapp-number">Numéro WhatsApp Business</Label>
-                      <Input
-                        id="whatsapp-number"
-                        value="+212 661 234 567"
-                        disabled
-                        className="bg-gray-50"
-                      />
+                  {/* Informations de configuration */}
+                  <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp-number" className="text-sm font-medium">
+                          Numéro WhatsApp Business
+                        </Label>
+                        <Input
+                          id="whatsapp-number"
+                          value="+212 661 234 567"
+                          disabled
+                          className="bg-gray-50 border-gray-200"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="business-name" className="text-sm font-medium">
+                          Nom de l'entreprise
+                        </Label>
+                        <Input
+                          id="business-name"
+                          value="Racha Business Group"
+                          disabled
+                          className="bg-gray-50 border-gray-200"
+                        />
+                      </div>
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="business-name">Nom de l'entreprise</Label>
+                      <Label htmlFor="webhook-url" className="text-sm font-medium">
+                        URL Webhook
+                      </Label>
                       <Input
-                        id="business-name"
-                        value="Racha Business Digital SARL"
+                        id="webhook-url"
+                        value="https://api.rachabusinessgroup.com/webhook/whatsapp"
                         disabled
-                        className="bg-gray-50"
+                        className="bg-gray-50 border-gray-200"
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Cette URL reçoit les messages WhatsApp en temps réel
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="webhook-url">URL Webhook</Label>
-                    <Input
-                      id="webhook-url"
-                      value="https://api.rachabusinessgroup.com/webhook/whatsapp"
-                      disabled
-                      className="bg-gray-50"
-                    />
-                  </div>
+                  <Separator />
 
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={handleWhatsAppReconfigure}>
+                  {/* Actions */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h4 className="font-medium">Reconfiguration</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Utilisez l'assistant pour modifier votre configuration WhatsApp
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={handleWhatsAppReconfigure}
+                      className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
+                    >
                       <Settings size={16} className="mr-2" />
                       Assistant de reconfiguration
                     </Button>
