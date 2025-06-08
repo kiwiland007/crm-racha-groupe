@@ -45,6 +45,7 @@ import { APIManagement } from "@/components/settings/APIManagement";
 import { DatabaseSync } from "@/components/settings/DatabaseSync";
 import { runAuthTests } from "@/utils/authTest";
 import { runIntegrationTests } from "@/utils/integrationTest";
+import { runDatabaseTests } from "@/utils/databaseTest";
 
 
 export default function Settings() {
@@ -143,6 +144,14 @@ export default function Settings() {
                 className="gap-2"
               >
                 🔌 Test Intégrations
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runDatabaseTests()}
+                className="gap-2"
+              >
+                🗄️ Test DB
               </Button>
             </div>
           </div>

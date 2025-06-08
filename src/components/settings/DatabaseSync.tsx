@@ -48,6 +48,10 @@ export function DatabaseSync() {
       setIsConnected(connected);
     } catch (error) {
       setIsConnected(false);
+      // Ne pas afficher d'erreur en mode développement sans backend
+      if (import.meta.env.MODE === 'production') {
+        console.error('Database connection failed:', error);
+      }
     }
   };
 
@@ -253,7 +257,10 @@ export function DatabaseSync() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Impossible de se connecter à la base de données. Vérifiez la configuration réseau.
+              {import.meta.env.MODE === 'development'
+                ? "Mode développement : API backend non disponible. Les données sont sauvegardées localement."
+                : "Impossible de se connecter à la base de données. Vérifiez la configuration réseau."
+              }
             </AlertDescription>
           </Alert>
         )}

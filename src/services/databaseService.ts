@@ -3,13 +3,14 @@
  * Racha Business CRM
  */
 
-import { 
-  API_ENDPOINTS, 
-  buildApiUrl, 
-  getAuthHeaders, 
-  QueryResult, 
+import {
+  API_ENDPOINTS,
+  buildApiUrl,
+  getAuthHeaders,
+  QueryResult,
   PaginatedResult,
-  PaginationParams 
+  PaginationParams,
+  ENV_CONFIG
 } from '@/config/database';
 import { toast } from 'sonner';
 
@@ -296,12 +297,29 @@ export class DatabaseService {
    */
   public async testConnection(): Promise<boolean> {
     try {
+      // En mode développement sans backend, retourner false mais ne pas logger d'erreur
+      if (ENV_CONFIG.isDevelopment && !this.isBackendAvailable()) {
+        return false;
+      }
+
       const result = await this.makeRequest('GET', buildApiUrl('/api/health'));
       return result.success;
     } catch (error) {
+      // Ne pas logger d'erreur si on sait que le backend n'est pas disponible
+      if (!this.isBackendAvailable()) {
+        return false;
+      }
       console.error('Database connection test failed:', error);
       return false;
     }
+  }
+
+  /**
+   * Vérifier si le backend API est disponible
+   */
+  private isBackendAvailable(): boolean {
+    // En mode développement, on peut fonctionner sans backend
+    return ENV_CONFIG.isProduction || localStorage.getItem('crm_backend_available') === 'true';
   }
 
   /**

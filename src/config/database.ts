@@ -244,22 +244,22 @@ export const SECURITY_CONFIG = {
   bcrypt: {
     saltRounds: 12
   },
-  
+
   // JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'racha-crm-secret-key-2024',
+    secret: import.meta.env.VITE_JWT_SECRET || 'racha-crm-secret-key-2024',
     expiresIn: '24h',
     refreshExpiresIn: '7d'
   },
-  
+
   // Sessions
   session: {
     maxAge: 24 * 60 * 60 * 1000, // 24 heures
-    secure: process.env.NODE_ENV === 'production',
+    secure: import.meta.env.MODE === 'production',
     httpOnly: true,
     sameSite: 'strict' as const
   },
-  
+
   // Rate limiting
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -269,10 +269,10 @@ export const SECURITY_CONFIG = {
 
 // Configuration de l'environnement
 export const ENV_CONFIG = {
-  isDevelopment: process.env.NODE_ENV === 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  apiUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001',
-  frontendUrl: process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000'
+  isDevelopment: import.meta.env.MODE === 'development',
+  isProduction: import.meta.env.MODE === 'production',
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+  frontendUrl: import.meta.env.VITE_FRONTEND_URL || 'http://localhost:3000'
 };
 
 // Utilitaires pour les requêtes
