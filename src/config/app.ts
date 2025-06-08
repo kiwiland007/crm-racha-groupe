@@ -114,8 +114,7 @@ export const APP_CONFIG = {
   // Configuration de développement
   development: {
     enableDebugLogs: process.env.NODE_ENV === 'development',
-    enableMockData: true,
-    enableTestFeatures: process.env.NODE_ENV === 'development'
+    enableMockData: true
   }
 } as const;
 

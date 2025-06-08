@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    name: 🧪 Test & Build
+  build:
+    name: 🏗️ Build & Deploy
     runs-on: ubuntu-latest
     
     steps:
