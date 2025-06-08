@@ -24,6 +24,7 @@ import {
   BellRing,
   Building,
   CreditCard,
+  Database,
   Facebook,
   Globe,
   Instagram,
@@ -41,6 +42,7 @@ import { LeadCaptureForm } from "@/components/marketing/LeadCaptureForm";
 
 import { IntegrationModals } from "@/components/settings/IntegrationModals";
 import { APIManagement } from "@/components/settings/APIManagement";
+import { DatabaseSync } from "@/components/settings/DatabaseSync";
 import { runAuthTests } from "@/utils/authTest";
 import { runIntegrationTests } from "@/utils/integrationTest";
 
@@ -147,7 +149,7 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="general" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:w-auto lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 lg:w-auto lg:grid-cols-6">
           <TabsTrigger value="general" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
             <Settings2 size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">Général</span>
@@ -167,6 +169,10 @@ export default function Settings() {
           <TabsTrigger value="api" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
             <CreditCard size={14} className="md:w-4 md:h-4" />
             <span className="hidden sm:inline">API</span>
+          </TabsTrigger>
+          <TabsTrigger value="database" className="flex gap-1 md:gap-2 items-center text-xs md:text-sm">
+            <Database size={14} className="md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Base de données</span>
           </TabsTrigger>
         </TabsList>
 
@@ -633,6 +639,10 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
+        {/* Synchronisation Base de données */}
+        <TabsContent value="database">
+          <DatabaseSync />
+        </TabsContent>
 
       </Tabs>
 
