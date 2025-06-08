@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Routes, Route } from "react-router-dom";
-// ProtectedRoute removed - not used
+import { ProtectedRoute } from "@/contexts/AuthContext";
 import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
 import { AppProviders } from "@/providers/AppProviders";
 
@@ -40,25 +40,27 @@ const AppContent = () => {
   }, [recordPageView]);
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/contacts" element={<Contacts />} />
-      <Route path="/tasks" element={<Tasks />} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/inventory" element={<Inventory />} />
-      <Route path="/events" element={<Events />} />
-      <Route path="/quotes" element={<Quotes />} />
-      <Route path="/invoices" element={<Invoices />} />
-      <Route path="/bon-livraison" element={<BonLivraison />} />
-      <Route path="/technical-sheets" element={<TechnicalSheets />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/invoice/new" element={<InvoiceForm />} />
+    <ProtectedRoute>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/contacts" element={<Contacts />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/quotes" element={<Quotes />} />
+        <Route path="/invoices" element={<Invoices />} />
+        <Route path="/bon-livraison" element={<BonLivraison />} />
+        <Route path="/technical-sheets" element={<TechnicalSheets />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/invoice/new" element={<InvoiceForm />} />
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </ProtectedRoute>
   );
 };
 

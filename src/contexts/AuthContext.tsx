@@ -67,6 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Erreur lors de la récupération des données utilisateur:', error);
         localStorage.removeItem('crm_user');
       }
+    } else {
+      // Auto-connexion en mode développement avec l'utilisateur admin
+      const defaultUser = demoUsers[0]; // Youssef Alami (admin)
+      setUser(defaultUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('crm_user', JSON.stringify(defaultUser));
     }
   }, []);
 
