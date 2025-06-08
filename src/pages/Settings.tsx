@@ -39,6 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserManagement } from "@/components/settings/UserManagement";
 import { LeadCaptureForm } from "@/components/marketing/LeadCaptureForm";
 import { WhatsAppStats } from "@/components/whatsapp/WhatsAppIntegration";
+import { WhatsAppConfigWizard } from "@/components/whatsapp/WhatsAppConfigWizard";
 import { IntegrationModals } from "@/components/settings/IntegrationModals";
 import { APIManagement } from "@/components/settings/APIManagement";
 
@@ -81,6 +82,7 @@ export default function Settings() {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [whatsappWizardOpen, setWhatsappWizardOpen] = useState(false);
 
   // Charger les paramètres depuis localStorage au démarrage
   useEffect(() => {
@@ -110,9 +112,7 @@ export default function Settings() {
   };
 
   const handleWhatsAppReconfigure = () => {
-    toast.info("Reconfiguration WhatsApp", {
-      description: "Ouverture de l'assistant de reconfiguration WhatsApp Business"
-    });
+    setWhatsappWizardOpen(true);
   };
 
   return (
@@ -692,9 +692,10 @@ export default function Settings() {
                     />
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-end space-x-2">
                     <Button variant="outline" onClick={handleWhatsAppReconfigure}>
-                      Reconfigurer
+                      <Settings size={16} className="mr-2" />
+                      Assistant de reconfiguration
                     </Button>
                   </div>
                 </div>
@@ -720,6 +721,11 @@ export default function Settings() {
         onEmailOpenChange={setEmailModalOpen}
         onChatOpenChange={setChatModalOpen}
         onAuthOpenChange={setAuthModalOpen}
+      />
+
+      <WhatsAppConfigWizard
+        open={whatsappWizardOpen}
+        onOpenChange={setWhatsappWizardOpen}
       />
 
 
