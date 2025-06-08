@@ -27,7 +27,7 @@ const Invoices = React.lazy(() => import("./pages/Invoices"));
 const BonLivraison = React.lazy(() => import("./pages/BonLivraison"));
 const TechnicalSheets = React.lazy(() => import("./pages/TechnicalSheets"));
 
-import { crmDatabase } from "./services/crmDatabaseService";
+import { databaseService } from "./services/databaseService";
 
 const AppContent = () => {
   const { recordPageView } = useMonitoring();
@@ -36,7 +36,7 @@ const AppContent = () => {
     recordPageView(window.location.pathname);
 
     // Initialiser la base de données au démarrage
-    crmDatabase.initialize().catch(console.error);
+    databaseService.testConnection().catch(console.error);
   }, [recordPageView]);
 
   return (
