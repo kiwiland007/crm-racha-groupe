@@ -1,4 +1,5 @@
 // Gestionnaire d'erreurs centralisé - Amélioration Senior Review
+import React from 'react';
 import { toast } from 'sonner';
 import { ApiError } from '@/types/api';
 

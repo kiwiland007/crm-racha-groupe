@@ -1,6 +1,9 @@
 /**
- * Service de base de données CRM intégré
- * Gère les opérations CRUD avec une API backend et localStorage comme fallback
+ * Service de gestion des données CRM
+ * Gère les opérations CRUD et la persistance via localStorage
+ *
+ * @version 2.0.0
+ * @author Racha Groupe
  */
 
 import { Contact, Product, Quote, Invoice, Event, Task, Notification, InventoryItem, User } from '../types';
@@ -11,24 +14,18 @@ interface DatabaseResponse<T> {
   error?: string;
 }
 
-// Configuration de l'API backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Configuration de l'application
+const APP_CONFIG = {
+  name: 'CRM Racha Groupe',
+  version: '2.0.0'
+};
 
-// Configuration de la base de données MySQL/MariaDB
-const DB_CONFIG = {
-  host: import.meta.env.VITE_DB_HOST || 'localhost',
-  port: parseInt(import.meta.env.VITE_DB_PORT || '3306'),
-  database: import.meta.env.VITE_DB_NAME || 'admin_crm',
-  user: import.meta.env.VITE_DB_USER || 'your_username',
-  password: import.meta.env.VITE_DB_PASSWORD || 'your_password',
-
-  // Configuration MySQL/MariaDB
-  charset: 'utf8mb4',
-  timezone: '+00:00',
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
-  multipleStatements: false,
+// Configuration pour l'application (localStorage uniquement)
+const STORAGE_CONFIG = {
+  prefix: 'crm_',
+  version: '1.0.0',
+  maxItems: 10000,
+  compression: false
 };
 
 export class CRMDatabaseService {

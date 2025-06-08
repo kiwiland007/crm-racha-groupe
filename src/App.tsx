@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/contexts/AuthContext";
+// ProtectedRoute removed - not used
 import RouterErrorBoundary from "@/components/common/RouterErrorBoundary";
 import { AppProviders } from "@/providers/AppProviders";
 
