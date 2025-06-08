@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,20 +19,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Truck, Package, User, MapPin, Calendar, FileText } from "lucide-react";
+import { Truck, Package, User, Calendar, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useBLContext } from "@/contexts/BLContext";
 import { BLItemsManager } from "./BLItemsManager";
 
-interface BLEditModalProps {
-  bl: any;
+interface BLCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
-  const { updateBL } = useBLContext();
+export function BLCreateModal({ open, onOpenChange }: BLCreateModalProps) {
+  const { addBL } = useBLContext();
   
   const [formData, setFormData] = useState({
     client: "",
@@ -41,7 +39,7 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
     clientEmail: "",
     dateLivraison: "",
     livreur: "",
-    transporteur: "",
+    transporteur: "Transport interne",
     vehicule: "",
     modeLivraison: "livraison_directe",
     status: "en_preparation",
@@ -54,30 +52,6 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
     items: []
   });
 
-  useEffect(() => {
-    if (bl && open) {
-      setFormData({
-        client: bl.client || "",
-        clientAdresse: bl.clientAdresse || "",
-        clientPhone: bl.clientPhone || "",
-        clientEmail: bl.clientEmail || "",
-        dateLivraison: bl.dateLivraison || "",
-        livreur: bl.livreur || "",
-        transporteur: bl.transporteur || "",
-        vehicule: bl.vehicule || "",
-        modeLivraison: bl.modeLivraison || "livraison_directe",
-        status: bl.status || "en_preparation",
-        conditionsLivraison: bl.conditionsLivraison || "",
-        observationsGenerales: bl.observationsGenerales || "",
-        observationsClient: bl.observationsClient || "",
-        totalColis: bl.totalColis || 1,
-        poidsTotal: bl.poidsTotal || 0,
-        volumeTotal: bl.volumeTotal || 0,
-        items: bl.items || []
-      });
-    }
-  }, [bl, open]);
-
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -85,61 +59,104 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
     }));
   };
 
-  const handleSave = () => {
-    if (!bl) return;
+  const handleCreate = async () => {
+    // Validation
+    if (!formData.client.trim()) {
+      toast.error("Veuillez saisir le nom du client");
+      return;
+    }
+    
+    if (!formData.clientAdresse.trim()) {
+      toast.error("Veuillez saisir l'adresse de livraison");
+      return;
+    }
+    
+    if (!formData.dateLivraison) {
+      toast.error("Veuillez sélectionner une date de livraison");
+      return;
+    }
+    
+    if (formData.items.length === 0) {
+      toast.error("Veuillez ajouter au moins un article à livrer");
+      return;
+    }
 
     try {
-      updateBL(bl.id, formData);
+      // Import dynamique du service de numérotation
+      const { numerotationService } = await import("@/services/numerotationService");
+      
+      // Générer un nouveau numéro BL
+      const newBLNumber = numerotationService.generateBLNumber();
+      
+      // Créer le nouveau BL
+      const newBL = {
+        id: newBLNumber,
+        factureId: `FACT-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
+        devisId: `DEVIS-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
+        dateCreation: new Date().toLocaleDateString('fr-FR'),
+        signatureClient: false,
+        signatureLivreur: false,
+        ...formData
+      };
+
+      // Ajouter le BL via le contexte
+      if (addBL) {
+        addBL(newBL);
+      }
+      
+      // Reset form
+      setFormData({
+        client: "",
+        clientAdresse: "",
+        clientPhone: "",
+        clientEmail: "",
+        dateLivraison: "",
+        livreur: "",
+        transporteur: "Transport interne",
+        vehicule: "",
+        modeLivraison: "livraison_directe",
+        status: "en_preparation",
+        conditionsLivraison: "",
+        observationsGenerales: "",
+        observationsClient: "",
+        totalColis: 1,
+        poidsTotal: 0,
+        volumeTotal: 0,
+        items: []
+      });
+      
       onOpenChange(false);
       
-      toast.success("BL modifié", {
-        description: `Les modifications du BL ${bl.id} ont été sauvegardées.`
+      toast.success("BL créé avec succès !", {
+        description: `Bon de livraison ${newBLNumber} créé pour ${formData.client}`,
+        action: {
+          label: "Voir",
+          onClick: () => console.log("Voir BL", newBLNumber)
+        }
       });
     } catch (error) {
-      toast.error("Erreur", {
-        description: "Impossible de sauvegarder les modifications."
+      console.error("Erreur création BL:", error);
+      toast.error("Erreur lors de la création", {
+        description: "Impossible de créer le bon de livraison"
       });
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "en_preparation": return "bg-blue-100 text-blue-800";
-      case "expedie": return "bg-orange-100 text-orange-800";
-      case "en_cours_livraison": return "bg-amber-100 text-amber-800";
-      case "livre": return "bg-green-100 text-green-800";
-      case "partiellement_livre": return "bg-yellow-100 text-yellow-800";
-      case "refuse": return "bg-red-100 text-red-800";
-      case "retour": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "en_preparation": return "En préparation";
-      case "expedie": return "Expédié";
-      case "en_cours_livraison": return "En cours de livraison";
-      case "livre": return "Livré";
-      case "partiellement_livre": return "Partiellement livré";
-      case "refuse": return "Refusé";
-      case "retour": return "En retour";
-      default: return status;
-    }
-  };
-
-  if (!bl) return null;
+  // Générer une date par défaut (dans 3 jours)
+  const defaultDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[900px] max-h-[95vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[1000px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Truck className="h-6 w-6 text-blue-600" />
-            Modifier le BL {bl.id}
+            <Plus className="h-6 w-6 text-blue-600" />
+            Créer un nouveau Bon de Livraison
           </DialogTitle>
           <DialogDescription>
-            Modification des informations du bon de livraison pour <span className="font-semibold">{bl.client}</span>
+            Remplissez les informations pour créer un nouveau bon de livraison
           </DialogDescription>
         </DialogHeader>
 
@@ -155,7 +172,7 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="client">Nom du client</Label>
+                  <Label htmlFor="client">Nom du client *</Label>
                   <Input
                     id="client"
                     value={formData.client}
@@ -175,7 +192,7 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="clientAdresse">Adresse de livraison</Label>
+                  <Label htmlFor="clientAdresse">Adresse de livraison *</Label>
                   <Textarea
                     id="clientAdresse"
                     value={formData.clientAdresse}
@@ -209,22 +226,28 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="dateLivraison">Date de livraison</Label>
+                  <Label htmlFor="dateLivraison">Date de livraison *</Label>
                   <Input
                     id="dateLivraison"
-                    value={formData.dateLivraison}
+                    type="date"
+                    value={formData.dateLivraison || defaultDate}
                     onChange={(e) => handleInputChange("dateLivraison", e.target.value)}
-                    placeholder="JJ/MM/AAAA"
                   />
                 </div>
                 <div>
                   <Label htmlFor="livreur">Livreur</Label>
-                  <Input
-                    id="livreur"
-                    value={formData.livreur}
-                    onChange={(e) => handleInputChange("livreur", e.target.value)}
-                    placeholder="Nom du livreur"
-                  />
+                  <Select value={formData.livreur} onValueChange={(value) => handleInputChange("livreur", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un livreur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mohamed Alami">Mohamed Alami</SelectItem>
+                      <SelectItem value="Karim Hassan">Karim Hassan</SelectItem>
+                      <SelectItem value="Rachid Lamrani">Rachid Lamrani</SelectItem>
+                      <SelectItem value="Youssef Benali">Youssef Benali</SelectItem>
+                      <SelectItem value="Layla Bensaid">Layla Bensaid</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="transporteur">Transporteur</Label>
@@ -264,78 +287,6 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
             </CardContent>
           </Card>
 
-          {/* Statut et informations complémentaires */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-purple-600" />
-                Statut et informations complémentaires
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="status">Statut du BL</Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en_preparation">En préparation</SelectItem>
-                      <SelectItem value="expedie">Expédié</SelectItem>
-                      <SelectItem value="en_cours_livraison">En cours de livraison</SelectItem>
-                      <SelectItem value="livre">Livré</SelectItem>
-                      <SelectItem value="partiellement_livre">Partiellement livré</SelectItem>
-                      <SelectItem value="refuse">Refusé</SelectItem>
-                      <SelectItem value="retour">En retour</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-2">
-                    <Badge className={getStatusColor(formData.status)}>
-                      {getStatusLabel(formData.status)}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <Label htmlFor="totalColis">Nombre de colis</Label>
-                    <Input
-                      id="totalColis"
-                      type="number"
-                      value={formData.totalColis}
-                      onChange={(e) => handleInputChange("totalColis", parseInt(e.target.value) || 1)}
-                      min="1"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="poidsTotal">Poids total (kg)</Label>
-                  <Input
-                    id="poidsTotal"
-                    type="number"
-                    step="0.1"
-                    value={formData.poidsTotal}
-                    onChange={(e) => handleInputChange("poidsTotal", parseFloat(e.target.value) || 0)}
-                    placeholder="0.0"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="volumeTotal">Volume total (m³)</Label>
-                  <Input
-                    id="volumeTotal"
-                    type="number"
-                    step="0.01"
-                    value={formData.volumeTotal}
-                    onChange={(e) => handleInputChange("volumeTotal", parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Articles à livrer */}
           <BLItemsManager
             items={formData.items}
@@ -346,8 +297,8 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-gray-600" />
-                Observations et conditions
+                <Calendar className="h-5 w-5 text-gray-600" />
+                Observations (optionnel)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -371,16 +322,6 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
                   rows={2}
                 />
               </div>
-              <div>
-                <Label htmlFor="observationsClient">Observations client</Label>
-                <Textarea
-                  id="observationsClient"
-                  value={formData.observationsClient}
-                  onChange={(e) => handleInputChange("observationsClient", e.target.value)}
-                  placeholder="Observations ou demandes spécifiques du client..."
-                  rows={2}
-                />
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -389,9 +330,9 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={handleCreate} className="gap-2">
             <Package className="h-4 w-4" />
-            Sauvegarder les modifications
+            Créer le Bon de Livraison
           </Button>
         </DialogFooter>
       </DialogContent>

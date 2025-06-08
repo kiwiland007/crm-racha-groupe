@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import BonLivraisonDetails from "@/components/bon-livraison/BonLivraisonDetails";
 import { BLEditModal } from "@/components/bon-livraison/BLEditModal";
+import { BLCreateModal } from "@/components/bon-livraison/BLCreateModal";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -56,6 +57,7 @@ export default function BonLivraison() {
   const [selectedBL, setSelectedBL] = useState<any>(null);
   const [editingBL, setEditingBL] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Utilisation des BL depuis le contexte
 
@@ -113,58 +115,8 @@ export default function BonLivraison() {
     }
   };
 
-  const handleCreateBL = async () => {
-    try {
-      console.log("=== CRÉATION NOUVEAU BL ===");
-
-      // Import dynamique du service de numérotation
-      const { numerotationService } = await import("@/services/numerotationService");
-
-      // Générer un nouveau numéro BL
-      const newBLNumber = numerotationService.generateBLNumber();
-      console.log("Nouveau numéro BL généré:", newBLNumber);
-
-      // Créer un nouveau BL avec des données par défaut
-      const newBL = {
-        id: newBLNumber,
-        factureId: `FACT-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
-        devisId: `DEVIS-25-${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`, // Optionnel
-        client: "Nouveau Client",
-        clientAdresse: "Adresse à définir",
-        dateCreation: new Date().toLocaleDateString('fr-FR'),
-        dateLivraison: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'), // +3 jours
-        livreur: "À assigner",
-        transporteur: "À définir",
-        status: "en_preparation",
-        items: [
-          {
-            designation: "Article à définir",
-            quantiteCommandee: 1,
-            quantiteLivree: 0,
-            unite: "pcs"
-          }
-        ],
-        totalColis: 1,
-        signatureClient: false,
-        signatureLivreur: false
-      };
-
-      // Ajouter le nouveau BL via le contexte
-      // addBL(newBL); // À implémenter avec le contexte
-
-      toast.success("Nouveau BL créé !", {
-        description: `BL ${newBLNumber} créé avec succès`,
-        action: {
-          label: "Modifier",
-          onClick: () => handleEditBL(newBL)
-        }
-      });
-    } catch (error) {
-      console.error("Erreur création BL:", error);
-      toast.error("Erreur création BL", {
-        description: "Impossible de créer le bon de livraison"
-      });
-    }
+  const handleCreateBL = () => {
+    setShowCreateModal(true);
   };
 
   const handleViewDetails = (bl: any) => {
@@ -430,6 +382,11 @@ export default function BonLivraison() {
         bl={editingBL}
         open={showEditModal}
         onOpenChange={setShowEditModal}
+      />
+
+      <BLCreateModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
       />
     </Layout>
   );
