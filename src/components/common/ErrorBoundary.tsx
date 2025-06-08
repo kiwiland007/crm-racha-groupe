@@ -285,7 +285,7 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 // Hook pour utiliser l'ErrorBoundary de manière fonctionnelle
-export const useErrorHandler = () => {
+export const useErrorHandlerLegacy = () => {
   const handleError = React.useCallback((error: Error, errorInfo?: ErrorInfo) => {
     console.error('Error caught by useErrorHandler:', error);
     

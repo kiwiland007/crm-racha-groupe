@@ -23,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search, Settings, Eye, Edit, Trash2, Package, Wrench, Download } from "lucide-react";
+import { AlertCircle, Filter, MoreVertical, Plus, Printer, QrCode, Search, Eye, Edit, Trash2, Package, Wrench, Download } from "lucide-react";
 import QRCodeGenerator from "@/components/common/QRCodeGenerator";
 import { qrCodeService } from "@/services/qrCodeService";
 import { EquipmentForm } from "@/components/inventory/EquipmentForm";
@@ -60,12 +60,12 @@ export default function Inventory() {
   const [showFilters, setShowFilters] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedItemForQR, setSelectedItemForQR] = useState<any>(null);
-  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedItemForQR, setSelectedItemForQR] = useState<InventoryItem | null>(null);
+  // QR Modal removed - not used
   const [showEquipmentForm, setShowEquipmentForm] = useState(false);
 
   // Nouveaux états pour les modals
-  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<InventoryItem | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
@@ -121,7 +121,16 @@ export default function Inventory() {
     setShowEquipmentForm(true);
   };
 
-  const handleAddEquipment = (equipmentData: any) => {
+  const handleAddEquipment = (equipmentData: {
+    name: string;
+    category: string;
+    status: InventoryItem['status'];
+    location: string;
+    purchaseDate: string;
+    purchasePrice: number;
+    serialNumber?: string;
+    notes?: string;
+  }) => {
     const newEquipment = {
       name: equipmentData.name,
       category: equipmentData.category,
@@ -142,12 +151,16 @@ export default function Inventory() {
     addItem(newEquipment);
   };
 
-  const handleGenerateQR = (item?: any) => {
+  const handleGenerateQR = (item?: InventoryItem) => {
     if (item) {
       setSelectedItemForQR(item);
-      setShowQRModal(true);
+      // QR Modal functionality removed - direct generation
+      const qrResult = qrCodeService.generateInventoryQR(item);
+      const qrUrl = qrCodeService.generateQRUrl(qrResult.jsonContent, 300);
+      qrCodeService.downloadQRFromUrl(qrUrl, qrResult.filename);
+
       toast.success("QR Code généré", {
-        description: `QR Code pour ${item.name} affiché`
+        description: `QR Code pour ${item.name} téléchargé`
       });
     } else {
       // Générer QR pour tous les équipements
@@ -174,30 +187,40 @@ export default function Inventory() {
     }
   };
 
-  const handleViewDetails = (item: any) => {
+  const handleViewDetails = (item: InventoryItem) => {
     setSelectedEquipment(item);
     setShowDetailsModal(true);
   };
 
-  const handleEditItem = (item: any) => {
+  const handleEditItem = (item: InventoryItem) => {
     setSelectedEquipment(item);
     setShowEditModal(true);
   };
 
-
-
-  const handleUpdateStock = (item: any) => {
+  const handleUpdateStock = (item: InventoryItem) => {
     setSelectedEquipment(item);
     setShowStockModal(true);
   };
 
-  const handleAddMaintenance = (item: any) => {
+  const handleAddMaintenance = (item: InventoryItem) => {
     setSelectedEquipment(item);
     setShowMaintenanceModal(true);
   };
 
   // Nouvelles fonctions de gestion
-  const handleSaveEquipment = (data: any) => {
+  const handleSaveEquipment = (data: {
+    id: number;
+    name: string;
+    category: string;
+    status: InventoryItem['status'];
+    quantity: number;
+    location: string;
+    salePrice: number;
+    rentalPrice: number;
+    serialNumber?: string;
+    purchaseDate?: string;
+    notes?: string;
+  }) => {
     updateItem(data.id, {
       name: data.name,
       category: data.category,
@@ -214,11 +237,20 @@ export default function Inventory() {
     });
   };
 
-  const handleSaveStock = (data: any) => {
+  const handleSaveStock = (data: {
+    id: number;
+    newQuantity: number;
+    reason?: string;
+  }) => {
     updateStock(data.id, data.newQuantity, data.reason);
   };
 
-  const handleSaveMaintenance = (data: any) => {
+  const handleSaveMaintenance = (data: {
+    id: number;
+    type: 'preventive' | 'corrective' | 'urgence';
+    scheduledDate: string;
+    priority: 'low' | 'medium' | 'high';
+  }) => {
     // Mettre l'équipement en maintenance si ce n'est pas déjà le cas
     const item = inventory.find(item => item.id === data.id);
     if (item && item.status !== "maintenance") {
@@ -236,16 +268,16 @@ export default function Inventory() {
     });
   };
 
-  const handleReturnFromRental = (item: any) => {
+  const handleReturnFromRental = (item: InventoryItem) => {
     updateStatus(item.id, "disponible", "Entrepôt principal");
     updateStock(item.id, item.quantity + 1, "Retour de location");
   };
 
-  const handleFinishMaintenance = (item: any) => {
+  const handleFinishMaintenance = (item: InventoryItem) => {
     updateStatus(item.id, "disponible", "Entrepôt principal");
   };
 
-  const handleDeleteItem = (item: any) => {
+  const handleDeleteItem = (item: InventoryItem) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${item.name} de l'inventaire ?`)) {
       deleteItem(item.id);
     }
