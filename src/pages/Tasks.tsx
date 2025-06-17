@@ -45,7 +45,7 @@ import {
   Calendar,
   Eye
 } from "lucide-react";
-import { useTaskContext } from "@/contexts/TaskContext";
+import { useTaskContext, Task } from "@/contexts/TaskContext"; // Import Task type
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -55,7 +55,7 @@ export default function Tasks() {
   const { tasks, addTask, updateTask, deleteTask, markTaskCompleted } = useTaskContext();
   
   const [openTaskForm, setOpenTaskForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -79,7 +79,7 @@ export default function Tasks() {
     setOpenTaskForm(true);
   };
 
-  const handleEditTask = (task: any) => {
+  const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setOpenTaskForm(true);
   };
@@ -92,8 +92,8 @@ export default function Tasks() {
     markTaskCompleted(taskId);
   };
 
-  const handleUpdateTask = (taskData: any) => {
-    if (editingTask) {
+  const handleUpdateTask = (taskData: Partial<Task>) => { // Assuming TaskForm provides Partial<Task>
+    if (editingTask && editingTask.id) { // Ensure editingTask and its id are defined
       updateTask(editingTask.id, taskData);
       setEditingTask(null);
     }

@@ -70,6 +70,11 @@ const formSchema = z.object({
 
 type EquipmentFormValues = z.infer<typeof formSchema>;
 
+// Type for the data passed to onAddEquipment callback
+interface NewEquipmentData extends Omit<EquipmentFormValues, 'purchasePrice'> {
+  purchasePrice: number;
+}
+
 interface Category {
   id: string;
   name: string;
@@ -87,7 +92,7 @@ export function EquipmentForm({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddEquipment: (data: any) => void;
+  onAddEquipment: (data: NewEquipmentData) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);

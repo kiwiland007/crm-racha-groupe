@@ -5,7 +5,7 @@ interface CacheConfig {
   key: string[];
   ttl?: number; // Time to live in milliseconds
   staleTime?: number;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
 }
 
 export const useDataCache = () => {

@@ -213,7 +213,7 @@ export interface DatabaseConnection {
   password: string;
 }
 
-export interface QueryResult<T = any> {
+export interface QueryResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

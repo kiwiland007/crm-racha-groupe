@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
+import { QuoteItem } from '@/types'; // Import QuoteItem
 
 export interface Quote {
   id: string;
@@ -12,7 +13,7 @@ export interface Quote {
   status: 'Émis' | 'En attente' | 'Accepté' | 'Facturé' | 'Refusé' | 'Expiré';
   paymentMethod: string;
   description: string;
-  items?: any[];
+  items?: QuoteItem[];
   notes?: string;
   validityDays?: number;
   createdAt: string;

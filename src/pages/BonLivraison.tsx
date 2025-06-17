@@ -42,6 +42,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import BonLivraisonDetails from "@/components/bon-livraison/BonLivraisonDetails";
+import { BonLivraison as BonLivraisonType } from "@/contexts/InvoiceContext"; // Import the type
 import { BLEditModal } from "@/components/bon-livraison/BLEditModal";
 import { BLCreateModal } from "@/components/bon-livraison/BLCreateModal";
 import { toast } from "sonner";
@@ -54,8 +55,8 @@ export default function BonLivraison() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showBLDetails, setShowBLDetails] = useState(false);
-  const [selectedBL, setSelectedBL] = useState<any>(null);
-  const [editingBL, setEditingBL] = useState<any>(null);
+  const [selectedBL, setSelectedBL] = useState<BonLivraisonType | null>(null);
+  const [editingBL, setEditingBL] = useState<BonLivraisonType | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -119,17 +120,17 @@ export default function BonLivraison() {
     setShowCreateModal(true);
   };
 
-  const handleViewDetails = (bl: any) => {
+  const handleViewDetails = (bl: BonLivraisonType) => {
     setSelectedBL(bl);
     setShowBLDetails(true);
   };
 
-  const handleEditBL = (bl: any) => {
+  const handleEditBL = (bl: BonLivraisonType) => {
     setEditingBL(bl);
     setShowEditModal(true);
   };
 
-  const handleGeneratePDF = async (bl: any) => {
+  const handleGeneratePDF = async (bl: BonLivraisonType) => {
     try {
       console.log("=== DÉBUT GÉNÉRATION PDF BL ===");
       console.log("Données BL reçues:", bl);
@@ -204,7 +205,7 @@ export default function BonLivraison() {
     }
   };
 
-  const handleDeleteBL = (bl: any) => {
+  const handleDeleteBL = (bl: BonLivraisonType) => {
     deleteBL(bl.id);
   };
 

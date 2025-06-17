@@ -35,18 +35,40 @@ import { toast } from "sonner";
 import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
 import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
 import { pdfServiceFixed, PDFQuoteData } from "@/services/pdfServiceFixed";
+import { Invoice, BonLivraison } from "@/contexts/InvoiceContext"; // Import Invoice type
+import { QuoteItem } from "@/types"; // Import QuoteItem
+
+interface InvoiceFormData {
+  id?: string;
+  client: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  projectName?: string;
+  description: string;
+  date: string;
+  total: number; // This is 'amount' in the Invoice model
+  advanceAmount?: number;
+  status: Invoice['status'];
+  paymentTerms: string; // This is 'paymentMethod' in the Invoice model
+  items?: QuoteItem[];
+  dueDate?: string;
+  notes?: string;
+  tax?: number;
+  taxRate?: number;
+  clientAddress?: string; // Added to match usage in handleGeneratePDF
+}
 
 export default function Invoices() {
   const { invoices, addInvoice, updateInvoice, deleteInvoice, getTotalAmount, getPaidAmount } = useInvoiceContext();
   const { createBLFromInvoice } = useBLContext();
 
   const [openInvoiceForm, setOpenInvoiceForm] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState<any>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const handleAddInvoice = (invoiceData: any) => {
-    const newInvoiceData = {
+  const handleAddInvoice = (invoiceData: InvoiceFormData) => {
+    const newInvoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt' | 'bonLivraison' | 'bonLivraisonId' | 'paidAt' | 'remainingAmount'> = {
       client: invoiceData.client,
       clientPhone: invoiceData.clientPhone || "",
       clientEmail: invoiceData.clientEmail || "",
@@ -56,14 +78,18 @@ export default function Invoices() {
       amount: invoiceData.total,
       advanceAmount: invoiceData.advanceAmount || 0,
       status: invoiceData.status,
-      paymentMethod: invoiceData.paymentTerms,
-      items: invoiceData.items || []
+      paymentMethod: invoiceData.paymentTerms, // Mapped to paymentMethod
+      items: invoiceData.items || [],
+      dueDate: invoiceData.dueDate,
+      notes: invoiceData.notes,
+      // Ensure all required fields for Omit<Invoice, ...> are present
+      // Assuming quoteId is optional or handled by addInvoice if not present in InvoiceFormData
     };
 
-    const newInvoice = addInvoice(newInvoiceData);
+    const newInvoice = addInvoice(newInvoiceData as Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>); // Ensure type compatibility
 
-    // Générer automatiquement le PDF
-    const filename = pdfServiceFixed.generateQuotePDF(invoiceData, 'invoice');
+    // Générer automatiquement le PDF using the form data which has all necessary fields for PDF
+    const filename = pdfServiceFixed.generateQuotePDF(invoiceData as PDFQuoteData, 'invoice');
     if (filename) {
       toast.success("PDF généré", {
         description: `PDF de la facture ${newInvoice.id} généré`
@@ -73,12 +99,28 @@ export default function Invoices() {
     return newInvoice;
   };
 
-  const handleUpdateInvoice = (invoiceData: any) => {
-    updateInvoice(invoiceData.id, invoiceData);
+  const handleUpdateInvoice = (invoiceData: InvoiceFormData & { id: string }) => {
+    const updateData: Partial<Invoice> = {
+      client: invoiceData.client,
+      clientPhone: invoiceData.clientPhone,
+      clientEmail: invoiceData.clientEmail,
+      projectName: invoiceData.projectName,
+      description: invoiceData.description,
+      date: invoiceData.date,
+      amount: invoiceData.total,
+      advanceAmount: invoiceData.advanceAmount,
+      status: invoiceData.status,
+      paymentMethod: invoiceData.paymentTerms,
+      items: invoiceData.items,
+      dueDate: invoiceData.dueDate,
+      notes: invoiceData.notes,
+      // tax and taxRate are not directly on Invoice, handle if needed
+    };
+    updateInvoice(invoiceData.id, updateData);
     setEditingInvoice(null);
   };
 
-  const handleEditInvoice = (invoice: any) => {
+  const handleEditInvoice = (invoice: Invoice) => {
     setEditingInvoice(invoice);
     setOpenInvoiceForm(true);
   };
@@ -87,7 +129,7 @@ export default function Invoices() {
     deleteInvoice(invoiceId);
   };
 
-  const handleGeneratePDF = (invoice: any) => {
+  const handleGeneratePDF = (invoice: Invoice) => {
     console.log("=== GÉNÉRATION PDF FACTURE ===");
     console.log("Données facture:", invoice);
 
@@ -100,12 +142,12 @@ export default function Invoices() {
         clientPhone: invoice.clientPhone || "",
         clientAddress: invoice.clientAddress || "",
         projectName: invoice.projectName || "Projet",
-        description: invoice.description || "Service",
-        date: invoice.date || new Date().toLocaleDateString('fr-FR'),
-        items: invoice.items && invoice.items.length > 0 ? invoice.items.map((item: any) => ({
-          type: item.type || "service" as const,
-          name: item.name || item.description || "Service",
-          description: item.description || item.name || "Description",
+        description: invoice.description,
+        date: invoice.date,
+        items: invoice.items && invoice.items.length > 0 ? invoice.items.map((item: QuoteItem) => ({
+          type: item.type || "service",
+          name: item.name || item.description,
+          description: item.description || item.name,
           quantity: item.quantity || 1,
           unitPrice: item.unitPrice || item.price || invoice.amount || 0,
           discount: item.discount || 0,
@@ -157,36 +199,35 @@ export default function Invoices() {
     }
   };
 
-  const handleCreateBL = (invoice: any) => {
-    const blData = {
-      clientAdresse: "Adresse à compléter",
-      dateLivraison: new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
-      livreur: "À assigner",
-      transporteur: "Transport interne",
-      modeLivraison: "livraison_directe" as const,
-      items: invoice.items?.map((item: any, index: number) => ({
-        id: index + 1,
-        productName: item.name || invoice.projectName,
-        category: "Service",
+  const handleCreateBL = (invoice: Invoice) => {
+    const blData: Omit<BonLivraison, 'id' | 'factureId' | 'createdAt' | 'updatedAt'> = {
+      clientId: invoice.clientId || "", // Assuming clientId exists or can be derived
+      client: invoice.client,
+      clientAddress: invoice.clientAddress || "Adresse à compléter",
+      deliveryAddress: invoice.clientAddress || "Adresse à compléter", // Default to clientAddress
+      deliveryDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Use Date object
+      deliveryPerson: "À assigner",
+      items: invoice.items?.map((item: QuoteItem): QuoteItem => ({
+        ...item, // Spread existing item properties
+        // Ensure all QuoteItem fields are present if mapping from a different structure
+        // For example, if item from invoice.items is not a full QuoteItem:
+        id: item.id || String(Math.random()), // Ensure ID if not present
+        type: item.type || 'service',
+        name: item.name || "Service",
+        description: item.description || "",
         quantity: item.quantity || 1,
-        quantiteCommandee: item.quantity || 1,
-        quantiteLivree: 0,
-        quantiteRestante: item.quantity || 1,
-        unitPrice: item.unitPrice || invoice.amount,
-        totalPrice: item.unitPrice * item.quantity || invoice.amount
-      })) || [{
-        id: 1,
-        productName: invoice.projectName,
-        category: "Service",
-        quantity: 1,
-        quantiteCommandee: 1,
-        quantiteLivree: 0,
-        quantiteRestante: 1,
-        unitPrice: invoice.amount,
-        totalPrice: invoice.amount
-      }],
-      totalColis: 1,
-      conditionsLivraison: "Livraison standard"
+        unitPrice: item.unitPrice || 0,
+        discount: item.discount || 0,
+        total: item.total || 0,
+      })) || [],
+      status: 'en_preparation',
+      totalColis: invoice.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 1,
+      // Optional fields from BonLivraison can be added if needed
+      notes: `BL pour facture ${invoice.id}`,
+      // These fields are not in BonLivraison from context, remove or ensure they are handled:
+      // transporteur: "Transport interne",
+      // modeLivraison: "livraison_directe" as const,
+      // conditionsLivraison: "Livraison standard"
     };
 
     const newBL = createBLFromInvoice(invoice.id, blData);

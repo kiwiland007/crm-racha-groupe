@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ForgotPassword } from '@/components/auth/ForgotPassword';
 import Logo from '@/components/ui/logo';
+import { UserCredential } from '@/types'; // Import UserCredential
 
 interface User {
   id: string;
@@ -51,6 +52,16 @@ const demoUsers: User[] = [
   }
 ];
 
+// Local interface for user data structure from localStorage
+interface StoredUser {
+  id: string | number; // id from localStorage might be number initially
+  fullName: string;
+  email: string;
+  role: string; // Role from localStorage might be a general string
+  phone?: string;
+  isActive?: boolean;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -96,15 +107,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Vérifier les utilisateurs créés via la gestion des utilisateurs
-      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
-      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]');
+      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]') as UserCredential[];
+      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]') as StoredUser[];
 
-      const foundCredential = storedCredentials.find((cred: any) =>
+      const foundCredential = storedCredentials.find((cred: UserCredential) =>
         cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
       );
 
       if (foundCredential) {
-        const foundStoredUser = storedUsers.find((user: any) => user.id === foundCredential.userId);
+        const foundStoredUser = storedUsers.find((userObj: StoredUser) => String(userObj.id) === String(foundCredential.userId));
 
         if (foundStoredUser && foundStoredUser.isActive) {
           // Convertir l'utilisateur au format AuthContext

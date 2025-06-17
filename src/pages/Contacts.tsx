@@ -40,6 +40,7 @@ import { AdvancedQuoteForm } from "@/components/invoices/AdvancedQuoteForm";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { useContactContext } from "@/contexts/ContactContext";
 import { useTaskContext } from "@/contexts/TaskContext";
+import { Contact, ContactFormData, QuoteFormData } from "@/types"; // Import necessary types
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,15 +65,22 @@ export default function Contacts() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [contactToAssign, setContactToAssign] = useState<number | null>(null);
   const [selectedAgent, setSelectedAgent] = useState("");
-  const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [contactPanelOpen, setContactPanelOpen] = useState(false);
-  const [editingContact, setEditingContact] = useState<any>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [openQuoteForm, setOpenQuoteForm] = useState(false);
-  const [quoteContactData, setQuoteContactData] = useState<any>(null);
+  const [quoteContactData, setQuoteContactData] = useState<Partial<QuoteFormData> | null>(null);
   const [openTaskForm, setOpenTaskForm] = useState(false);
-  const [taskContactData, setTaskContactData] = useState<any>(null);
 
-  const handleAddContact = (contactData: any) => {
+  interface TaskRelatedData {
+    contactId: string;
+    contactName: string;
+    title: string;
+    description: string;
+  }
+  const [taskContactData, setTaskContactData] = useState<TaskRelatedData | null>(null);
+
+  const handleAddContact = (contactData: ContactFormData) => {
     addContact(contactData);
   };
 
@@ -94,12 +102,12 @@ export default function Contacts() {
     setAssignDialogOpen(true);
   };
 
-  const handleViewContact = (contact: any) => {
+  const handleViewContact = (contact: Contact) => {
     setSelectedContact(contact);
     setContactPanelOpen(true);
   };
 
-  const handleEditContact = (contact: any) => {
+  const handleEditContact = (contact: Contact) => {
     setEditingContact(contact);
     setOpenContactForm(true);
     toast.info("Modification du contact", {
@@ -107,7 +115,7 @@ export default function Contacts() {
     });
   };
 
-  const handleUpdateContact = (updatedContact: any) => {
+  const handleUpdateContact = (updatedContact: Contact) => {
     updateContact(updatedContact.id, updatedContact);
     setEditingContact(null);
   };
@@ -133,7 +141,7 @@ export default function Contacts() {
     }
   };
 
-  const handleCreateQuote = (contact: any) => {
+  const handleCreateQuote = (contact: Contact) => {
     // Préparer les données du contact pour le formulaire de devis
     setQuoteContactData({
       client: contact.company || contact.name,
@@ -155,7 +163,7 @@ export default function Contacts() {
     });
   };
 
-  const handleCreateTask = (contact: any) => {
+  const handleCreateTask = (contact: Contact) => {
     // Préparer les données du contact pour le formulaire de tâche
     setTaskContactData({
       contactId: contact.id,
@@ -172,7 +180,7 @@ export default function Contacts() {
     });
   };
 
-  const handleAddNote = (contact: any) => {
+  const handleAddNote = (contact: Contact) => {
     // Ouvrir le panel du contact et faire défiler vers la section notes
     setSelectedContact(contact);
     setContactPanelOpen(true);

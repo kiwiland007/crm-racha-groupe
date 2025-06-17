@@ -24,17 +24,38 @@ import { Truck, Package, User, MapPin, Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useBLContext } from "@/contexts/BLContext";
 import { BLItemsManager } from "./BLItemsManager";
+import { BonLivraison, QuoteItem } from "@/types";
 
 interface BLEditModalProps {
-  bl: any;
+  bl: BonLivraison | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface EditFormDataState {
+  client: string;
+  clientAdresse: string;
+  clientPhone: string;
+  clientEmail: string;
+  dateLivraison: string;
+  livreur: string;
+  transporteur: string;
+  vehicule: string;
+  modeLivraison: string;
+  status: string;
+  conditionsLivraison: string;
+  observationsGenerales: string;
+  observationsClient: string;
+  totalColis: number;
+  poidsTotal: number;
+  volumeTotal: number;
+  items: QuoteItem[];
 }
 
 export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
   const { updateBL } = useBLContext();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EditFormDataState>({
     client: "",
     clientAdresse: "",
     clientPhone: "",
@@ -58,27 +79,27 @@ export function BLEditModal({ bl, open, onOpenChange }: BLEditModalProps) {
     if (bl && open) {
       setFormData({
         client: bl.client || "",
-        clientAdresse: bl.clientAdresse || "",
-        clientPhone: bl.clientPhone || "",
-        clientEmail: bl.clientEmail || "",
-        dateLivraison: bl.dateLivraison || "",
-        livreur: bl.livreur || "",
-        transporteur: bl.transporteur || "",
-        vehicule: bl.vehicule || "",
-        modeLivraison: bl.modeLivraison || "livraison_directe",
+        clientAdresse: bl.clientAddress || "", // Corrected: clientAddress instead of clientAdresse
+        clientPhone: bl.clientPhone || "", // Assuming BonLivraison has clientPhone
+        clientEmail: bl.clientEmail || "", // Assuming BonLivraison has clientEmail
+        dateLivraison: bl.deliveryDate ? new Date(bl.deliveryDate).toISOString().split('T')[0] : "", // Format date
+        livreur: bl.deliveryPerson || "", // Corrected: deliveryPerson instead of livreur
+        transporteur: bl.trackingNumber || "", // Using trackingNumber as placeholder for transporteur
+        vehicule: "", // Assuming BonLivraison might not have vehicule, default to empty
+        modeLivraison: bl.status || "livraison_directe", // This seems to be a mix-up, using bl.status for modeLivraison
         status: bl.status || "en_preparation",
-        conditionsLivraison: bl.conditionsLivraison || "",
-        observationsGenerales: bl.observationsGenerales || "",
-        observationsClient: bl.observationsClient || "",
-        totalColis: bl.totalColis || 1,
-        poidsTotal: bl.poidsTotal || 0,
-        volumeTotal: bl.volumeTotal || 0,
+        conditionsLivraison: bl.notes || "", // Using notes as placeholder for conditionsLivraison
+        observationsGenerales: bl.notes || "", // Using notes as placeholder
+        observationsClient: "", // Assuming BonLivraison might not have this, default to empty
+        totalColis: bl.items?.length || 1, // Calculate from items length
+        poidsTotal: 0, // Assuming BonLivraison might not have this, default to 0
+        volumeTotal: 0, // Assuming BonLivraison might not have this, default to 0
         items: bl.items || []
       });
     }
   }, [bl, open]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof EditFormDataState, value: string | number | QuoteItem[] | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

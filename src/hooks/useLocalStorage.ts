@@ -105,7 +105,7 @@ export function useLocalStorage<T>(
 }
 
 // Hook spécialisé pour les objets avec merge
-export function useLocalStorageObject<T extends Record<string, any>>(
+export function useLocalStorageObject<T extends Record<string, unknown>>(
   key: string,
   defaultValue: T,
   options: Omit<UseLocalStorageOptions<T>, 'defaultValue'> = {}
@@ -187,7 +187,7 @@ export function useLocalStorageArray<T>(
 }
 
 // Hook pour la gestion des préférences utilisateur
-export function useUserPreferences<T extends Record<string, any>>(
+export function useUserPreferences<T extends Record<string, unknown>>(
   defaultPreferences: T
 ) {
   return useLocalStorageObject('user_preferences', defaultPreferences, {
@@ -285,9 +285,9 @@ export const localStorageUtils = {
   },
   
   // Exporter toutes les données du CRM
-  exportCRMData: (): Record<string, any> => {
+  exportCRMData: (): Record<string, unknown> => {
     const keys = localStorageUtils.getCRMKeys();
-    const data: Record<string, any> = {};
+    const data: Record<string, unknown> = {};
     
     keys.forEach(key => {
       const value = localStorage.getItem(key);
@@ -304,7 +304,7 @@ export const localStorageUtils = {
   },
   
   // Importer des données dans le CRM
-  importCRMData: (data: Record<string, any>): void => {
+  importCRMData: (data: Record<string, unknown>): void => {
     Object.entries(data).forEach(([key, value]) => {
       if (key.startsWith('crm_')) {
         try {

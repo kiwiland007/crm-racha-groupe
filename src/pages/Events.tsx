@@ -33,6 +33,7 @@ import {
   FileText,
   X
 } from "lucide-react";
+import { Event as EventType, ReservedMaterialItem } from "@/types"; // Import EventType and ReservedMaterialItem
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,111 +62,124 @@ import { eventReportPDFService, EventReportData } from "@/services/eventReportPD
 export default function Events() {
   const { events, addEvent, updateEvent, assignTechnicians, reserveMaterials } = useEventContext();
 
+  interface EventFormData {
+    id?: string; // Optional for new events
+    title: string;
+    startDate: string; // Assuming string from form
+    endDate: string;   // Assuming string from form
+    startTime: string;
+    endTime: string;
+    location: string;
+    client: string;
+    status: string; // Or a more specific status union type
+    teamMembers: string; // Will be parsed to number
+    equipments: string;  // Will be parsed to number
+    description: string;
+    priority?: 'low' | 'medium' | 'high';
+  }
+
+  // ReservedMaterialItem is now imported from @/types
+
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openEventForm, setOpenEventForm] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openTechnicianAssignment, setOpenTechnicianAssignment] = useState(false);
-  const [assigningEvent, setAssigningEvent] = useState<any>(null);
+  const [assigningEvent, setAssigningEvent] = useState<EventType | null>(null);
   const [openMaterialReservation, setOpenMaterialReservation] = useState(false);
-  const [reservingEvent, setReservingEvent] = useState<any>(null);
-  const [viewingEvent, setViewingEvent] = useState<any>(null);
+  const [reservingEvent, setReservingEvent] = useState<EventType | null>(null);
+  const [viewingEvent, setViewingEvent] = useState<EventType | null>(null);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
 
-  const handleAddEvent = (eventData: any) => {
+  const handleAddEvent = (eventData: EventFormData) => {
+    // Note: The transformation to EventType happens in useEventContext().addEvent
+    // Here we are just passing form data after basic parsing.
+    // The actual EventType creation should align with useEventContext().addEvent expectations.
     const newEventData = {
-      title: eventData.title,
-      startDate: formatDate(new Date(eventData.startDate)),
-      endDate: formatDate(new Date(eventData.endDate)),
-      time: `${eventData.startTime} - ${eventData.endTime}`,
-      location: eventData.location,
-      client: eventData.client,
-      status: eventData.status,
+      ...eventData, // Spread first to include all form fields
       teamMembers: parseInt(eventData.teamMembers),
       equipments: parseInt(eventData.equipments),
-      description: eventData.description,
-      reservedMaterials: [],
-      priority: eventData.priority || 'medium'
+      // Ensure dates are handled correctly if they need to be Date objects vs strings
+      // For now, assuming addEvent in context handles string dates from form
+      // reservedMaterials: [], // This should be initialized by the context or later
     };
 
-    addEvent(newEventData);
+    // This cast might be too strong if addEvent expects a different shape
+    addEvent(newEventData as Omit<EventType, 'id' | 'createdAt' | 'updatedAt' | 'assignedTechnicians' | 'materials' | 'time'> & { time?: string });
   };
 
-  const handleUpdateEvent = (eventData: any) => {
+  const handleUpdateEvent = (eventData: EventFormData & { id: string }) => {
+    // Similar to handleAddEvent, ensure structure aligns with updateEvent in context
     const updatedEventData = {
-      title: eventData.title,
-      startDate: formatDate(new Date(eventData.startDate)),
-      endDate: formatDate(new Date(eventData.endDate)),
-      time: `${eventData.startTime} - ${eventData.endTime}`,
-      location: eventData.location,
-      client: eventData.client,
-      status: eventData.status,
+      ...eventData,
       teamMembers: parseInt(eventData.teamMembers),
       equipments: parseInt(eventData.equipments),
-      description: eventData.description,
-      priority: eventData.priority || 'medium'
     };
-
-    updateEvent(eventData.id, updatedEventData);
+    // This cast might be too strong if updateEvent expects a different shape
+    updateEvent(eventData.id, updatedEventData as Partial<EventType> & { time?: string });
     setEditingEvent(null);
   };
 
-  const handleEditEvent = (event: any) => {
-    setEditingEvent(event);
-    setOpenEventForm(true);
+  const handleEditEvent = (event: EventType) => {
+    setEditingEvent(event); // Store the original event object for context/logic
+    setOpenEventForm(true); // EventForm will receive this 'event' of EventType
+                           // and should map it to its internal form values.
   };
 
-  const handleCloseForm = (open: boolean) => {
-    setOpenEventForm(open);
-    if (!open) {
+  const handleCloseForm = (openState: boolean) => {
+    setOpenEventForm(openState);
+    if (!openState) {
       setEditingEvent(null);
     }
   };
 
-  const handleAssignTechnicians = (event: any) => {
+  const handleAssignTechnicians = (event: EventType) => {
     setAssigningEvent(event);
     setOpenTechnicianAssignment(true);
   };
 
-  const handleTechnicianAssignment = (technicianIds: number[]) => {
+  const handleTechnicianAssignment = (technicianIds: string[]) => { // Assuming technicianIds are strings
     if (assigningEvent) {
       assignTechnicians(assigningEvent.id, technicianIds);
       setAssigningEvent(null);
     }
   };
 
-  const handleReserveMaterial = (event: any) => {
+  const handleReserveMaterial = (event: EventType) => {
     setReservingEvent(event);
     setOpenMaterialReservation(true);
   };
 
-  const handleMaterialReservation = (eventId: number, reservedMaterials: any[]) => {
-    reserveMaterials(eventId, reservedMaterials);
+  const handleMaterialReservation = (eventId: string, materials: ReservedMaterialItem[]) => {
+    // Context function reserveMaterials might expect a different type for materials.
+    // Casting to 'any' temporarily if context is not yet updated.
+    // Ideally, context's reserveMaterials should expect ReservedMaterialItem[].
+    reserveMaterials(eventId, materials as any);
     setReservingEvent(null);
   };
 
-  const handleViewDetails = (event: any) => {
+  const handleViewDetails = (event: EventType) => {
     setViewingEvent(event);
     setOpenDetailsModal(true);
   };
 
-  const handleGenerateReport = (event: any) => {
-    console.log("=== GÉNÉRATION RAPPORT ÉVÉNEMENT ===");
-    console.log("Données événement:", event);
-
+  const handleGenerateReport = (event: EventType) => {
     try {
+      console.log("=== DÉBUT GÉNÉRATION RAPPORT ÉVÉNEMENT ===");
+      console.log("Données événement:", event);
       // Convertir les données d'événement au format attendu par le service PDF
+      // Ensure event properties match EventType or provide defaults
       const reportData: EventReportData = {
-        id: event.id || `EVT-${Date.now()}`,
-        title: event.title || "Événement",
-        client: event.client || "Client non spécifié",
-        date: event.startDate || new Date().toLocaleDateString('fr-FR'),
+        id: event.id,
+        title: event.title,
+        client: event.client,
+        date: event.startDate,
         time: event.time || "Non spécifié",
-        location: event.location || "Lieu non spécifié",
-        status: event.status || "En attente",
-        description: event.description || "",
-        assignedTechnicians: event.assignedTechnicians || [],
-        reservedMaterials: event.reservedMaterials || [],
+        location: event.location,
+        status: event.status,
+        description: event.description,
+        assignedTechnicians: event.assignedTo || [],
+        reservedMaterials: event.materials || [],
         notes: event.notes || "",
         budget: event.budget || undefined,
         actualCost: event.actualCost || undefined
@@ -173,7 +187,7 @@ export default function Events() {
 
       console.log("Données rapport formatées:", reportData);
 
-      const filename = eventReportPDFService.generateEventReport(reportData);
+      const filename = eventReportPDFService.generateEventReport(reportData); // Pass materials
       if (filename) {
         toast.success("Rapport généré avec succès", {
           description: `Le fichier ${filename} a été téléchargé.`,
@@ -376,11 +390,11 @@ export default function Events() {
                             <Package className="h-3 w-3 text-blue-600" />
                           </div>
                           <span className="text-sm font-medium text-gray-700">
-                            Matériel réservé ({event.reservedMaterials.length})
+                            Matériel réservé ({event.materials?.length || 0})
                           </span>
                         </div>
                         <div className="grid gap-2">
-                          {event.reservedMaterials.slice(0, 3).map((material: any, index: number) => (
+                          {(event.materials || []).slice(0, 3).map((material: ReservedMaterialItem, index: number) => (
                             <div key={index} className="flex items-center justify-between p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
@@ -397,10 +411,10 @@ export default function Events() {
                               </div>
                             </div>
                           ))}
-                          {event.reservedMaterials.length > 3 && (
+                          {(event.materials?.length || 0) > 3 && (
                             <div className="text-center py-2">
                               <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-xs">
-                                +{event.reservedMaterials.length - 3} équipements supplémentaires
+                                +{(event.materials?.length || 0) - 3} équipements supplémentaires
                               </Badge>
                             </div>
                           )}

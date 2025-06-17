@@ -23,7 +23,14 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  interface SearchResultItem {
+    type: string;
+    name: string;
+    description: string;
+    route: string;
+  }
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   const showStockAlert = () => {
@@ -85,7 +92,7 @@ const Index = () => {
     setShowSearchResults(true);
   };
 
-  const handleSearchResultClick = (result: any) => {
+  const handleSearchResultClick = (result: SearchResultItem) => {
     navigate(result.route);
     setShowSearchResults(false);
     setSearchTerm("");

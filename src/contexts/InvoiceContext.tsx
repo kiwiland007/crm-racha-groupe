@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
+import { QuoteItem } from '@/types'; // Import QuoteItem
 
 export interface BonLivraison {
   id: string;
@@ -12,7 +13,7 @@ export interface BonLivraison {
   livreur: string;
   transporteur: string;
   status: 'en_preparation' | 'expedie' | 'en_cours_livraison' | 'livre' | 'partiellement_livre' | 'refuse';
-  items: any[];
+  items: QuoteItem[];
   totalColis: number;
   signatureClient: boolean;
   signatureLivreur: boolean;
@@ -35,7 +36,7 @@ export interface Invoice {
   remainingAmount?: number;
   status: 'Brouillon' | 'En attente' | 'Payée' | 'Partiellement payée' | 'En retard' | 'Annulée';
   paymentMethod: string;
-  items?: any[];
+  items?: QuoteItem[];
   notes?: string;
   paidAt?: string;
   bonLivraison?: BonLivraison;

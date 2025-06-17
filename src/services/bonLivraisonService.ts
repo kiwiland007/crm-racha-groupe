@@ -19,6 +19,25 @@ const COMPANY_CONFIG = {
 };
 
 // Types pour les données BL professionnelles
+export interface BonLivraisonItemData {
+  reference?: string;
+  designation: string;
+  description?: string;
+  quantiteCommandee: number;
+  quantiteLivree: number;
+  quantiteRestante?: number;
+  unite?: string;
+  numeroSerie?: string;
+  numeroLot?: string;
+  etat: 'neuf' | 'occasion' | 'reconditionne' | 'defectueux';
+  observations?: string;
+  // Fields used in older drawLivraisonTable, if needed:
+  name?: string; // Alias for designation
+  quantity?: number; // Alias for quantiteCommandee
+  quantityLivree?: number; // Alias for quantiteLivree
+  category?: string; // Used in addProfessionalItemsTable
+}
+
 export interface BonLivraisonData {
   id: string;
   devisId?: string; // Référence au devis original
@@ -47,19 +66,7 @@ export interface BonLivraisonData {
   heurePrevisionnelle?: string;
 
   // Articles
-  items: Array<{
-    reference?: string; // Référence produit
-    designation: string;
-    description?: string;
-    quantiteCommandee: number;
-    quantiteLivree: number;
-    quantiteRestante?: number; // Calculé automatiquement
-    unite?: string; // Unité (pcs, kg, m, etc.)
-    numeroSerie?: string;
-    numeroLot?: string;
-    etat: 'neuf' | 'occasion' | 'reconditionne' | 'defectueux';
-    observations?: string;
-  }>;
+  items: BonLivraisonItemData[];
 
   // Livraison
   livreur: string;
@@ -347,7 +354,7 @@ class BonLivraisonService {
   /**
    * Ajoute un tableau professionnel des articles
    */
-  private addProfessionalItemsTable(items: any[], yPos: number): number {
+  private addProfessionalItemsTable(items: BonLivraisonItemData[], yPos: number): number {
     // En-tête du tableau (plus compact)
     this.doc.setFillColor(26, 43, 60);
     this.doc.rect(20, yPos, 170, 10, 'F'); // Réduit de 12 à 10
@@ -462,7 +469,7 @@ class BonLivraisonService {
   /**
    * Ajoute un récapitulatif des quantités avec disposition améliorée
    */
-  private addQuantitySummary(items: any[], yPos: number): number {
+  private addQuantitySummary(items: BonLivraisonItemData[], yPos: number): number {
     const totalCmd = items.reduce((sum, item) => sum + (item.quantiteCommandee || item.quantity || 0), 0);
     const totalLivr = items.reduce((sum, item) => sum + (item.quantiteLivree || item.quantityLivree || 0), 0);
     const totalReste = totalCmd - totalLivr;
@@ -698,7 +705,7 @@ class BonLivraisonService {
   /**
    * ANCIENNES MÉTHODES - À SUPPRIMER PROGRESSIVEMENT
    */
-  private addBLInfo(data: BonLivraisonData, yPos: number): void {
+  private addBLInfo(data: BonLivraisonData, yPos: number): void { // data is already BonLivraisonData
     this.doc.setTextColor(0, 0, 0);
 
     // === SECTION INFORMATIONS BL (Colonne gauche) ===
@@ -795,7 +802,7 @@ class BonLivraisonService {
   /**
    * Dessine le tableau des articles livrés avec disposition optimisée
    */
-  private drawLivraisonTable(items: any[], startY: number): void {
+  private drawLivraisonTable(items: BonLivraisonItemData[], startY: number): void {
     // Colonnes optimisées pour meilleure lisibilité
     const colWidths = [70, 18, 18, 35, 25, 24];
     const colPositions = [20, 90, 108, 126, 161, 186];

@@ -2,14 +2,14 @@ import { useState, useCallback, useMemo } from 'react';
 import { ValidationRule } from '@/types/api';
 
 // Types pour le hook de formulaire
-export interface FormField<T = any> {
+export interface FormField<T = unknown> {
   value: T;
   error?: string;
   touched: boolean;
   dirty: boolean;
 }
 
-export interface FormConfig<T extends Record<string, any>> {
+export interface FormConfig<T extends Record<string, unknown>> {
   initialValues: T;
   validationRules?: Partial<Record<keyof T, ValidationRule>>;
   onSubmit?: (values: T) => void | Promise<void>;
@@ -17,7 +17,7 @@ export interface FormConfig<T extends Record<string, any>> {
   validateOnBlur?: boolean;
 }
 
-export interface UseFormReturn<T extends Record<string, any>> {
+export interface UseFormReturn<T extends Record<string, unknown>> {
   values: T;
   errors: Partial<Record<keyof T, string>>;
   touched: Partial<Record<keyof T, boolean>>;
@@ -56,7 +56,7 @@ export interface UseFormReturn<T extends Record<string, any>> {
 }
 
 // Fonction de validation
-const validateValue = (value: any, rule: ValidationRule): string | null => {
+const validateValue = (value: unknown, rule: ValidationRule): string | null => {
   if (rule.required && (value === undefined || value === null || value === '')) {
     return 'Ce champ est requis';
   }
@@ -81,7 +81,7 @@ const validateValue = (value: any, rule: ValidationRule): string | null => {
 };
 
 // Hook principal
-export function useForm<T extends Record<string, any>>({
+export function useForm<T extends Record<string, unknown>>({
   initialValues,
   validationRules = {},
   onSubmit,

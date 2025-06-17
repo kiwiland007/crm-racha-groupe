@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { Plus, X, Upload, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProductContext } from "@/contexts/ProductContext";
+import { TechnicalSheet } from "@/types";
 
 const technicalSheetSchema = z.object({
   name: z.string().min(1, { message: "Le nom est requis" }),
@@ -73,8 +74,8 @@ type TechnicalSheetFormValues = z.infer<typeof technicalSheetSchema>;
 interface TechnicalSheetFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (data: TechnicalSheetFormValues) => void;
-  editingSheet?: any;
+  onSave?: (data: TechnicalSheetFormValues) => void; // data here is before adding id, createdAt, etc.
+  editingSheet?: TechnicalSheet | null;
 }
 
 export function TechnicalSheetForm({
