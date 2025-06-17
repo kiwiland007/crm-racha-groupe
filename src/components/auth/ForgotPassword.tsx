@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, ArrowLeft, CheckCircle, RefreshCw } from "lucide-react";
+import { User, UserCredential } from "@/types";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Adresse email invalide" }),
@@ -70,14 +71,14 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
 
     try {
       // Vérifier si l'email existe dans le système
-      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
-      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]');
+      const storedCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]') as UserCredential[];
+      const storedUsers = JSON.parse(localStorage.getItem('crm_users') || '[]') as User[];
 
-      const foundCredential = storedCredentials.find((cred: any) =>
+      const foundCredential = storedCredentials.find((cred: UserCredential) =>
         cred.email.toLowerCase() === data.email.toLowerCase()
       );
 
-      const foundUser = storedUsers.find((user: any) =>
+      const foundUser = storedUsers.find((user: User) =>
         user.email.toLowerCase() === data.email.toLowerCase()
       );
 
@@ -120,8 +121,8 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
       }
 
       // Mettre à jour le mot de passe dans les identifiants stockés
-      const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]');
-      const updatedCredentials = existingCredentials.map((cred: any) => {
+      const existingCredentials = JSON.parse(localStorage.getItem('crm_user_credentials') || '[]') as UserCredential[];
+      const updatedCredentials = existingCredentials.map((cred: UserCredential) => {
         if (cred.email.toLowerCase() === email.toLowerCase()) {
           return { ...cred, password: data.newPassword };
         }

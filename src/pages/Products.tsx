@@ -103,7 +103,7 @@ export default function Products() {
     setSearchTerm(term);
   };
 
-  const handleFilter = (filters: any) => {
+  const handleFilter = (filters: Record<string, unknown>) => {
     Object.entries(filters).forEach(([key, value]) => {
       setFilter(key, value);
     });

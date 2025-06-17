@@ -26,13 +26,14 @@ import {
   Download,
   Edit
 } from "lucide-react";
+import { TechnicalSheet, SpecificationItem } from "@/types";
 
 interface TechnicalSheetDetailsProps {
-  sheet: any;
+  sheet: TechnicalSheet | null; // Allow null for initial state or if sheet might not exist
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit?: (sheet: any) => void;
-  onGeneratePDF?: (sheet: any) => void;
+  onEdit?: (sheet: TechnicalSheet) => void;
+  onGeneratePDF?: (sheet: TechnicalSheet) => void;
 }
 
 export function TechnicalSheetDetails({
@@ -104,7 +105,7 @@ export function TechnicalSheetDetails({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {sheet.specifications?.map((spec: any, index: number) => (
+                {sheet.specifications?.map((spec: SpecificationItem, index: number) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="font-medium text-gray-700">{spec.name}</span>
                     <span className="text-gray-900">

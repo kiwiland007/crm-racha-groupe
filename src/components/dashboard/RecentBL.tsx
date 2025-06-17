@@ -10,12 +10,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface RecentBLItem {
+  id: string;
+  devisId: string;
+  client: string;
+  dateLivraison: string;
+  livreur: string;
+  status: string;
+  totalColis: number;
+  montant: string;
+  adresse: string;
+}
+
 export function RecentBL() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const recentBL = [
+  const recentBL: RecentBLItem[] = [
     {
       id: "BL-25-001",
       devisId: "DEVIS-25-001",
@@ -108,20 +120,20 @@ export function RecentBL() {
     }
   };
 
-  const handleGeneratePDF = (bl: any) => {
+  const handleGeneratePDF = (bl: RecentBLItem) => {
     toast.success("PDF généré", {
       description: `BL ${bl.id} téléchargé`
     });
   };
 
-  const handleViewDetails = (bl: any) => {
+  const handleViewDetails = (bl: RecentBLItem) => {
     navigate('/bon-livraison');
     toast.info("Détails du BL", {
       description: `Redirection vers ${bl.id}`
     });
   };
 
-  const handleTrackDelivery = (bl: any) => {
+  const handleTrackDelivery = (bl: RecentBLItem) => {
     toast.info("Suivi livraison", {
       description: `Suivi du BL ${bl.id} - Livreur: ${bl.livreur}`
     });

@@ -67,13 +67,13 @@ export function useSearch<T>({
 interface UseAdvancedSearchOptions<T> {
   data: T[];
   searchFields: (keyof T)[];
-  filters?: Record<string, any>;
-  filterFunctions?: Record<string, (item: T, filterValue: any) => boolean>;
+  filters?: Record<string, unknown>;
+  filterFunctions?: Record<string, (item: T, filterValue: unknown) => boolean>;
 }
 
 interface UseAdvancedSearchResult<T> extends UseSearchResult<T> {
-  filters: Record<string, any>;
-  setFilter: (key: string, value: any) => void;
+  filters: Record<string, unknown>;
+  setFilter: (key: string, value: unknown) => void;
   clearFilter: (key: string) => void;
   clearAllFilters: () => void;
   activeFilterCount: number;
@@ -116,7 +116,7 @@ export function useAdvancedSearch<T>({
         } else {
           // Default filter logic
           result = result.filter(item => {
-            const itemValue = (item as any)[key];
+            const itemValue = (item as Record<string, unknown>)[key];
             return itemValue === value;
           });
         }
@@ -126,7 +126,7 @@ export function useAdvancedSearch<T>({
     return result;
   }, [data, searchTerm, filters, searchFields, filterFunctions]);
 
-  const setFilter = (key: string, value: any) => {
+  const setFilter = (key: string, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 

@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { databaseService } from '@/services/databaseService';
 import { toast } from 'sonner';
+import { AppConfig } from '@/types'; // Import AppConfig
 
 interface UseDatabaseOptions {
   autoSync?: boolean;
@@ -61,7 +62,7 @@ export function useDatabase(options: UseDatabaseOptions = {}) {
   const syncData = useCallback(async (
     entityName: string, 
     action: 'create' | 'update' | 'delete', 
-    data: any
+    data: unknown // Changed from any to unknown
   ) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
@@ -120,7 +121,7 @@ export function useDatabase(options: UseDatabaseOptions = {}) {
   }, []);
 
   // Sauvegarder les paramètres de l'entreprise
-  const saveCompanySettings = useCallback(async (settings: any) => {
+  const saveCompanySettings = useCallback(async (settings: AppConfig['company']) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
@@ -139,7 +140,7 @@ export function useDatabase(options: UseDatabaseOptions = {}) {
   }, []);
 
   // Sauvegarder une intégration
-  const saveIntegration = useCallback(async (type: string, config: any) => {
+  const saveIntegration = useCallback(async (type: string, config: Record<string, unknown>) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {

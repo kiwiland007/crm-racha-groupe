@@ -148,22 +148,42 @@ export interface BonLivraison {
   updatedAt: Date;
 }
 
-export interface Event {
+// Removed the first, older Event interface that was here.
+
+export interface ReservedMaterialItem {
+  productName: string;
+  quantity: number;
+  // Add other relevant fields if necessary, e.g., id, unit from Product/Service
+}
+
+export interface Event { // This is now the single, updated Event interface
   id: string;
   title: string;
   description: string;
   clientId?: string;
   client: string;
   location: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string; // Keep as string if form/context uses string
+  endDate: string;   // Keep as string
+  time?: string;      // Combined start/end time string e.g., "09:00 - 17:00"
   type: 'installation' | 'maintenance' | 'training' | 'meeting' | 'demo';
-  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
-  assignedTo: string[];
-  materials?: string[];
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled' | 'confirmé' | 'en attente'; // Added statuses from component
+  assignedTo: string[]; // Technicians IDs or names
+  materials?: ReservedMaterialItem[]; // Changed from string[]
   notes?: string;
+  budget?: number;
+  actualCost?: number;
+  teamMembers?: number; // Added from component logic
+  equipments?: number;  // Added from component logic
+  priority?: 'low' | 'medium' | 'high'; // Added from component logic
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface SpecificationItem {
+  name: string;
+  value: string;
+  unit: string;
 }
 
 export interface InventoryItem {
@@ -186,15 +206,20 @@ export interface TechnicalSheet {
   name: string;
   model: string;
   brand: string;
-  specifications: Record<string, string>;
+  category?: string;
+  description?: string;
+  specifications: SpecificationItem[];
+  dimensions?: { length?: number | string; width?: number | string; height?: number | string; weight?: number | string };
+  powerRequirements?: { voltage?: string; power?: string; frequency?: string };
+  connectivity?: string[];
+  operatingConditions?: { temperature?: string; humidity?: string };
+  warranty: string; // Was an object, simplified to string based on component usage
+  certifications?: string[];
+  accessories?: string[];
+  maintenanceNotes?: string;
   documentation?: string[];
   images?: string[];
   manuals?: string[];
-  warranty: {
-    duration: number;
-    type: 'manufacturer' | 'extended';
-    terms: string;
-  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -209,6 +234,7 @@ export interface Notification {
   read: boolean;
   actionUrl?: string;
   metadata?: Record<string, unknown>;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   createdAt: Date;
   expiresAt?: Date;
 }
@@ -314,6 +340,12 @@ export interface AppConfig {
   limits: {
     [key: string]: number;
   };
+}
+
+// Type for stored user credentials
+export interface UserCredential {
+  email: string;
+  password?: string; // Password might not always be present depending on the context
 }
 
 export type { User as AuthUser };

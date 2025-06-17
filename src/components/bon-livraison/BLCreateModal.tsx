@@ -23,16 +23,37 @@ import { Truck, Package, User, Calendar, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useBLContext } from "@/contexts/BLContext";
 import { BLItemsManager } from "./BLItemsManager";
+import { QuoteItem } from "@/types";
 
 interface BLCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface FormDataState {
+  client: string;
+  clientAdresse: string;
+  clientPhone: string;
+  clientEmail: string;
+  dateLivraison: string;
+  livreur: string;
+  transporteur: string;
+  vehicule: string;
+  modeLivraison: string;
+  status: string;
+  conditionsLivraison: string;
+  observationsGenerales: string;
+  observationsClient: string;
+  totalColis: number;
+  poidsTotal: number;
+  volumeTotal: number;
+  items: QuoteItem[];
+}
+
 export function BLCreateModal({ open, onOpenChange }: BLCreateModalProps) {
   const { addBL } = useBLContext();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataState>({
     client: "",
     clientAdresse: "",
     clientPhone: "",
@@ -52,7 +73,7 @@ export function BLCreateModal({ open, onOpenChange }: BLCreateModalProps) {
     items: []
   });
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof FormDataState, value: string | number | QuoteItem[] | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

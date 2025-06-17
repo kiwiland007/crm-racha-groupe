@@ -72,8 +72,17 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   );
 };
 
+interface NavigatorNetworkInformation extends Navigator {
+  connection?: NetworkInformation;
+}
+
+interface NetworkInformation extends EventTarget {
+  readonly effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
+  // Add other properties if needed: downlink, downlinkMax, rtt, saveData, type
+}
+
 // HOC pour lazy loading avec error boundary
-export const withLazyLoading = <P extends object>(
+export const withLazyLoading = <P extends Record<string, unknown>>(
   Component: React.ComponentType<P>,
   fallback?: React.ReactNode
 ) => {
@@ -88,11 +97,11 @@ export const withLazyLoading = <P extends object>(
 
 // Hook pour le preloading conditionnel
 export const usePreload = () => {
-  const preloadComponent = (importFn: () => Promise<any>) => {
+  const preloadComponent = (importFn: () => Promise<{ default: React.ComponentType<unknown> }>) => {
     // Preload seulement si la connexion est rapide
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      if (connection.effectiveType === '4g' || connection.effectiveType === '3g') {
+      const connection = (navigator as NavigatorNetworkInformation).connection;
+      if (connection && (connection.effectiveType === '4g' || connection.effectiveType === '3g')) {
         importFn();
       }
     } else {
@@ -177,32 +186,32 @@ export const PageComponents = {
 
 // Composants de formulaire avec lazy loading
 export const FormComponents = {
-  ContactForm: (props: any) => (
+  ContactForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyContactForm {...props} />
     </LazyWrapper>
   ),
-  ProductForm: (props: any) => (
+  ProductForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyProductForm {...props} />
     </LazyWrapper>
   ),
-  QuoteForm: (props: any) => (
+  QuoteForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyQuoteForm {...props} />
     </LazyWrapper>
   ),
-  AdvancedQuoteForm: (props: any) => (
+  AdvancedQuoteForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyAdvancedQuoteForm {...props} />
     </LazyWrapper>
   ),
-  EventForm: (props: any) => (
+  EventForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyEventForm {...props} />
     </LazyWrapper>
   ),
-  TechnicalSheetForm: (props: any) => (
+  TechnicalSheetForm: <P extends Record<string, unknown>>(props: P) => (
     <LazyWrapper variant="form">
       <LazyTechnicalSheetForm {...props} />
     </LazyWrapper>

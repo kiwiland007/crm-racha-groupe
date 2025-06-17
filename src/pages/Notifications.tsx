@@ -44,6 +44,7 @@ import {
   Settings
 } from "lucide-react";
 import { useNotificationContext } from "@/contexts/NotificationContext";
+import { Notification } from "@/types"; // Import Notification type
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -154,7 +155,7 @@ export default function Notifications() {
     }
   };
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: Notification) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
