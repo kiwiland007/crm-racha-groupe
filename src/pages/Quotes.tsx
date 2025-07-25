@@ -34,37 +34,74 @@ import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
 import QuoteDetails from "@/components/quotes/QuoteDetails";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Quote, QuoteItem as GlobalQuoteItem } from "@/contexts/QuoteContext"; // Adjusted import
+
+interface QuotePageFormData {
+  id?: string;
+  client: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  date: string;
+  total: number;
+  status: Quote['status'];
+  paymentTerms: string;
+  description: string;
+  projectName?: string;
+  items?: GlobalQuoteItem[]; // Use imported QuoteItem
+  validityDays?: number;
+  advanceAmount?: number;
+  // For PDF generation, ensure all fields for PDFQuoteData are here or mapped
+  clientAddress?: string; // Example: if needed for PDF but not core Quote
+  tax?: number;
+  taxRate?: number;
+  notes?: string;
+}
 
 export default function Quotes() {
   const isMobile = useIsMobile();
   const { quotes, addQuote, updateQuote, deleteQuote, convertToInvoice } = useQuoteContext();
 
   const [openQuoteForm, setOpenQuoteForm] = useState(false);
-  const [editingQuote, setEditingQuote] = useState<any>(null);
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showQuoteDetails, setShowQuoteDetails] = useState(false);
-  const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
 
-  const handleAddQuote = (quoteData: any) => {
-    const newQuoteData = {
+  const handleAddQuote = (quoteData: QuotePageFormData) => {
+    const newQuoteData: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> = {
       client: quoteData.client,
       date: quoteData.date,
       amount: quoteData.total,
-      advanceAmount: 0,
+      advanceAmount: quoteData.advanceAmount || 0,
       status: quoteData.status,
       paymentMethod: quoteData.paymentTerms,
-      description: quoteData.description || quoteData.projectName,
+      description: quoteData.description || quoteData.projectName || "",
       clientPhone: quoteData.clientPhone || "",
       clientEmail: quoteData.clientEmail || "",
       items: quoteData.items || [],
-      validityDays: 30
+      validityDays: quoteData.validityDays || 30,
+      notes: quoteData.notes, // ensure notes is part of newQuoteData if it's in Quote type
     };
 
     const newQuote = addQuote(newQuoteData);
 
-    // Générer automatiquement le PDF
-    const filename = pdfServiceFixed.generateQuotePDF(quoteData, 'quote');
+    // Prepare data for PDF generation, mapping from QuotePageFormData
+    const pdfDataForService: PDFQuoteData = {
+      ...newQuote, // Spread the created quote
+      clientAddress: quoteData.clientAddress || "",
+      projectName: quoteData.projectName || newQuote.description,
+      subtotal: newQuote.amount,
+      discount: 0, // Default or map if available
+      tax: quoteData.tax || Math.round(newQuote.amount * ( (quoteData.taxRate || 20) / 100)),
+      total: newQuote.amount + (quoteData.tax || Math.round(newQuote.amount * ( (quoteData.taxRate || 20) / 100))),
+      taxRate: quoteData.taxRate || 20,
+      paymentTerms: newQuote.paymentMethod,
+      validityDays: newQuote.validityDays || 30,
+      notes: newQuote.notes || `Devis généré automatiquement pour ${newQuote.client}`,
+    };
+
+    const filename = pdfServiceFixed.generateQuotePDF(pdfDataForService, 'quote');
     if (filename) {
       toast.success("PDF généré", {
         description: `PDF du devis ${newQuote.id} généré`
@@ -74,7 +111,7 @@ export default function Quotes() {
     return newQuote;
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date) => { // This function is unused
     return date.toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
@@ -122,7 +159,7 @@ export default function Quotes() {
     }
   };
 
-  const handleGeneratePDF = (quote: any) => {
+  const handleGeneratePDF = (quote: Quote) => {
     // Convertir le devis au format PDFQuoteData
     const pdfData: PDFQuoteData = {
       id: quote.id,
@@ -168,26 +205,40 @@ export default function Quotes() {
     });
   };
 
-  const handleViewDetails = (quote: any) => {
+  const handleViewDetails = (quote: Quote) => {
     setSelectedQuote(quote);
     setShowQuoteDetails(true);
   };
 
-  const handleEditQuote = (quote: any) => {
+  const handleEditQuote = (quote: Quote) => {
     setEditingQuote(quote);
     setOpenQuoteForm(true);
   };
 
-  const handleUpdateQuote = (quoteData: any) => {
-    updateQuote(quoteData.id, quoteData);
+  const handleUpdateQuote = (quoteData: QuotePageFormData & { id: string }) => {
+    const updateData: Partial<Quote> = {
+      client: quoteData.client,
+      clientPhone: quoteData.clientPhone,
+      clientEmail: quoteData.clientEmail,
+      date: quoteData.date,
+      amount: quoteData.total,
+      advanceAmount: quoteData.advanceAmount,
+      status: quoteData.status,
+      paymentMethod: quoteData.paymentTerms,
+      description: quoteData.description,
+      items: quoteData.items,
+      validityDays: quoteData.validityDays,
+      notes: quoteData.notes,
+    };
+    updateQuote(quoteData.id, updateData);
     setEditingQuote(null);
   };
 
-  const handleConvertToInvoice = (quote: any) => {
+  const handleConvertToInvoice = (quote: Quote) => {
     convertToInvoice(quote.id);
   };
 
-  const handleSendEmail = (quote: any) => {
+  const handleSendEmail = (quote: Quote) => {
     if (quote.clientEmail) {
       const subject = `Devis ${quote.id} - ${quote.client}`;
       const body = `Bonjour,\n\nVeuillez trouver ci-joint votre devis ${quote.id}.\n\nCordialement,\nRacha Business Digital`;
@@ -204,11 +255,11 @@ export default function Quotes() {
     }
   };
 
-  const handleDeleteQuote = (quote: any) => {
+  const handleDeleteQuote = (quote: Quote) => {
     deleteQuote(quote.id);
   };
 
-  const handleSendWhatsApp = (quote: any) => {
+  const handleSendWhatsApp = (quote: Quote) => {
     if (quote.clientPhone) {
       const cleanPhone = quote.clientPhone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
       const message = `Bonjour ${quote.client},\n\nVotre devis ${quote.id} d'un montant de ${quote.amount.toLocaleString()} MAD est disponible.\n\nDescription: ${quote.description}\n\nCordialement,\nRacha Business Digital\n📞 +212 6 69 38 28 28`;

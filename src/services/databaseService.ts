@@ -10,14 +10,15 @@ import {
   QueryResult,
   PaginatedResult,
   PaginationParams,
-  ENV_CONFIG
+  ENV_CONFIG,
+  AppConfig // Import AppConfig
 } from '@/config/database';
 import { toast } from 'sonner';
 
 export class DatabaseService {
   private static instance: DatabaseService;
   private isOnline: boolean = navigator.onLine;
-  private syncQueue: Array<{ action: string; data: any; timestamp: number }> = [];
+  private syncQueue: Array<{ action: string; data: unknown; timestamp: number }> = [];
 
   constructor() {
     // Écouter les changements de connexion
@@ -44,7 +45,7 @@ export class DatabaseService {
   private async makeRequest<T>(
     method: string,
     url: string,
-    data?: any
+    data?: unknown
   ): Promise<QueryResult<T>> {
     try {
       const response = await fetch(url, {
@@ -71,7 +72,7 @@ export class DatabaseService {
   /**
    * Synchroniser les données avec la base de données
    */
-  public async syncData(entity: string, action: 'create' | 'update' | 'delete', data: any): Promise<boolean> {
+  public async syncData(entity: string, action: 'create' | 'update' | 'delete', data: unknown): Promise<boolean> {
     if (!this.isOnline) {
       // Ajouter à la queue de synchronisation
       this.syncQueue.push({
@@ -101,11 +102,11 @@ export class DatabaseService {
           break;
         case 'update':
           method = 'PUT';
-          url = buildApiUrl(endpoint.replace(':id', data.id));
+          url = buildApiUrl(endpoint.replace(':id', (data as { id: string }).id));
           break;
         case 'delete':
           method = 'DELETE';
-          url = buildApiUrl(endpoint.replace(':id', data.id));
+          url = buildApiUrl(endpoint.replace(':id', (data as { id: string }).id));
           break;
       }
 
@@ -133,7 +134,7 @@ export class DatabaseService {
    */
   public async fetchData<T>(
     entity: string, 
-    params?: PaginationParams & Record<string, any>
+    params?: PaginationParams & Record<string, string | number | boolean | undefined>
   ): Promise<QueryResult<PaginatedResult<T>>> {
     try {
       const endpoint = this.getEndpointForEntity(entity);
@@ -162,7 +163,7 @@ export class DatabaseService {
   /**
    * Sauvegarder les paramètres de l'entreprise
    */
-  public async saveCompanySettings(settings: any): Promise<boolean> {
+  public async saveCompanySettings(settings: AppConfig['company']): Promise<boolean> {
     try {
       // Sauvegarder localement d'abord
       localStorage.setItem('crm_company_settings', JSON.stringify(settings));
@@ -190,7 +191,7 @@ export class DatabaseService {
   /**
    * Sauvegarder les intégrations
    */
-  public async saveIntegration(type: string, config: any): Promise<boolean> {
+  public async saveIntegration(type: string, config: Record<string, unknown>): Promise<boolean> {
     try {
       // Sauvegarder localement d'abord
       localStorage.setItem(`crm_integration_${type}`, JSON.stringify(config));
@@ -222,7 +223,7 @@ export class DatabaseService {
   /**
    * Charger les données depuis la base de données
    */
-  public async loadData(entity: string): Promise<any[]> {
+  public async loadData(entity: string): Promise<unknown[]> {
     try {
       const result = await this.fetchData(entity);
       
@@ -254,8 +255,13 @@ export class DatabaseService {
       this.syncQueue = JSON.parse(queueData);
       
       for (const item of this.syncQueue) {
-        const [action, entity] = item.action.split('_');
-        await this.syncData(entity, action as any, item.data);
+        const [actionStr, entity] = item.action.split('_');
+        const action = actionStr as 'create' | 'update' | 'delete'; // Basic assertion
+        if (['create', 'update', 'delete'].includes(action)) {
+          await this.syncData(entity, action, item.data);
+        } else {
+          console.warn(`Invalid action in sync queue: ${actionStr}`);
+        }
       }
       
       // Vider la queue après synchronisation

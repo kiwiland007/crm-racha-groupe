@@ -11,8 +11,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { pdfServiceFixed } from "@/services/pdfServiceFixed";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface RecentInvoiceItem {
+  id: string;
+  client: string;
+  contact: string;
+  date: string;
+  amount: number;
+  advanceAmount: number;
+  status: string;
+  paymentMethod: string;
+  description?: string; // Optional: as it's used in PDF generation
+}
+
 // Données factices pour les factures récentes
-const invoices = [
+const invoices: RecentInvoiceItem[] = [
   {
     id: "INV-001",
     client: "Société ABC",
@@ -78,7 +90,7 @@ export function RecentInvoices() {
     });
   };
 
-  const handleGeneratePDF = (invoice: any) => {
+  const handleGeneratePDF = (invoice: RecentInvoiceItem) => {
     const pdfData = {
       id: invoice.id,
       client: invoice.client,
@@ -101,7 +113,7 @@ export function RecentInvoices() {
     });
   };
 
-  const handleEditInvoice = (invoice: any) => {
+  const handleEditInvoice = (invoice: RecentInvoiceItem) => {
     // Redirection vers la page de modification de facture
     window.location.href = `/invoices?edit=${invoice.id}`;
     toast.info("Redirection", {

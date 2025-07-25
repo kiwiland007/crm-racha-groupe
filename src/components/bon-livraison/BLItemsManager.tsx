@@ -52,6 +52,13 @@ interface BLItemsManagerProps {
   readonly?: boolean;
 }
 
+interface PredefinedItem {
+  type: 'produit' | 'service';
+  designation: string;
+  unite: string;
+  description: string;
+}
+
 export function BLItemsManager({ items, onItemsChange, readonly = false }: BLItemsManagerProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,7 +159,7 @@ export function BLItemsManager({ items, onItemsChange, readonly = false }: BLIte
     });
   };
 
-  const handleSelectPredefined = (predefined: any) => {
+  const handleSelectPredefined = (predefined: PredefinedItem) => {
     setNewItem({
       ...newItem,
       type: predefined.type,
